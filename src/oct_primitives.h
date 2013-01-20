@@ -29,6 +29,36 @@ typedef oct_I32 oct_Word;
 typedef oct_U32 oct_Uword;
 #endif
 
+#elif defined (__APPLE__)
+
+#include <inttypes.h>
+
+typedef int8_t   oct_I8;
+typedef uint8_t  oct_U8;
+typedef int16_t  oct_I16;
+typedef uint16_t oct_U16;
+typedef int32_t  oct_I32;
+typedef uint32_t oct_U32;
+typedef int64_t  oct_I64;
+typedef uint64_t oct_U64;
+typedef float    oct_F32;
+typedef double   oct_F64;
+
+typedef oct_U8 oct_Bool;
+#define oct_True 1
+#define oct_False 0
+
+typedef oct_I32 oct_Char;
+
+#ifdef __LP64__
+#define OCT64
+typedef oct_I64 oct_Word;
+typedef oct_U64 oct_Uword;
+#else
+typedef oct_I32 oct_Word;
+typedef oct_U32 oct_Uword;
+#endif
+
 #else
 
 #endif

@@ -7,6 +7,7 @@
 #include <math.h>
 #include <float.h>
 #include <memory.h>
+#include <limits.h>
 
 // DEBUG
 #include <stdio.h>

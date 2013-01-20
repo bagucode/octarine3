@@ -70,6 +70,7 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	mainCtx->rt = rt;
 	mainCtx->reader = (oct_Reader*)malloc(sizeof(oct_Reader));
 	oct_Reader_ctor(mainCtx, mainCtx->reader); // This is a little weird
+    oct_TLSInit(rt->currentContext);
 	oct_TLSSet(rt->currentContext, mainCtx);
 
 	// *** 2. Initialize all the built in types

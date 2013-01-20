@@ -10,9 +10,19 @@ typedef struct oct_TLS {
 	DWORD index;
 } oct_TLS;
 
+#elif defined (__APPLE__)
+#include <pthread.h>
+
+typedef struct oct_TLS {
+    pthread_key_t key;
+} oct_TLS;
+
 #else
+
 #endif
 
+void oct_TLSInit(oct_TLS tls);
+void oct_TLSDestroy(oct_TLS tls);
 void oct_TLSSet(oct_TLS tls, void* val);
 void* oct_TLSGet(oct_TLS tls);
 
