@@ -15,6 +15,7 @@
 #include "oct_context.h"
 #include "oct_reader.h"
 #include "oct_primitive_pointers.h"
+#include "oct_initTarget.h"
 
 #include <stdlib.h>
 
@@ -53,6 +54,8 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	oct_OString str;
 	oct_OSymbol sym;
 	oct_BNamespace octarine;
+
+	oct_initJITTarget();
 
 	rt = (oct_Runtime*)calloc(1, sizeof(oct_Runtime));
 	if(!rt) {
