@@ -2,8 +2,8 @@
 
 #ifdef _WIN32
 
-void oct_TLSInit(oct_TLS tls) {
-    tls.index = TlsAlloc();
+void oct_TLSInit(oct_TLS* tls) {
+    tls->index = TlsAlloc();
 }
 
 void oct_TLSDestroy(oct_TLS tls) {
@@ -20,8 +20,8 @@ void* oct_TLSGet(oct_TLS tls) {
 
 #elif defined (__APPLE__)
 
-void oct_TLSInit(oct_TLS tls) {
-    pthread_key_create(&tls.key, NULL);
+void oct_TLSInit(oct_TLS* tls) {
+    pthread_key_create(&tls->key, NULL);
 }
 
 void oct_TLSDestroy(oct_TLS tls) {

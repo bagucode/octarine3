@@ -21,7 +21,7 @@ typedef struct oct_TLS {
 
 #endif
 
-void oct_TLSInit(oct_TLS tls);
+void oct_TLSInit(oct_TLS* tls);
 void oct_TLSDestroy(oct_TLS tls);
 void oct_TLSSet(oct_TLS tls, void* val);
 void* oct_TLSGet(oct_TLS tls);
