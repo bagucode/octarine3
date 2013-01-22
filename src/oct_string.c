@@ -135,3 +135,16 @@ oct_Bool oct_BString_equals(struct oct_Context* ctx, oct_BString x, oct_BString 
 	*out_result = (memcmp(&x.ptr->utf8Data.ptr->data[0], &y.ptr->utf8Data.ptr->data[0], x.ptr->size) == 0);
 	return oct_True;
 }
+
+oct_Bool oct_BStringCString_equals(struct oct_Context* ctx, oct_BString str, const char* cstr, oct_Bool* out_result) {
+	oct_Uword len = strlen(cstr);
+	if(str.ptr->size != len) {
+		*out_result = oct_False;
+		return oct_True;
+	}
+	// TODO: UTF-8
+	// This comparison has to be changed because the backing array may be a different size from the
+	// string size since the string size is supposed to be in logical characters, not bytes.
+	*out_result = (memcmp(&str.ptr->utf8Data.ptr->data[0], cstr, str.ptr->size) == 0);
+	return oct_True;
+}

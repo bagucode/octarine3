@@ -141,6 +141,7 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	oct_OString_createFromCString(mainCtx, "octarine", &str);
 	oct_OSymbol_alloc(mainCtx, str, &sym);
 	oct_Namespace_create(mainCtx, sym, &octarine);
+	mainCtx->ns = octarine.ptr;
 
 	// *** 4. Register all built in types and functions in octarine namespace.
 	bind_type(mainCtx, octarine, "U8", rt->builtInTypes.U8);

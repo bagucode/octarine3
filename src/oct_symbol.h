@@ -17,6 +17,9 @@ typedef struct oct_BSymbol {
 	oct_Symbol* ptr;
 } oct_BSymbol;
 
+#define OCT_SYMBOLOPTION_NOTHING 0
+#define OCT_SYMBOLOPTION_SYMBOL 1
+
 typedef struct oct_OSymbolOption {
 	oct_Uword variant;
 	union {

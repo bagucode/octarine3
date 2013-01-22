@@ -58,6 +58,49 @@ static void StringTests() {
 	assert(oct_Runtime_destroy(rt, &error));
 }
 
+static void NamespaceTests() {
+	oct_Runtime* rt;
+	oct_Context* ctx;
+	oct_BNamespace ns;
+	oct_AnyOption val;
+	oct_AnyOption lookedUp;
+	oct_OSymbol sym;
+	oct_BSymbol bsym;
+	oct_OString name;
+	oct_OString valStr;
+	oct_BType type;
+	const char* error;
+
+	rt = oct_Runtime_create(&error);
+	assert(rt);
+	ctx = oct_Runtime_currentContext(rt);
+	assert(ctx);
+	assert(ctx->ns);
+	ns.ptr = ctx->ns;
+
+	// Binding
+	assert(oct_OString_createFromCString(ctx, "theName", &name));
+	assert(oct_OString_createFromCString(ctx, "theValue", &valStr));
+	assert(oct_OSymbol_alloc(ctx, name, &sym));
+	val.variant = OCT_ANYOPTION_ANY;
+	assert(oct_Any_setPtrKind(ctx, &val.any, OCT_POINTER_OWNED));
+	assert(oct_Any_setPtr(ctx, &val.any, valStr.ptr));
+	type.ptr = ctx->rt->builtInTypes.String;
+	assert(oct_Any_setType(ctx, &val.any, type));
+	assert(oct_Namespace_bind(ctx, ns, sym, val));
+	// End Binding
+
+	// Lookup
+	bsym.ptr = sym.ptr;
+	assert(oct_Namespace_lookup(ctx, ns, bsym, &lookedUp));
+	assert(lookedUp.variant == val.variant);
+	assert(lookedUp.any.data[0] == val.any.data[0]);
+	assert(lookedUp.any.data[1] == val.any.data[1]);
+	// End Lookup
+
+	assert(oct_Runtime_destroy(rt, &error));
+}
+
 int main(int argc, char** argv) {
 	const char* error;
 	oct_Charstream stream;
@@ -71,26 +114,19 @@ int main(int argc, char** argv) {
 	oct_OStringStream ss;
 	oct_BStringStream bss;
 	oct_BReadable breadable;
-	oct_Any evalResult;
+	oct_AnyOption evalResult;
 	reader.ptr = ctx->reader;
 
 	oct_OString_createFromCString(ctx, "- . ! 1 2 3 -37 1.5 0.34 .34 1e16 -0.8 -.8 -.main .main -main { [ hello \"hej\" \"hell o workdl\" (this is a (nested) \"list\" of 8 readables )", &str);
-	//oct_OString_createFromCString(ctx, "(small)", &str);
 
 	// Borrow string pointer
 	bstr.ptr = str.ptr;
 
 	oct_OStringStream_create(ctx, bstr, &ss);
 
-	// Create charstream instance from the stringstream
-	//csVTable.read = (oct_Bool(*)(struct oct_Context*, void*, oct_Char*)) oct_BStringStream_readChar;
-	//csVTable.peek = (oct_Bool(*)(struct oct_Context*, void*, oct_Char*)) oct_BStringStream_peekChar;
-	//stream.b_self = ss.ptr; // Borrow stringstream pointer
-	//stream.vtable = &csVTable;
 	bss.ptr = ss.ptr;
 	oct_BStringStream_asCharStream(ctx, bss, &stream);
 
-	// This loop leaks memory. All valid results are owned by caller and should be deleted before rr is re-used
 	while(oct_True) {
 		oct_Reader_read(ctx, reader, stream, &rr);
 		if(rr.variant == OCT_READRESULT_ERROR) {
@@ -99,7 +135,9 @@ int main(int argc, char** argv) {
 		breadable.ptr = rr.readable.ptr;
 		oct_Compiler_eval(ctx, breadable, &evalResult);
 		oct_ReadResult_dtor(ctx, &rr);
-		oct_Any_dtor(ctx, evalResult);
+		if(evalResult.variant == OCT_ANYOPTION_ANY) {
+			oct_Any_dtor(ctx, evalResult.any);
+		}
 	};
 
 	// End of scope, destroy in reverse order.
@@ -108,6 +146,7 @@ int main(int argc, char** argv) {
 	oct_Runtime_destroy(rt, &error);
 
 	StringTests();
+	NamespaceTests();
 
 	return 0;
 }

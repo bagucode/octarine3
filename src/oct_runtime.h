@@ -72,6 +72,7 @@ typedef struct oct_BuiltInTypes {
 	struct oct_Type* Any;
 	struct oct_Type* AAny;
 	struct oct_Type* OAAny;
+	struct oct_Type* AnyOption;
 	struct oct_Type* NamespaceBinding;
 	struct oct_Type* ANamespaceBinding;
 	struct oct_Type* OANamespaceBinding;

@@ -37,5 +37,6 @@ oct_Bool oct_OString_createFromCharArray(struct oct_Context* ctx, oct_OAChar cha
 oct_Bool oct_OString_destroy(struct oct_Context* ctx, oct_OString str);
 
 oct_Bool oct_BString_equals(struct oct_Context* ctx, oct_BString x, oct_BString y, oct_Bool* out_result);
+oct_Bool oct_BStringCString_equals(struct oct_Context* ctx, oct_BString str, const char* cstr, oct_Bool* out_result);
 
 #endif

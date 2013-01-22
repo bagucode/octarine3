@@ -19,7 +19,7 @@ oct_Bool _oct_NamespaceBinding_initType(struct oct_Context* ctx) {
 	t->structType.fields.ptr->data[0].offset = offsetof(oct_NamespaceBinding, sym);
 	t->structType.fields.ptr->data[0].type.ptr = ctx->rt->builtInTypes.Symbol;
 	t->structType.fields.ptr->data[1].offset = offsetof(oct_NamespaceBinding, obj);
-	t->structType.fields.ptr->data[1].type.ptr = ctx->rt->builtInTypes.Any;
+	t->structType.fields.ptr->data[1].type.ptr = ctx->rt->builtInTypes.AnyOption;
 	return oct_True;
 }
 
@@ -102,22 +102,80 @@ oct_Bool oct_Namespace_create(struct oct_Context* ctx, oct_OSymbol name, oct_BNa
 		lastNode->next = newNode;
 	}
 	// TODO: unlock namespace collection
+	out_ns->ptr = &newNode->ns;
 	return oct_True;
 }
 
 oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_OSymbol sym, oct_AnyOption val) {
-	// TODO: lock bindings
-	// find first free binding in namespace
+	oct_Uword i, j;
+	oct_Uword newSize;
+	oct_OANamespaceBinding newBindings;
 
-	// if no free binding exists; expand bindings array
+	// TODO: lock bindings
+	for(i = 0; i < ns.ptr->bindings.ptr->size; ++i) {
+		if(ns.ptr->bindings.ptr->bindings[i].sym.variant == OCT_SYMBOLOPTION_NOTHING) {
+			// Free slot
+			// TODO: save free slot index but check all because we can't have duplicates!
+			goto ok;
+		}
+	}
+	// No free bindings. Expand array.
+	newSize = ns.ptr->bindings.ptr->size * 2;
+	newBindings.ptr = (oct_ANamespaceBinding*)malloc(sizeof(oct_ANamespaceBinding) + (sizeof(oct_NamespaceBinding) * newSize));
+	if(newBindings.ptr == NULL) {
+		// TODO: unlock bindings
+		return oct_False; // OOM
+	}
+	newBindings.ptr->size = newSize;
+	for(i = 0; i < ns.ptr->bindings.ptr->size; ++i) {
+		newBindings.ptr->bindings[i] = ns.ptr->bindings.ptr->bindings[i];
+	}
+	j = i;
+	for(j = 0; j < newSize; ++j) {
+		newBindings.ptr->bindings[j].sym.variant = OCT_NSBINDING_NOTHING;
+		newBindings.ptr->bindings[j].sym.nothing.dummy = 0;
+		newBindings.ptr->bindings[j].obj.variant = OCT_ANYOPTION_NOTHING;
+		newBindings.ptr->bindings[j].obj.nothing.dummy = 0;
+	}
+
+	free(ns.ptr->bindings.ptr);
+	ns.ptr->bindings.ptr = newBindings.ptr;
 
 	// TODO: unlock bindings
+
+ok:
+	ns.ptr->bindings.ptr->bindings[i].sym.variant = OCT_SYMBOLOPTION_SYMBOL;
+	ns.ptr->bindings.ptr->bindings[i].sym.sym = sym;
+	ns.ptr->bindings.ptr->bindings[i].obj = val; // TODO: copy/refcount/root if val is not owned
+	return oct_True;
 }
 
 oct_Bool oct_Namespace_lookup(struct oct_Context* ctx, oct_BNamespace ns, oct_BSymbol sym, oct_AnyOption* out_val) {
+	oct_Uword i;
+	oct_BString n1;
+	oct_BString n2;
+	oct_Bool eq;
+
 	// TODO: lock bindings
 
-	// find binding, if there is none: set out_val to nothing
+	for(i = 0; i < ns.ptr->bindings.ptr->size; ++i) {
+		if(ns.ptr->bindings.ptr->bindings[i].sym.variant == OCT_SYMBOLOPTION_SYMBOL) {
+			n1.ptr = ns.ptr->bindings.ptr->bindings[i].sym.sym.ptr->name.ptr;
+			n2.ptr = sym.ptr->name.ptr;
+			if(!oct_BString_equals(ctx, n1, n2, &eq)) {
+				// TODO: unlock bindings
+				return oct_False;
+			}
+			if(eq) {
+				*out_val = ns.ptr->bindings.ptr->bindings[i].obj;
+				// TODO: unlock bindings
+				return oct_True;
+			}
+		}
+	}
 
 	// TODO: unlock bindings
+	out_val->variant = OCT_ANYOPTION_NOTHING;
+	out_val->nothing.dummy = 0;
+	return oct_True;
 }
