@@ -12,15 +12,18 @@
 // do     -> eval multiple forms and return result of last
 // quote  -> suppress evaluation
 // fn     -> create function (lambda)
-// throw? -> throw exception (if used, also need catch and finally?)
-// .      -> get value of struct member
-// !      -> set value of struct member
+// throw  -> throw exception (if used, also need catch and finally?)
+// ?      -> get value
+// !      -> set value
 
-// one creation form for each kind of data type...
-// struct -> create struct
-// ...
-
-// 
+// One creation form for each kind of data type.
+// prototype -> create prototype
+// template  -> create template (not needed?)
+// variadic  -> create variadic type
+// struct    -> create struct
+// array     -> create array or fixed size array (overload)
+// interface -> create interface
+// Pointer types are implicitly created for each type
 
 static oct_Bool eval_sym(struct oct_Context* ctx, oct_Symbol* sym, oct_AnyOption* out_result) {
 	oct_BNamespace ns;
@@ -44,5 +47,7 @@ static oct_Bool eval_def(struct oct_Context* ctx, oct_OSymbol sym, oct_BReadable
 }
 
 oct_Bool oct_Compiler_eval(struct oct_Context* ctx, oct_BReadable readable, oct_AnyOption* out_result) {
-
+    if(readable.ptr->variant == OCT_READABLE_SYMBOL) {
+        return eval_sym(ctx, &readable.ptr->symbol, out_result);
+    }
 }
