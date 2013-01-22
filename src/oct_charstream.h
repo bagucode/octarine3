@@ -12,10 +12,10 @@ typedef struct oct_CharstreamVTable {
 	oct_Bool (*peek)(struct oct_Context* ctx, void* b_self /*borrowed*/, oct_Char* out_peeked);
 } oct_CharstreamVTable;
 
-typedef struct oct_BCharstream {
-	void* b_self; // Borrowed
+typedef struct oct_Charstream {
+	oct_Any object;
 	oct_CharstreamVTable* vtable;
-} oct_BCharstream;
+} oct_Charstream;
 
 // Private
 

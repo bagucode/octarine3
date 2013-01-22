@@ -84,6 +84,7 @@ typedef struct oct_BuiltInTypes {
 	struct oct_Type* OABFunction;
 	struct oct_Type* AChar;
 	struct oct_Type* OAChar;
+	struct oct_Type* BStringStream;
 	/* TODO: TYPE HASH! Structurally equal types should be same! */
 } oct_BuiltInTypes;
 

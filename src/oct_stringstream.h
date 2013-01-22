@@ -34,4 +34,8 @@ oct_Bool oct_StringStream_dtor(struct oct_Context* ctx, oct_StringStream* stream
 oct_Bool oct_OStringStream_create(struct oct_Context* ctx, oct_BString str, oct_OStringStream* out_stream);
 oct_Bool oct_OStringStream_destroy(struct oct_Context* ctx, oct_OStringStream stream);
 
+struct oct_Charstream;
+
+oct_Bool oct_BStringStream_asCharStream(struct oct_Context* ctx, oct_BStringStream stream, struct oct_Charstream* out_cs);
+
 #endif

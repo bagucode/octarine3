@@ -27,6 +27,9 @@ oct_Bool _oct_OAAny_initType(struct oct_Context* ctx) {
 	return oct_True;
 }
 
+// data[0] holds type pointer and pointer kind
+// data[1] holds object pointer
+
 oct_Bool oct_Any_setPtrKind(struct oct_Context* ctx, oct_Any* any, oct_Uword ptrKind) {
 	// clear old
 	any->data[0] &= (~0x7);
@@ -57,3 +60,19 @@ oct_Bool oct_Any_setPtr(struct oct_Context* ctx, oct_Any* any, void* ptr) {
 	any->data[1] = ((oct_Uword)ptr);
 	return oct_True;
 }
+
+oct_Bool oct_Any_getPtrKind(struct oct_Context* ctx, oct_Any any, oct_Uword* out_ptrKind) {
+	*out_ptrKind = (any.data[0] & 0x7);
+	return oct_True;
+}
+
+oct_Bool oct_Any_getType(struct oct_Context* ctx, oct_Any any, oct_BType* out_type) {
+	out_type->ptr = (oct_Type*)(any.data[0] & (~0x7));
+	return oct_True;
+}
+
+oct_Bool oct_Any_getPtr(struct oct_Context* ctx, oct_Any any, void** ptr) {
+	*ptr = ((void*)any.data[1]);
+	return oct_True;
+}
+

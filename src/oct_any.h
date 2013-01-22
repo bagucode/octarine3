@@ -31,4 +31,8 @@ oct_Bool oct_Any_setPtrKind(struct oct_Context* ctx, oct_Any* any, oct_Uword ptr
 oct_Bool oct_Any_setType(struct oct_Context* ctx, oct_Any* any, oct_BType type);
 oct_Bool oct_Any_setPtr(struct oct_Context* ctx, oct_Any* any, void* ptr);
 
+oct_Bool oct_Any_getPtrKind(struct oct_Context* ctx, oct_Any any, oct_Uword* out_ptrKind);
+oct_Bool oct_Any_getType(struct oct_Context* ctx, oct_Any any, oct_BType* out_type);
+oct_Bool oct_Any_getPtr(struct oct_Context* ctx, oct_Any any, void** ptr);
+
 #endif

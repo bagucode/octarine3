@@ -208,7 +208,8 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 }
 
 oct_Bool oct_Runtime_destroy(oct_Runtime* rt, const char** out_error) {
-	return oct_False;
+	// TODO: ... implement?
+	return oct_True;
 }
 
 oct_Context* oct_Runtime_currentContext(oct_Runtime* rt) {
