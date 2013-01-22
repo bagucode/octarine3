@@ -84,7 +84,7 @@ oct_Bool oct_Namespace_create(struct oct_Context* ctx, oct_OSymbol name, oct_BNa
 
 	// init bindings to nothing
 	for(i = 0; i < 10; ++i) {
-		newNode->ns.bindings.ptr->bindings[i].sym.variant = OCT_NSBINDING_NOTHING;
+		newNode->ns.bindings.ptr->bindings[i].sym.variant = OCT_SYMBOLOPTION_NOTHING;
 		newNode->ns.bindings.ptr->bindings[i].sym.nothing.dummy = 0;
 		newNode->ns.bindings.ptr->bindings[i].obj.variant = OCT_ANYOPTION_NOTHING;
 		newNode->ns.bindings.ptr->bindings[i].obj.nothing.dummy = 0;
@@ -132,7 +132,7 @@ oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_OSym
 	}
 	j = i;
 	for(j = 0; j < newSize; ++j) {
-		newBindings.ptr->bindings[j].sym.variant = OCT_NSBINDING_NOTHING;
+		newBindings.ptr->bindings[j].sym.variant = OCT_SYMBOLOPTION_NOTHING;
 		newBindings.ptr->bindings[j].sym.nothing.dummy = 0;
 		newBindings.ptr->bindings[j].obj.variant = OCT_ANYOPTION_NOTHING;
 		newBindings.ptr->bindings[j].obj.nothing.dummy = 0;

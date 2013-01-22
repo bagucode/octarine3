@@ -15,9 +15,6 @@ typedef struct oct_ANamespaceBinding {
 	oct_NamespaceBinding bindings[];
 } oct_ANamespaceBinding;
 
-#define OCT_NSBINDING_NOTHING 0
-#define OCT_NSBINDING_SOMETHING 1
-
 typedef struct oct_OANamespaceBinding {
 	oct_ANamespaceBinding* ptr;
 } oct_OANamespaceBinding;
