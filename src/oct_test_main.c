@@ -43,6 +43,7 @@ static void StringTests() {
 	assert(readResult.variant == OCT_READRESULT_READABLE);
 	assert(readResult.readable.ptr->variant == OCT_READABLE_STRING);
 	bs2.ptr = &readResult.readable.ptr->string;
+	assert(oct_OStringStream_destroy(ctx, ss));
 
 	assert(oct_OString_destroy(ctx, s1));
 	assert(oct_OString_createFromCString(ctx, "Hello", &s1));
@@ -97,6 +98,8 @@ int main(int argc, char** argv) {
 		}
 		breadable.ptr = rr.readable.ptr;
 		oct_Compiler_eval(ctx, breadable, &evalResult);
+		oct_ReadResult_dtor(ctx, &rr);
+		oct_Any_dtor(ctx, evalResult);
 	};
 
 	// End of scope, destroy in reverse order.

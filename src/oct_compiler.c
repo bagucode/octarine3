@@ -1,4 +1,8 @@
 #include "oct_compiler.h"
+#include "oct_symbol.h"
+#include "oct_namespace.h"
+#include "oct_context.h"
+#include "oct_runtime.h"
 
 // Built in forms:
 // def    -> establish binding in current namespace
@@ -17,5 +21,18 @@
 
 // 
 
-oct_Bool oct_Compiler_eval(struct oct_Context* ctx, oct_BReadable readable, oct_Any* out_result) {
+static oct_Bool eval_sym(struct oct_Context* ctx, oct_Symbol* sym, oct_AnyOption* out_result) {
+	oct_BNamespace ns;
+	oct_BSymbol bsym;
+	ns.ptr = ctx->ns;
+	bsym.ptr = sym;
+	return oct_Namespace_lookup(ctx, ns, bsym, out_result);
+}
+
+static oct_Bool eval_def(struct oct_Context* ctx, oct_BReadable args, oct_AnyOption* out_result) {
+	// Need Seq interface?
+}
+
+oct_Bool oct_Compiler_eval(struct oct_Context* ctx, oct_BReadable readable, oct_AnyOption* out_result) {
+
 }

@@ -5,10 +5,12 @@
 
 struct oct_Runtime;
 struct oct_Reader;
+struct oct_Namespace;
 
 typedef struct oct_Context {
 	struct oct_Runtime* rt;
 	struct oct_Reader* reader;
+	struct oct_Namespace* ns;
 } oct_Context;
 
 // Private

@@ -13,6 +13,10 @@ typedef struct oct_OSymbol {
 	oct_Symbol* ptr;
 } oct_OSymbol;
 
+typedef struct oct_BSymbol {
+	oct_Symbol* ptr;
+} oct_BSymbol;
+
 typedef struct oct_OSymbolOption {
 	oct_Uword variant;
 	union {

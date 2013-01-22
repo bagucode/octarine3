@@ -76,3 +76,7 @@ oct_Bool oct_Any_getPtr(struct oct_Context* ctx, oct_Any any, void** ptr) {
 	return oct_True;
 }
 
+oct_Bool oct_Any_dtor(struct oct_Context* ctx, oct_Any any) {
+	// TODO: implement
+}
+

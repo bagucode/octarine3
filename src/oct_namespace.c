@@ -115,3 +115,10 @@ oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_OSym
 	// TODO: unlock bindings
 }
 
+oct_Bool oct_Namespace_lookup(struct oct_Context* ctx, oct_BNamespace ns, oct_BSymbol sym, oct_AnyOption* out_val) {
+	// TODO: lock bindings
+
+	// find binding, if there is none: set out_val to nothing
+
+	// TODO: unlock bindings
+}
