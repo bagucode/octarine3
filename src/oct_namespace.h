@@ -7,7 +7,7 @@
 
 typedef struct oct_NamespaceBinding {
 	oct_OSymbolOption sym;
-	oct_Any obj;
+	oct_AnyOption obj;
 } oct_NamespaceBinding;
 
 typedef struct oct_ANamespaceBinding {
@@ -47,7 +47,7 @@ oct_Bool _oct_BNamespace_initType(struct oct_Context* ctx);
 // Public
 
 oct_Bool oct_Namespace_create(struct oct_Context* ctx, oct_OSymbol name, oct_BNamespace* out_ns);
-oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_OSymbol sym, oct_Any val);
+oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_OSymbol sym, oct_AnyOption val);
 oct_Bool oct_Namespace_lookup(struct oct_Context* ctx, oct_BNamespace ns, oct_BSymbol sym, oct_AnyOption* out_val);
 
 #endif

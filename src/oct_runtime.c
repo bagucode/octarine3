@@ -35,16 +35,17 @@ static void alloc_builtIn(oct_Runtime* rt) {
 static oct_Bool bind_type(oct_Context* ctx, oct_BNamespace ns, const char* name, oct_Type* type) {
 	oct_OString str;
 	oct_OSymbol sym;
-	oct_Any val;
+	oct_AnyOption val;
 	oct_BType btype;
 	
 	btype.ptr = ctx->rt->builtInTypes.Type;
+	val.variant = OCT_ANYOPTION_ANY;
 
 	if(!oct_OString_createFromCString(ctx, name, &str)) return oct_False;
 	if(!oct_OSymbol_alloc(ctx, str, &sym)) return oct_False;
-	if(!oct_Any_setPtrKind(ctx, &val, OCT_POINTER_BORROWED)) return oct_False;
-	if(!oct_Any_setType(ctx, &val, btype)) return oct_False;
-	if(!oct_Any_setPtr(ctx, &val, type)) return oct_False;
+	if(!oct_Any_setPtrKind(ctx, &val.any, OCT_POINTER_BORROWED)) return oct_False;
+	if(!oct_Any_setType(ctx, &val.any, btype)) return oct_False;
+	if(!oct_Any_setPtr(ctx, &val.any, type)) return oct_False;
 	return oct_Namespace_bind(ctx, ns, sym, val);
 }
 

@@ -86,9 +86,8 @@ oct_Bool oct_Namespace_create(struct oct_Context* ctx, oct_OSymbol name, oct_BNa
 	for(i = 0; i < 10; ++i) {
 		newNode->ns.bindings.ptr->bindings[i].sym.variant = OCT_NSBINDING_NOTHING;
 		newNode->ns.bindings.ptr->bindings[i].sym.nothing.dummy = 0;
-		// TODO: set the Any instance to an actual value?
-		newNode->ns.bindings.ptr->bindings[i].obj.data[0] = 0;
-		newNode->ns.bindings.ptr->bindings[i].obj.data[1] = 0;
+		newNode->ns.bindings.ptr->bindings[i].obj.variant = OCT_ANYOPTION_NOTHING;
+		newNode->ns.bindings.ptr->bindings[i].obj.nothing.dummy = 0;
 	}
 
 	// put new node in list
@@ -106,7 +105,7 @@ oct_Bool oct_Namespace_create(struct oct_Context* ctx, oct_OSymbol name, oct_BNa
 	return oct_True;
 }
 
-oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_OSymbol sym, oct_Any val) {
+oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_OSymbol sym, oct_AnyOption val) {
 	// TODO: lock bindings
 	// find first free binding in namespace
 
