@@ -42,20 +42,41 @@ static oct_Bool eval_sym(struct oct_Context* ctx, oct_Symbol* sym, oct_AnyOption
 
 static oct_Bool eval_def(struct oct_Context* ctx, oct_BReadableList args, oct_AnyOption* out_result) {
 	oct_BNamespace ns;
+	oct_BReadable readable;
 	oct_BReadableList lst;
 	oct_OReadableOption first;
 	oct_ReadableListOption rest;
 
 	printf("eval_def\n");
 
-	//ns.ptr = ctx->ns;
-	//if(!oct_Compiler_eval(ctx, arg, out_result)) {
-	//	return oct_False;
-	//}
-	//// as a side effect of def, the eval result of arg is bound to sym in the current namespace
-	//if(!oct_Namespace_bind(ctx, ns, sym, *out_result)) {
-	//	return oct_False;
-	//}
+	if(args.ptr->readable.variant == OCT_OREADABLEOPTION_NOTHING) {
+		// arg list empty, should this be an error result rather than an "exception"?
+		return oct_False;
+	}
+	readable.ptr = args.ptr->readable.readable.ptr;
+	if(oct_ReadableList_first(ctx, lst, &first)) {
+		return oct_False;
+	}
+	// first argument needs to be a symbol
+	if(first.variant == OCT_OREADABLEOPTION_NOTHING) {
+		// weird
+		return oct_False;
+	}
+	if(first.readable.ptr->variant != OCT_READABLE_SYMBOL) {
+		// expected symbol, was ... something else
+		return oct_False;
+	}
+
+
+	ns.ptr = ctx->ns;
+	
+	if(!oct_Compiler_eval(ctx, arg, out_result)) {
+		return oct_False;
+	}
+	// as a side effect of def, the eval result of arg is bound to sym in the current namespace
+	if(!oct_Namespace_bind(ctx, ns, sym, *out_result)) {
+		return oct_False;
+	}
 	return oct_True;
 }
 
