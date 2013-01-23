@@ -56,5 +56,7 @@ oct_Bool oct_ReadableList_ctor(struct oct_Context* ctx, oct_ReadableList* rl);
 oct_Bool oct_ReadableList_dtor(struct oct_Context* ctx, oct_ReadableList* rl);
 oct_Bool oct_ReadableList_append(struct oct_Context* ctx, oct_BReadableList lst, oct_OReadable readable);
 oct_Bool oct_ReadableList_empty(struct oct_Context* ctx, oct_BReadableList lst, oct_Bool* out_result);
+oct_Bool oct_ReadableList_first(struct oct_Context* ctx, oct_BReadableList lst, oct_OReadableOption* out_result);
+oct_Bool oct_ReadableList_rest(struct oct_Context* ctx, oct_BReadableList lst, oct_ReadableListOption* out_result);
 
 #endif

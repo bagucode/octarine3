@@ -383,6 +383,7 @@ static oct_Bool readList(struct oct_Context* ctx, oct_BReader reader, oct_Charst
 		// OOM
 		goto error;
 	}
+	out_result->readable.ptr->variant = OCT_READABLE_LIST;
 	// Empty list to start with
 	CHECK(oct_ReadableList_ctor(ctx, &out_result->readable.ptr->list));
 	bList.ptr = &out_result->readable.ptr->list;

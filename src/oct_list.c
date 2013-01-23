@@ -206,3 +206,18 @@ oct_Bool oct_OReadableList_dtor(struct oct_Context* ctx, oct_OReadableList orl) 
 	}
 }
 
+oct_Bool oct_ReadableList_first(struct oct_Context* ctx, oct_BReadableList lst, oct_OReadableOption* out_result) {
+	// This is probably wrong.
+	// Getting an owned variable from out of a struct will invalidate the variable within the struct
+	// so maybe it should also be cleared from the list?
+	// In octarine itself, the compiler should make sure that the value in the struct is not used
+	// after this operation. But how to do that in the C code?
+	*out_result = lst.ptr->readable;
+	return oct_True;
+}
+
+oct_Bool oct_ReadableList_rest(struct oct_Context* ctx, oct_BReadableList lst, oct_ReadableListOption* out_result) {
+	// Issue with ownership here too?
+	*out_result = lst.ptr->next;
+	return oct_True;
+}

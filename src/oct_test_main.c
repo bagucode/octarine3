@@ -116,7 +116,7 @@ int main(int argc, char** argv) {
 	oct_AnyOption evalResult;
 	reader.ptr = ctx->reader;
 
-	oct_OString_createFromCString(ctx, "- . ! ? 1 2 3 -37 1.5 0.34 .34 1e16 -0.8 -.8 -.main .main -main { [ hello \"hej\" \"hell o workdl\" (this is a (nested) \"list\" of 8 readables )", &str);
+	oct_OString_createFromCString(ctx, "- . ! ? 1 2 3 -37 1.5 0.34 .34 1e16 -0.8 -.8 -.main .main -main { [ hello \"hej\" \"hell o workdl\" (this is a (nested) \"list\" of 8 readables ) (def mac \"mac\")", &str);
 
 	// Borrow string pointer
 	bstr.ptr = str.ptr;
