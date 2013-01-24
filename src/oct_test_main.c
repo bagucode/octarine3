@@ -101,6 +101,61 @@ static void NamespaceTests() {
 	assert(oct_Runtime_destroy(rt, &error));
 }
 
+static void defTest() {
+	oct_Runtime* rt;
+	oct_Context* ctx;
+	oct_BNamespace ns;
+	oct_AnyOption lookedUp;
+	oct_OString str;
+	oct_BString bs1;
+	oct_BString bs2;
+	oct_ReadResult readResult;
+	oct_BReadable readable;
+	oct_BReader reader;
+	oct_BString bstr;
+	oct_OStringStream ss;
+	oct_BStringStream bss;
+	oct_Charstream stream;
+	oct_BSymbol bsym;
+	oct_OSymbol osym;
+	oct_Bool result;
+	oct_AnyOption evalResult;
+	void* outStr;
+	const char* error;
+
+	rt = oct_Runtime_create(&error);
+	assert(rt);
+	ctx = oct_Runtime_currentContext(rt);
+	assert(ctx);
+	assert(ctx->ns);
+	ns.ptr = ctx->ns;
+
+	// Eval
+	oct_OString_createFromCString(ctx, "(def hello \"Hello\")", &str);
+	bstr.ptr = str.ptr;
+	oct_OStringStream_create(ctx, bstr, &ss);
+	bss.ptr = ss.ptr;
+	oct_BStringStream_asCharStream(ctx, bss, &stream);
+	reader.ptr = ctx->reader;
+	oct_Reader_read(ctx, reader, stream, &readResult);
+	readable.ptr = readResult.readable.ptr;
+	oct_Compiler_eval(ctx, readable, &evalResult);
+
+	// Lookup
+	oct_OString_createFromCString(ctx, "hello", &str);
+	oct_OSymbol_alloc(ctx, str, &osym);
+	bsym.ptr = osym.ptr;
+	assert(oct_Namespace_lookup(ctx, ns, bsym, &lookedUp));
+	oct_Any_getPtr(ctx, lookedUp.any, &outStr);
+	oct_OString_createFromCString(ctx, "Hello", &str);
+	bs1.ptr = str.ptr;
+	bs2.ptr = (oct_String*)outStr;
+	assert(oct_BString_equals(ctx, bs1, bs2, &result));
+	assert(result);
+
+	assert(oct_Runtime_destroy(rt, &error));
+}
+
 int main(int argc, char** argv) {
 	const char* error;
 	oct_Charstream stream;
@@ -146,6 +201,7 @@ int main(int argc, char** argv) {
 
 	StringTests();
 	NamespaceTests();
+	defTest();
 
 	return 0;
 }

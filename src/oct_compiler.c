@@ -4,6 +4,7 @@
 #include "oct_context.h"
 #include "oct_runtime.h"
 #include "oct_readable.h"
+#include "oct_pointertype.h"
 
 // DEBUG
 #include <stdio.h>
@@ -41,43 +42,51 @@ static oct_Bool eval_sym(struct oct_Context* ctx, oct_Symbol* sym, oct_AnyOption
 }
 
 static oct_Bool eval_def(struct oct_Context* ctx, oct_BReadableList args, oct_AnyOption* out_result) {
+	// (def <symbol>)
+	// (def <symbol> <value>)
 	oct_BNamespace ns;
 	oct_BReadable readable;
 	oct_BReadableList lst;
 	oct_OReadableOption first;
+	oct_OReadableOption second;
 	oct_ReadableListOption rest;
+	oct_BString str;
+	oct_Uword count;
+	oct_OSymbol sym;
 
 	printf("eval_def\n");
 
-	if(args.ptr->readable.variant == OCT_OREADABLEOPTION_NOTHING) {
-		// arg list empty, should this be an error result rather than an "exception"?
+	if(!oct_ReadableList_count(ctx, args, &count)) {
 		return oct_False;
 	}
-	readable.ptr = args.ptr->readable.readable.ptr;
-	if(oct_ReadableList_first(ctx, lst, &first)) {
+	if(count < 1 || count > 2) {
+		// wrong number of args
 		return oct_False;
 	}
-	// first argument needs to be a symbol
-	if(first.variant == OCT_OREADABLEOPTION_NOTHING) {
-		// weird
+	if(!oct_ReadableList_first(ctx, args, &first)) {
 		return oct_False;
 	}
 	if(first.readable.ptr->variant != OCT_READABLE_SYMBOL) {
 		// expected symbol, was ... something else
 		return oct_False;
 	}
-
-
+	// eval second argument if we have one
+	if(count == 2) {
+		if(!oct_ReadableList_nth(ctx, args, 1, &second)) {
+			return oct_False;
+		}
+		readable.ptr = second.readable.ptr;
+		if(!oct_Compiler_eval(ctx, readable, out_result)) {
+			return oct_False;
+		}
+	}
+	else {
+		out_result->variant == OCT_ANYOPTION_NOTHING;
+	}
+	// bind in current namespace
 	ns.ptr = ctx->ns;
-	
-	if(!oct_Compiler_eval(ctx, arg, out_result)) {
-		return oct_False;
-	}
-	// as a side effect of def, the eval result of arg is bound to sym in the current namespace
-	if(!oct_Namespace_bind(ctx, ns, sym, *out_result)) {
-		return oct_False;
-	}
-	return oct_True;
+	sym.ptr = &first.readable.ptr->symbol;
+	return oct_Namespace_bind(ctx, ns, sym, *out_result);
 }
 
 oct_Bool oct_Compiler_eval(struct oct_Context* ctx, oct_BReadable readable, oct_AnyOption* out_result) {
@@ -86,6 +95,7 @@ oct_Bool oct_Compiler_eval(struct oct_Context* ctx, oct_BReadable readable, oct_
 	oct_BReadableList lst;
 	oct_ReadableListOption rest;
 	oct_Bool eq;
+	oct_BType btype;
 
     if(readable.ptr->variant == OCT_READABLE_SYMBOL) {
         return eval_sym(ctx, &readable.ptr->symbol, out_result);
@@ -114,5 +124,13 @@ oct_Bool oct_Compiler_eval(struct oct_Context* ctx, oct_BReadable readable, oct_
 				}
 			}
 		}
+	}
+	else if(readable.ptr->variant == OCT_READABLE_STRING) {
+		out_result->variant = OCT_ANYOPTION_ANY;
+		oct_Any_setPtr(ctx, &out_result->any, &readable.ptr->string);
+		oct_Any_setPtrKind(ctx, &out_result->any, OCT_POINTER_OWNED);
+		btype.ptr = ctx->rt->builtInTypes.String;
+		oct_Any_setType(ctx, &out_result->any, btype);
+		return oct_True;
 	}
 }

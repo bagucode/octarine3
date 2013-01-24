@@ -221,3 +221,34 @@ oct_Bool oct_ReadableList_rest(struct oct_Context* ctx, oct_BReadableList lst, o
 	*out_result = lst.ptr->next;
 	return oct_True;
 }
+
+oct_Bool oct_ReadableList_count(struct oct_Context* ctx, oct_BReadableList lst, oct_Uword* out_count) {
+	if(lst.ptr->next.variant == OCT_READABLE_LINKED_LIST_OPTION_NOTHING 
+		&& lst.ptr->readable.variant == OCT_OREADABLEOPTION_NOTHING) {
+			*out_count = 0;
+			return oct_True;
+	}
+	*out_count = 1;
+	while(lst.ptr->next.variant == OCT_READABLE_LINKED_LIST_OPTION_LIST) {
+		++(*out_count);
+		lst.ptr = lst.ptr->next.rll.ptr;
+	}
+	return oct_True;
+}
+
+oct_Bool oct_ReadableList_nth(struct oct_Context* ctx, oct_BReadableList lst, oct_Uword idx, oct_OReadableOption* out_result) {
+	oct_Uword count;
+	for(count = 0; count < idx, lst.ptr->next.variant == OCT_READABLE_LINKED_LIST_OPTION_LIST; ++count) {
+		lst.ptr = lst.ptr->next.rll.ptr;
+	}
+	if(count < idx) {
+		// out of bounds. Should this be an "exception"?
+		out_result->variant = OCT_OREADABLEOPTION_NOTHING;
+		return oct_True;
+	}
+	out_result->variant = OCT_OREADABLEOPTION_OREADABLE;
+	out_result->readable.ptr = lst.ptr->readable.readable.ptr;
+	// The list node value is now owned by the caller.
+	// Should it be unlinked?
+	return oct_True;
+}
