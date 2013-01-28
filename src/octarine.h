@@ -3,7 +3,6 @@
 
 #include "oct_context.h"
 #include "oct_error.h"
-#include "oct_heap.h"
 #include "oct_namespace.h"
 #include "oct_primitives.h"
 #include "oct_runtime.h"
