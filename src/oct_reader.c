@@ -38,11 +38,11 @@ static oct_Bool reader_pushChar(oct_Context* ctx, oct_BReader reader, oct_Char c
 	return oct_True;
 }
 
-static void reader_popChar(oct_BReader reader) {
-	if(reader.ptr->nchars > 0) {
-		--reader.ptr->nchars;
-	}
-}
+//static void reader_popChar(oct_BReader reader) {
+//	if(reader.ptr->nchars > 0) {
+//		--reader.ptr->nchars;
+//	}
+//}
 
 static void reader_clearChars(oct_BReader reader) {
 	reader.ptr->nchars = 0;
@@ -52,13 +52,13 @@ static oct_Uword reader_nChars(oct_BReader reader) {
 	return reader.ptr->nchars;
 }
 
-static void reader_removeAt(oct_BReader reader, oct_Uword idx) {
-	--reader.ptr->nchars;
-	for(; idx < reader.ptr->nchars; ++idx) {
-		reader.ptr->readBuffer.ptr->data[idx] = reader.ptr->readBuffer.ptr->data[idx + 1];
-	}
-	reader.ptr->readBuffer.ptr->data[reader.ptr->nchars] = '\0';
-}
+//static void reader_removeAt(oct_BReader reader, oct_Uword idx) {
+//	--reader.ptr->nchars;
+//	for(; idx < reader.ptr->nchars; ++idx) {
+//		reader.ptr->readBuffer.ptr->data[idx] = reader.ptr->readBuffer.ptr->data[idx + 1];
+//	}
+//	reader.ptr->readBuffer.ptr->data[reader.ptr->nchars] = '\0';
+//}
 
 static oct_Char reader_getChar(oct_BReader reader, oct_Uword idx) {
 	return reader.ptr->readBuffer.ptr->data[idx];
@@ -425,7 +425,7 @@ static oct_Bool readList(struct oct_Context* ctx, oct_BReader reader, oct_Charst
 		}
 		bList.ptr = bList.ptr->next.rll.ptr;
 	}
-	printf("LIST END: %d ELEMENTS )\n", DEBUG_I);
+	printf("LIST END: %llu ELEMENTS )\n", DEBUG_I);
 
 	goto end;
 error:

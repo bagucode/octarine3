@@ -46,11 +46,8 @@ static oct_Bool eval_def(struct oct_Context* ctx, oct_BReadableList args, oct_An
 	// (def <symbol> <value>)
 	oct_BNamespace ns;
 	oct_BReadable readable;
-	oct_BReadableList lst;
 	oct_OReadableOption first;
 	oct_OReadableOption second;
-	oct_ReadableListOption rest;
-	oct_BString str;
 	oct_Uword count;
 	oct_OSymbol sym;
 
@@ -81,7 +78,7 @@ static oct_Bool eval_def(struct oct_Context* ctx, oct_BReadableList args, oct_An
 		}
 	}
 	else {
-		out_result->variant == OCT_ANYOPTION_NOTHING;
+		out_result->variant = OCT_ANYOPTION_NOTHING;
 	}
 	// bind in current namespace
 	ns.ptr = ctx->ns;
