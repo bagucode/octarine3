@@ -1,64 +1,87 @@
 #ifndef oct_list
 #define oct_list
 
-#include "oct_nothing.h"
-#include "oct_readable_pointers.h"
+#include "oct_any.h"
 
 // The basic linked list is a template type and is not defined in C
 // Need a concrete type that can contain any readable type
 
-struct oct_ReadableList;
+struct oct_List;
 
-typedef struct oct_OReadableList {
-	struct oct_ReadableList* ptr;
-} oct_OReadableList;
+typedef struct oct_OList {
+	struct oct_List* ptr;
+} oct_OList;
 
-typedef struct oct_BReadableList {
-	struct oct_ReadableList* ptr;
-} oct_BReadableList;
+typedef struct oct_MList {
+	struct oct_List* ptr;
+} oct_MList;
 
-#define OCT_READABLE_LINKED_LIST_OPTION_NOTHING 0
-#define OCT_READABLE_LINKED_LIST_OPTION_LIST 1
+typedef struct oct_BList {
+	struct oct_List* ptr;
+} oct_BList;
 
-typedef struct oct_ReadableListOption {
-	oct_Uword variant; // OCT_READABLE_LINKED_LIST_OPTION_*
+#define OCT_LISTOPTION_NOTHING 0
+#define OCT_LISTOPTION_LIST 1
+
+typedef struct oct_OListOption {
+	oct_Uword variant;
 	union {
 		oct_Nothing nothing;
-		oct_OReadableList rll;
+		oct_OList list;
 	};
-} oct_ReadableListOption;
+} oct_OListOption;
 
-typedef struct oct_ReadableList {
-	oct_OReadableOption readable;
-	oct_ReadableListOption next;
-} oct_ReadableList;
+typedef struct oct_BListOption {
+	oct_Uword variant;
+	union {
+		oct_Nothing nothing;
+		oct_BList list;
+	};
+} oct_BListOption;
+
+typedef struct oct_List {
+	oct_AnyOption data;
+	oct_OListOption next;
+} oct_List;
+
+typedef struct oct_ListBorrowed {
+	oct_AnyOption data;
+	oct_BListOption next;
+} oct_ListBorrowed;
 
 // Private
 
 struct oct_Context;
+struct oct_BType;
 
-// Linked list template
-oct_Bool _oct_ListT_initType(struct oct_Context* ctx);
-oct_Bool _oct_ListOptionT_initType(struct oct_Context* ctx);
-
-// List<Readable>
-oct_Bool _oct_ReadableList_initType(struct oct_Context* ctx);
-oct_Bool _oct_OReadableList_initType(struct oct_Context* ctx);
-oct_Bool _oct_BReadableList_initType(struct oct_Context* ctx);
-oct_Bool _oct_ReadableListOption_initType(struct oct_Context* ctx);
+oct_Bool _oct_List_initType(struct oct_Context* ctx);
+oct_Bool _oct_OList_initType(struct oct_Context* ctx);
+oct_Bool _oct_MList_initType(struct oct_Context* ctx);
+oct_Bool _oct_BList_initType(struct oct_Context* ctx);
+oct_Bool _oct_OListOption_initType(struct oct_Context* ctx);
 
 // Public
 
-oct_Bool oct_OReadableList_ctor(struct oct_Context* ctx, oct_OReadableList* out_result);
-oct_Bool oct_OReadableList_dtor(struct oct_Context* ctx, oct_OReadableList orl);
+// Create & Destroy
+oct_Bool oct_List_ctor(struct oct_Context* ctx, oct_List* self);
+oct_Bool oct_List_dtor(struct oct_Context* ctx, oct_List* self);
+oct_Bool oct_List_createOwned(struct oct_Context* ctx, oct_OList* out_result);
+oct_Bool oct_List_createManaged(struct oct_Context* ctx, oct_MList* out_result);
+oct_Bool oct_List_borrowOwned(struct oct_Context* ctx, oct_OList lst, oct_BList* out_lst);
+oct_Bool oct_List_borrowManaged(struct oct_Context* ctx, oct_MList lst, oct_BList* out_lst);
+oct_Bool oct_List_destroyOwned(struct oct_Context* ctx, oct_OList lst);
 
-oct_Bool oct_ReadableList_ctor(struct oct_Context* ctx, oct_ReadableList* rl);
-oct_Bool oct_ReadableList_dtor(struct oct_Context* ctx, oct_ReadableList* rl);
-oct_Bool oct_ReadableList_append(struct oct_Context* ctx, oct_BReadableList lst, oct_OReadable readable);
-oct_Bool oct_ReadableList_empty(struct oct_Context* ctx, oct_BReadableList lst, oct_Bool* out_result);
-oct_Bool oct_ReadableList_first(struct oct_Context* ctx, oct_BReadableList lst, oct_OReadableOption* out_result);
-oct_Bool oct_ReadableList_rest(struct oct_Context* ctx, oct_BReadableList lst, oct_ReadableListOption* out_result);
-oct_Bool oct_ReadableList_count(struct oct_Context* ctx, oct_BReadableList lst, oct_Uword* out_count);
-oct_Bool oct_ReadableList_nth(struct oct_Context* ctx, oct_BReadableList lst, oct_Uword idx, oct_OReadableOption* out_result);
+// Util
+oct_Bool oct_List_getType(struct oct_Context* ctx, struct oct_BType* out_type);
+
+// Operations
+oct_Bool oct_List_append(struct oct_Context* ctx, oct_BList lst, oct_Any obj);
+oct_Bool oct_List_emptyp(struct oct_Context* ctx, oct_BList lst, oct_Bool* out_result);
+oct_Bool oct_List_first(struct oct_Context* ctx, oct_BList lst, oct_AnyOption* out_any);
+// Not sure about the rest function... A borrowed list that contains owned pointers, is that ok?
+// Perhaps the return value should be deeply borrowed?
+oct_Bool oct_List_rest(struct oct_Context* ctx, oct_BList lst, oct_BListOption* out_lst);
+oct_Bool oct_List_count(struct oct_Context* ctx, oct_BList lst, oct_Uword* out_count);
+oct_Bool oct_List_nth(struct oct_Context* ctx, oct_BList lst, oct_Uword idx, oct_OReadableOption* out_result);
 
 #endif
