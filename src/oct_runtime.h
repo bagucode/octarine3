@@ -32,7 +32,7 @@ typedef struct oct_BuiltInTypes {
 	struct oct_Type* Char;
 	struct oct_Type* Bool;
 	// Aggregate types
-	struct oct_Type* ListT;
+	struct oct_Type* List;
 	struct oct_Type* Symbol;
 	struct oct_Type* OSymbol;
 	struct oct_Type* OSymbolOption;
@@ -58,16 +58,14 @@ typedef struct oct_BuiltInTypes {
 	struct oct_Type* AU8;
 	struct oct_Type* OAU8;
 	struct oct_Type* Readable;
-	struct oct_Type* ReadableList;
-	struct oct_Type* OReadableList;
-	struct oct_Type* BReadableList;
-	struct oct_Type* ReadableListOption;
+	struct oct_Type* OList;
+	struct oct_Type* BList;
+	struct oct_Type* OListOption;
 	struct oct_Type* OReadable;
 	struct oct_Type* OReadableOption;
 	struct oct_Type* Reader;
 	struct oct_Type* ReadResult;
 	struct oct_Type* Nothing;
-	struct oct_Type* ListOptionT;
 	struct oct_Type* OptionT;
 	struct oct_Type* Any;
 	struct oct_Type* AAny;

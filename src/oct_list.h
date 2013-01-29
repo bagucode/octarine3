@@ -44,11 +44,6 @@ typedef struct oct_List {
 	oct_OListOption next;
 } oct_List;
 
-typedef struct oct_ListBorrowed {
-	oct_AnyOption data;
-	oct_BListOption next;
-} oct_ListBorrowed;
-
 // Private
 
 struct oct_Context;
@@ -78,10 +73,8 @@ oct_Bool oct_List_getType(struct oct_Context* ctx, struct oct_BType* out_type);
 oct_Bool oct_List_append(struct oct_Context* ctx, oct_BList lst, oct_Any obj);
 oct_Bool oct_List_emptyp(struct oct_Context* ctx, oct_BList lst, oct_Bool* out_result);
 oct_Bool oct_List_first(struct oct_Context* ctx, oct_BList lst, oct_AnyOption* out_any);
-// Not sure about the rest function... A borrowed list that contains owned pointers, is that ok?
-// Perhaps the return value should be deeply borrowed?
 oct_Bool oct_List_rest(struct oct_Context* ctx, oct_BList lst, oct_BListOption* out_lst);
 oct_Bool oct_List_count(struct oct_Context* ctx, oct_BList lst, oct_Uword* out_count);
-oct_Bool oct_List_nth(struct oct_Context* ctx, oct_BList lst, oct_Uword idx, oct_OReadableOption* out_result);
+oct_Bool oct_List_nth(struct oct_Context* ctx, oct_BList lst, oct_Uword idx, oct_AnyOption* out_any);
 
 #endif

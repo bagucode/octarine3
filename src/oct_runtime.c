@@ -187,12 +187,11 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	bind_type(mainCtx, octarine, "ReadableList", rt->builtInTypes.ReadableList);
 	bind_type(mainCtx, octarine, "~ReadableList", rt->builtInTypes.OReadableList);
 	bind_type(mainCtx, octarine, "&ReadableList", rt->builtInTypes.BReadableList);
-	bind_type(mainCtx, octarine, "ReadableListOption", rt->builtInTypes.ReadableListOption);
+	bind_type(mainCtx, octarine, "ListOption", rt->builtInTypes.ListOption);
 	bind_type(mainCtx, octarine, "~Readable", rt->builtInTypes.OReadable);
 	// Don't like this syntax for the owned readable option:
 	bind_type(mainCtx, octarine, "~ReadableOption", rt->builtInTypes.OReadableOption);
 	bind_type(mainCtx, octarine, "Nothing", rt->builtInTypes.Nothing);
-	bind_type(mainCtx, octarine, "ListOption<>", rt->builtInTypes.ListOptionT);
 	bind_type(mainCtx, octarine, "Option<>", rt->builtInTypes.OptionT);
 	bind_type(mainCtx, octarine, "Any", rt->builtInTypes.Any);
 	bind_type(mainCtx, octarine, "+Any", rt->builtInTypes.AAny);

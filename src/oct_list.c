@@ -8,10 +8,60 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-// Template types
-// ListOptionTemplate would be generated automatically as an inner type in octarine
-// by using the Option template inside the List template
-// but in C we have to create it manually
+oct_Bool _oct_List_initType(struct oct_Context* ctx) {
+	oct_Type* t = ctx->rt->builtInTypes.List;
+	oct_Bool result;
+	t->variant = OCT_TYPE_STRUCT;
+	t->structType.alignment = 0;
+	t->structType.size = sizeof(oct_List);
+	result = oct_OAField_alloc(ctx, 2, &t->structType.fields);
+	if(!result) {
+		return result;
+	}
+	t->structType.fields.ptr->data[0].offset = offsetof(oct_List, data);
+	t->structType.fields.ptr->data[0].type.ptr = ctx->rt->builtInTypes.AnyOption;
+	t->structType.fields.ptr->data[1].offset = offsetof(oct_List, next);
+	t->structType.fields.ptr->data[1].type.ptr = ctx->rt->builtInTypes.OListOption;
+	return oct_True;
+}
+
+oct_Bool _oct_OList_initType(struct oct_Context* ctx) {
+	oct_Type* t = ctx->rt->builtInTypes.OList;
+	oct_Bool result;
+	t->variant = OCT_TYPE_POINTER;
+	t->pointerType.kind = OCT_POINTER_OWNED;
+	t->pointerType.type.ptr = ctx->rt->builtInTypes.List;
+	return oct_True;
+}
+
+oct_Bool _oct_MList_initType(struct oct_Context* ctx);
+oct_Bool _oct_BList_initType(struct oct_Context* ctx);
+oct_Bool _oct_OListOption_initType(struct oct_Context* ctx);
+
+// Public
+
+// Create & Destroy
+oct_Bool oct_List_ctor(struct oct_Context* ctx, oct_List* self);
+oct_Bool oct_List_dtor(struct oct_Context* ctx, oct_List* self);
+oct_Bool oct_List_createOwned(struct oct_Context* ctx, oct_OList* out_result);
+oct_Bool oct_List_createManaged(struct oct_Context* ctx, oct_MList* out_result);
+oct_Bool oct_List_borrowOwned(struct oct_Context* ctx, oct_OList lst, oct_BList* out_lst);
+oct_Bool oct_List_borrowManaged(struct oct_Context* ctx, oct_MList lst, oct_BList* out_lst);
+oct_Bool oct_List_destroyOwned(struct oct_Context* ctx, oct_OList lst);
+
+// Util
+oct_Bool oct_List_getType(struct oct_Context* ctx, struct oct_BType* out_type);
+
+// Operations
+oct_Bool oct_List_append(struct oct_Context* ctx, oct_BList lst, oct_Any obj);
+oct_Bool oct_List_emptyp(struct oct_Context* ctx, oct_BList lst, oct_Bool* out_result);
+oct_Bool oct_List_first(struct oct_Context* ctx, oct_BList lst, oct_AnyOption* out_any);
+oct_Bool oct_List_rest(struct oct_Context* ctx, oct_BList lst, oct_BListOption* out_lst);
+oct_Bool oct_List_count(struct oct_Context* ctx, oct_BList lst, oct_Uword* out_count);
+oct_Bool oct_List_nth(struct oct_Context* ctx, oct_BList lst, oct_Uword idx, oct_AnyOption* out_any);
+
+
+////////////////// OLD CRAP
 
 oct_Bool _oct_ListT_initType(oct_Context* ctx) {
 	oct_Type* t = ctx->rt->builtInTypes.ListT;
