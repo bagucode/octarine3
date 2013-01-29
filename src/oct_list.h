@@ -1,5 +1,5 @@
-#ifndef oct_list_private
-#define oct_list_private
+#ifndef oct_list
+#define oct_list
 
 #include "oct_nothing.h"
 #include "oct_readable_pointers.h"
