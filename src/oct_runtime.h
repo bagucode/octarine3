@@ -59,6 +59,7 @@ typedef struct oct_BuiltInTypes {
 	struct oct_Type* OAU8;
 	struct oct_Type* Readable;
 	struct oct_Type* OList;
+	struct oct_Type* MList;
 	struct oct_Type* BList;
 	struct oct_Type* OListOption;
 	struct oct_Type* OReadable;

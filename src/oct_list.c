@@ -27,16 +27,42 @@ oct_Bool _oct_List_initType(struct oct_Context* ctx) {
 
 oct_Bool _oct_OList_initType(struct oct_Context* ctx) {
 	oct_Type* t = ctx->rt->builtInTypes.OList;
-	oct_Bool result;
 	t->variant = OCT_TYPE_POINTER;
 	t->pointerType.kind = OCT_POINTER_OWNED;
 	t->pointerType.type.ptr = ctx->rt->builtInTypes.List;
 	return oct_True;
 }
 
-oct_Bool _oct_MList_initType(struct oct_Context* ctx);
-oct_Bool _oct_BList_initType(struct oct_Context* ctx);
-oct_Bool _oct_OListOption_initType(struct oct_Context* ctx);
+oct_Bool _oct_MList_initType(struct oct_Context* ctx) {
+	oct_Type* t = ctx->rt->builtInTypes.MList;
+	t->variant = OCT_TYPE_POINTER;
+	t->pointerType.kind = OCT_POINTER_MANAGED;
+	t->pointerType.type.ptr = ctx->rt->builtInTypes.List;
+	return oct_True;
+}
+
+oct_Bool _oct_BList_initType(struct oct_Context* ctx) {
+	oct_Type* t = ctx->rt->builtInTypes.BList;
+	t->variant = OCT_TYPE_POINTER;
+	t->pointerType.kind = OCT_POINTER_BORROWED;
+	t->pointerType.type.ptr = ctx->rt->builtInTypes.List;
+	return oct_True;
+}
+
+oct_Bool _oct_OListOption_initType(struct oct_Context* ctx) {
+    oct_Type* t = ctx->rt->builtInTypes.OListOption;
+    oct_Bool result;
+    t->variant = OCT_TYPE_VARIADIC;
+    t->variadicType.alignment = 0;
+    t->variadicType.size = sizeof(oct_OListOption);
+    result = oct_OABType_alloc(ctx, 2, &t->variadicType.types);
+    if(!result) {
+        return oct_False;
+    }
+    t->variadicType.types.ptr->data[0].ptr = ctx->rt->builtInTypes.Nothing;
+    t->variadicType.types.ptr->data[0].ptr = ctx->rt->builtInTypes.OList;
+    return oct_True;
+}
 
 // Public
 
