@@ -115,7 +115,7 @@ oct_Bool oct_List_destroyOwned(struct oct_Context* ctx, oct_OList lst) {
         prev = lst.ptr;
         lst.ptr = lst.ptr->next.list.ptr;
         oct_ExchangeHeap_free(ctx, prev);
-    };
+    }
     return result;
 }
 
@@ -143,7 +143,31 @@ oct_Bool oct_List_prepend(struct oct_Context* ctx, oct_OList lst, oct_Any obj, o
 }
 
 oct_Bool oct_List_append(struct oct_Context* ctx, oct_BList lst, oct_Any obj) {
-
+	oct_Bool b;
+	if(!oct_List_emptyp(ctx, lst, &b)) {
+		return oct_False;
+	}
+	if(b) {
+		if(!oct_Any_move(ctx, obj, &lst.ptr->data.any)) {
+			return oct_False;
+		}
+		lst.ptr->data.variant = OCT_ANYOPTION_ANY;
+	}
+	else {
+		while(lst.ptr->next.variant == OCT_LISTOPTION_LIST) {
+			lst.ptr = lst.ptr->next.list.ptr;
+		}
+		if(!oct_List_createOwned(ctx, &lst.ptr->next.list)) {
+			return oct_False;
+		}
+		if(!oct_Any_move(ctx, obj, &lst.ptr->next.list.ptr->data.any)) {
+			oct_List_destroyOwned(ctx, lst.ptr->next.list);
+			return oct_False;
+		}
+		lst.ptr->next.list.ptr->data.variant = OCT_ANYOPTION_ANY;
+		lst.ptr->next.variant = OCT_LISTOPTION_LIST;
+	}
+	return oct_True;
 }
 
 oct_Bool oct_List_emptyp(struct oct_Context* ctx, oct_BList lst, oct_Bool* out_result);
