@@ -69,6 +69,7 @@ oct_Bool oct_List_destroyOwned(struct oct_Context* ctx, oct_OList lst);
 oct_Bool oct_List_getType(struct oct_Context* ctx, struct oct_BType* out_type);
 
 // Operations
+oct_Bool oct_List_prepend(struct oct_Context* ctx, oct_OList lst, oct_Any obj, oct_OList* out_lst);
 oct_Bool oct_List_append(struct oct_Context* ctx, oct_BList lst, oct_Any obj);
 oct_Bool oct_List_emptyp(struct oct_Context* ctx, oct_BList lst, oct_Bool* out_result);
 oct_Bool oct_List_first(struct oct_Context* ctx, oct_BList lst, oct_AnyOption* out_any);

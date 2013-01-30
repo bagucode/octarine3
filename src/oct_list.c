@@ -5,6 +5,7 @@
 #include "oct_readable.h"
 #include "oct_readable_pointers.h"
 #include "oct_exchangeheap.h"
+#include "oct_managedheap.h"
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -81,9 +82,24 @@ oct_Bool oct_List_createOwned(struct oct_Context* ctx, oct_OList* out_result) {
     return oct_List_ctor(ctx, out_result->ptr);
 }
 
-oct_Bool oct_List_createManaged(struct oct_Context* ctx, oct_MList* out_result);
-oct_Bool oct_List_borrowOwned(struct oct_Context* ctx, oct_OList lst, oct_BList* out_lst);
-oct_Bool oct_List_borrowManaged(struct oct_Context* ctx, oct_MList lst, oct_BList* out_lst);
+oct_Bool oct_List_createManaged(struct oct_Context* ctx, oct_MList* out_result) {
+	oct_BType bt;
+	bt.ptr = ctx->rt->builtInTypes.List;
+	if(!oct_ManagedHeap_alloc(ctx, bt, (void**)&out_result->ptr)) {
+		return oct_False;
+	}
+	return oct_List_ctor(ctx, out_result->ptr);
+}
+
+oct_Bool oct_List_borrowOwned(struct oct_Context* ctx, oct_OList lst, oct_BList* out_lst) {
+	out_lst->ptr = lst.ptr;
+	return oct_True;
+}
+
+oct_Bool oct_List_borrowManaged(struct oct_Context* ctx, oct_MList lst, oct_BList* out_lst) {
+	out_lst->ptr = lst.ptr;
+	return oct_True;
+}
 
 oct_Bool oct_List_destroyOwned(struct oct_Context* ctx, oct_OList lst) {
     oct_Bool result = oct_True;
@@ -104,10 +120,32 @@ oct_Bool oct_List_destroyOwned(struct oct_Context* ctx, oct_OList lst) {
 }
 
 // Util
-oct_Bool oct_List_getType(struct oct_Context* ctx, struct oct_BType* out_type);
+oct_Bool oct_List_getType(struct oct_Context* ctx, struct oct_BType* out_type) {
+	out_type->ptr = ctx->rt->builtInTypes.List;
+	return oct_True;
+}
 
 // Operations
-oct_Bool oct_List_append(struct oct_Context* ctx, oct_BList lst, oct_Any obj);
+oct_Bool oct_List_prepend(struct oct_Context* ctx, oct_OList lst, oct_Any obj, oct_OList* out_lst) {
+	if(!oct_List_createOwned(ctx, out_lst)) {
+		return oct_False;
+	}
+
+	out_lst->ptr->next.variant = OCT_LISTOPTION_LIST;
+	out_lst->ptr->next.list.ptr = lst.ptr;
+
+	out_lst->ptr->data.variant = OCT_ANYOPTION_ANY;
+	if(!oct_Any_move(ctx, obj, &out_lst->ptr->data.any)) {
+		oct_List_destroyOwned(ctx, *out_lst);
+		return oct_False;
+	}
+	return oct_True;
+}
+
+oct_Bool oct_List_append(struct oct_Context* ctx, oct_BList lst, oct_Any obj) {
+
+}
+
 oct_Bool oct_List_emptyp(struct oct_Context* ctx, oct_BList lst, oct_Bool* out_result);
 oct_Bool oct_List_first(struct oct_Context* ctx, oct_BList lst, oct_AnyOption* out_any);
 oct_Bool oct_List_rest(struct oct_Context* ctx, oct_BList lst, oct_BListOption* out_lst);

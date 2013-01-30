@@ -47,6 +47,10 @@ oct_Bool oct_Any_getPtrKind(struct oct_Context* ctx, oct_Any any, oct_Uword* out
 oct_Bool oct_Any_getType(struct oct_Context* ctx, oct_Any any, oct_BType* out_type);
 oct_Bool oct_Any_getPtr(struct oct_Context* ctx, oct_Any any, void** ptr);
 
+oct_Bool oct_Any_copy(struct oct_Context* ctx, oct_Any any, oct_Any* out_copy);
+oct_Bool oct_Any_move(struct oct_Context* ctx, oct_Any release, oct_Any* out_newOwner);
+
+oct_Bool oct_Any_ctor(struct oct_Context* ctx, oct_Any* out_any);
 oct_Bool oct_Any_dtor(struct oct_Context* ctx, oct_Any any);
 
 #endif

@@ -80,3 +80,8 @@ oct_Bool oct_Any_dtor(struct oct_Context* ctx, oct_Any any) {
 	// TODO: implement
 }
 
+oct_Bool oct_Any_ctor(struct oct_Context* ctx, oct_Any* out_any) {
+	out_any->data[0] = 0;
+	out_any->data[1] = 0;
+	return oct_True;
+}
