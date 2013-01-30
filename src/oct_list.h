@@ -59,7 +59,6 @@ oct_Bool _oct_OListOption_initType(struct oct_Context* ctx);
 
 // Create & Destroy
 oct_Bool oct_List_ctor(struct oct_Context* ctx, oct_List* self);
-oct_Bool oct_List_dtor(struct oct_Context* ctx, oct_List* self);
 oct_Bool oct_List_createOwned(struct oct_Context* ctx, oct_OList* out_result);
 oct_Bool oct_List_createManaged(struct oct_Context* ctx, oct_MList* out_result);
 oct_Bool oct_List_borrowOwned(struct oct_Context* ctx, oct_OList lst, oct_BList* out_lst);

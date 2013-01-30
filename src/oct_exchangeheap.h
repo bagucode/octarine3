@@ -7,4 +7,9 @@ typedef struct oct_ExchangeHeap {
     oct_Uword dummy;
 } oct_ExchangeHeap;
 
+struct oct_Context;
+
+oct_Bool oct_ExchangeHeap_alloc(struct oct_Context* ctx, oct_Uword size, void** out_place);
+oct_Bool oct_ExchangeHeap_free(struct oct_Context* ctx, void* place);
+
 #endif

@@ -4,6 +4,7 @@
 #include "oct_context.h"
 #include "oct_readable.h"
 #include "oct_readable_pointers.h"
+#include "oct_exchangeheap.h"
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -67,13 +68,40 @@ oct_Bool _oct_OListOption_initType(struct oct_Context* ctx) {
 // Public
 
 // Create & Destroy
-oct_Bool oct_List_ctor(struct oct_Context* ctx, oct_List* self);
-oct_Bool oct_List_dtor(struct oct_Context* ctx, oct_List* self);
-oct_Bool oct_List_createOwned(struct oct_Context* ctx, oct_OList* out_result);
+oct_Bool oct_List_ctor(struct oct_Context* ctx, oct_List* self) {
+    self->data.variant = OCT_ANYOPTION_NOTHING;
+    self->next.variant = OCT_LISTOPTION_NOTHING;
+    return oct_True;
+}
+
+oct_Bool oct_List_createOwned(struct oct_Context* ctx, oct_OList* out_result) {
+    if(!oct_ExchangeHeap_alloc(ctx, sizeof(oct_List), (void**)&out_result->ptr)) {
+        return oct_False;
+    }
+    return oct_List_ctor(ctx, out_result->ptr);
+}
+
 oct_Bool oct_List_createManaged(struct oct_Context* ctx, oct_MList* out_result);
 oct_Bool oct_List_borrowOwned(struct oct_Context* ctx, oct_OList lst, oct_BList* out_lst);
 oct_Bool oct_List_borrowManaged(struct oct_Context* ctx, oct_MList lst, oct_BList* out_lst);
-oct_Bool oct_List_destroyOwned(struct oct_Context* ctx, oct_OList lst);
+
+oct_Bool oct_List_destroyOwned(struct oct_Context* ctx, oct_OList lst) {
+    oct_Bool result = oct_True;
+    oct_List* prev;
+    while(oct_True) {
+        if(lst.ptr->data.variant == OCT_ANYOPTION_ANY) {
+            result = result && oct_Any_dtor(ctx, lst.ptr->data.any);
+        }
+        if(lst.ptr->next.variant == OCT_LISTOPTION_NOTHING) {
+            oct_ExchangeHeap_free(ctx, lst.ptr);
+            break;
+        }
+        prev = lst.ptr;
+        lst.ptr = lst.ptr->next.list.ptr;
+        oct_ExchangeHeap_free(ctx, prev);
+    };
+    return result;
+}
 
 // Util
 oct_Bool oct_List_getType(struct oct_Context* ctx, struct oct_BType* out_type);
