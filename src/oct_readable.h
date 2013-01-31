@@ -29,7 +29,7 @@ typedef struct oct_Readable {
 		oct_F32 f32;
 		oct_String string;
 		oct_Symbol symbol;
-		oct_ReadableList list;
+		oct_List list;
 		// oct_ReadableVector vec;
 		// oct_ReadableMap map;
 	};
