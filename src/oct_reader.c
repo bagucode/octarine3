@@ -1,5 +1,9 @@
 #include "oct_reader.h"
 #include "oct_context.h"
+#include "oct_exchangeheap.h"
+#include "oct_pointertype.h"
+#include "oct_runtime.h"
+#include "oct_list.h"
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -201,6 +205,8 @@ static oct_Bool readI32(struct oct_Context* ctx, oct_BReader reader, oct_Charstr
 	oct_Uword i = 0;
 	char convertBuf[20];
 	oct_Bool result = oct_True;
+	void* box;
+	oct_BType bt;
 
 	if(reader_nChars(reader) > 19) {
 		// too many chars TODO: error reporting
@@ -233,16 +239,18 @@ static oct_Bool readI32(struct oct_Context* ctx, oct_BReader reader, oct_Charstr
 		return readF32(ctx, reader, source, out_result);
 	}
 	// OK
-	out_result->variant = OCT_READRESULT_READABLE;
-	out_result->readable.ptr = (oct_Readable*)malloc(sizeof(oct_Readable));
-	if(!out_result->readable.ptr) {
+	out_result->variant = OCT_READRESULT_ANY;
+	if(!oct_ExchangeHeap_alloc(ctx, sizeof(oct_I32), &box)) {
 		// OOM
 		goto error;
 	}
-	out_result->readable.ptr->variant = OCT_READABLE_INT;
-	out_result->readable.ptr->i32 = (oct_I32)l;
+	bt.ptr = ctx->rt->builtInTypes.I32;
+	if(!oct_Any_setAll(ctx, &out_result->result, OCT_POINTER_OWNED, bt, box)) {
+		goto error;
+	}
+	*((oct_I32*)box) = l;
 
-	printf("Read an I32: %d\n", out_result->readable.ptr->i32);
+	printf("Read an I32: %d\n", *((oct_I32*)box));
 
 	goto end;
 error:
@@ -258,6 +266,8 @@ static oct_Bool readF32(struct oct_Context* ctx, oct_BReader reader, oct_Charstr
 	oct_Uword i;
 	char convertBuf[15];
 	oct_Bool result = oct_True;
+	void* box;
+	oct_BType bt;
 
 	if(reader_nChars(reader) > 14) {
 		// too many chars TODO: error reporting
@@ -285,16 +295,18 @@ static oct_Bool readF32(struct oct_Context* ctx, oct_BReader reader, oct_Charstr
 		return readSymbol(ctx, reader, source, out_result);
 	}
 	// OK
-	out_result->variant = OCT_READRESULT_READABLE;
-	out_result->readable.ptr = (oct_Readable*)malloc(sizeof(oct_Readable));
-	if(!out_result->readable.ptr) {
+	out_result->variant = OCT_READRESULT_ANY;
+	if(!oct_ExchangeHeap_alloc(ctx, sizeof(oct_F32), &box)) {
 		// OOM
 		goto error;
 	}
-	out_result->readable.ptr->variant = OCT_READABLE_FLOAT;
-	out_result->readable.ptr->f32 = (oct_F32)d;
+	bt.ptr = ctx->rt->builtInTypes.F32;
+	if(!oct_Any_setAll(ctx, &out_result->result, OCT_POINTER_OWNED, bt, box)) {
+		goto error;
+	}
+	*((oct_F32*)box) = d;
 
-	printf("Read an F32: %f\n", out_result->readable.ptr->f32);
+	printf("Read an F32: %f\n", *((oct_F32*)box));
 
 	goto end;
 error:
@@ -307,6 +319,8 @@ end:
 static oct_Bool readString(struct oct_Context* ctx, oct_BReader reader, oct_Charstream source, oct_ReadResult* out_result) {
 	oct_Bool result = oct_True;
 	oct_Char next;
+	oct_BType bt;
+	void* box;
 
 	// discard leading "
 	reader_clearChars(reader);
@@ -323,19 +337,22 @@ static oct_Bool readString(struct oct_Context* ctx, oct_BReader reader, oct_Char
 	// discard ending "
 	DISCARD_CHAR;
 
-	out_result->variant = OCT_READRESULT_READABLE;
-	out_result->readable.ptr = (oct_Readable*)malloc(sizeof(oct_Readable));
-	if(!out_result->readable.ptr) {
+	out_result->variant = OCT_READRESULT_ANY;
+	if(!oct_ExchangeHeap_alloc(ctx, sizeof(oct_String), &box)) {
 		// OOM
-		return oct_False;
+		goto error;
 	}
-	out_result->readable.ptr->variant = OCT_READABLE_STRING;
-	if(!oct_String_ctorCharArray(ctx, &out_result->readable.ptr->string, reader.ptr->readBuffer, 0, reader.ptr->nchars)) {
-		free(out_result->readable.ptr);
+	if(!oct_String_ctorCharArray(ctx, (oct_String*)box, reader.ptr->readBuffer, 0, reader.ptr->nchars)) {
+		oct_ExchangeHeap_free(ctx, box);
+		goto error;
+	}
+	bt.ptr = ctx->rt->builtInTypes.String;
+	if(!oct_Any_setAll(ctx, &out_result->result, OCT_POINTER_OWNED, bt, box)) {
+		oct_ExchangeHeap_free(ctx, box);
 		goto error;
 	}
 
-	printf("Read a String: \"%s\"\n", &out_result->readable.ptr->string.utf8Data.ptr->data[0]);
+	printf("Read a String: \"%s\"\n", ((oct_String*)box)->utf8Data.ptr->data[0]);
 
 	goto end;
 error:
@@ -347,19 +364,32 @@ end:
 
 static oct_Bool readSymbol(struct oct_Context* ctx, oct_BReader reader, oct_Charstream source, oct_ReadResult* out_result) {
 	oct_Bool result = oct_True;
-	out_result->variant = OCT_READRESULT_READABLE;
-	out_result->readable.ptr = (oct_Readable*)malloc(sizeof(oct_Readable));
-	if(!out_result->readable.ptr) {
+	void* box;
+	oct_BType bt;
+	oct_OString name;
+
+	out_result->variant = OCT_READRESULT_ANY;
+	if(!oct_ExchangeHeap_alloc(ctx, sizeof(oct_Symbol), &box)) {
 		// OOM
 		goto error;
 	}
-	out_result->readable.ptr->variant = OCT_READABLE_SYMBOL;
-	if(!oct_OString_createFromCharArray(ctx, reader.ptr->readBuffer, 0, reader.ptr->nchars, &out_result->readable.ptr->symbol.name)) {
-		free(out_result->readable.ptr);
+	if(!oct_OString_createFromCharArray(ctx, reader.ptr->readBuffer, 0, reader.ptr->nchars, &name)) {
+		oct_ExchangeHeap_free(ctx, box);
+		goto error;
+	}
+	if(!oct_Symbol_ctor(ctx, (oct_Symbol*)box, name)) {
+		oct_OString_destroy(ctx, name);
+		oct_ExchangeHeap_free(ctx, box);
+		goto error;
+	}
+	bt.ptr = ctx->rt->builtInTypes.Symbol;
+	if(!oct_Any_setAll(ctx, &out_result->result, OCT_POINTER_OWNED, bt, box)) {
+		oct_OString_destroy(ctx, name);
+		oct_ExchangeHeap_free(ctx, box);
 		goto error;
 	}
 
-	printf("Read a Symbol: %s\n", &out_result->readable.ptr->symbol.name.ptr->utf8Data.ptr->data[0]);
+	printf("Read a Symbol: %s\n", ((oct_Symbol*)box)->name.ptr->utf8Data.ptr->data[0]);
 
 	goto end;
 error:
@@ -373,20 +403,19 @@ static oct_Bool readList(struct oct_Context* ctx, oct_BReader reader, oct_Charst
 	oct_Bool result = oct_True;
 	oct_Char next;
 	oct_ReadResult content;
-	oct_BReadableList bList;
+	oct_OList olist;
+	oct_BList list;
+	oct_BType bt;
 
 	oct_Uword DEBUG_I;
 
-	out_result->variant = OCT_READRESULT_READABLE;
-	out_result->readable.ptr = (oct_Readable*)malloc(sizeof(oct_Readable));
-	if(!out_result->readable.ptr) {
-		// OOM
-		goto error;
-	}
-	out_result->readable.ptr->variant = OCT_READABLE_LIST;
-	// Empty list to start with
-	CHECK(oct_ReadableList_ctor(ctx, &out_result->readable.ptr->list));
-	bList.ptr = &out_result->readable.ptr->list;
+	list.ptr = NULL;
+
+	out_result->variant = OCT_READRESULT_ANY;
+	CHECK(oct_List_createOwned(ctx, &olist));
+	list.ptr = olist.ptr;
+	bt.ptr = ctx->rt->builtInTypes.List;
+	CHECK(oct_Any_setAll(ctx, &out_result->result, OCT_POINTER_OWNED, bt, list.ptr));
 
 	// Drop leading (
 	reader_clearChars(reader);
@@ -402,7 +431,8 @@ static oct_Bool readList(struct oct_Context* ctx, oct_BReader reader, oct_Charst
 			out_result->errorCode = content.errorCode;
 			goto end;
 		}
-		CHECK(oct_ReadableList_append(ctx, bList, content.readable));
+		CHECK(oct_List_append(ctx, list, content.result));
+		//CHECK(oct_ReadableList_append(ctx, bList, content.readable));
 		PEEK_CHAR(&next);
 		while(isspace(next)) {
 			DISCARD_CHAR;
@@ -413,23 +443,14 @@ static oct_Bool readList(struct oct_Context* ctx, oct_BReader reader, oct_Charst
 	// discard ending )
 	DISCARD_CHAR;
 
-	DEBUG_I = 0;
-
-	bList.ptr = &out_result->readable.ptr->list;
-	while(oct_True) {
-		if(bList.ptr->readable.variant == OCT_OREADABLEOPTION_OREADABLE) {
-			++DEBUG_I;
-		}
-		if(bList.ptr->next.variant != OCT_READABLE_LINKED_LIST_OPTION_LIST) {
-			break;
-		}
-		bList.ptr = bList.ptr->next.rll.ptr;
-	}
+	oct_List_count(ctx, list, &DEBUG_I);
 	printf("LIST END: %llu ELEMENTS )\n", DEBUG_I);
 
 	goto end;
 error:
-	// TODO: free the list and anything in the "content" variable here
+	if(list.ptr) {
+		oct_List_destroyOwned(ctx, olist);
+	}
 	result = oct_False;
 end:
 	reader_clearChars(reader);
@@ -438,12 +459,12 @@ end:
 
 static oct_Bool readVector(struct oct_Context* ctx, oct_BReader reader, oct_Charstream source, oct_ReadResult* out_result) {
 	reader_clearChars(reader);
-	out_result->variant = OCT_READRESULT_READABLE;
+	out_result->variant = OCT_READRESULT_ANY;
 	return oct_True;
 }
 
 static oct_Bool readMap(struct oct_Context* ctx, oct_BReader reader, oct_Charstream source, oct_ReadResult* out_result) {
 	reader_clearChars(reader);
-	out_result->variant = OCT_READRESULT_READABLE;
+	out_result->variant = OCT_READRESULT_ANY;
 	return oct_True;
 }

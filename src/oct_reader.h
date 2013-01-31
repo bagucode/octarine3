@@ -1,12 +1,11 @@
 #ifndef oct_reader
 #define oct_reader
 
-#include "oct_readable.h"
 #include "oct_chararray.h"
 #include "oct_charstream.h"
 
 #define OCT_READRESULT_ERROR 0
-#define OCT_READRESULT_READABLE 1
+#define OCT_READRESULT_ANY 1
 
 #define OCT_READERROR_NEED_MORE_DATA 0
 #define OCT_READERROR_IO_ERROR 1
@@ -15,7 +14,7 @@ typedef struct oct_ReadResult {
 	oct_Uword variant;
 	union {
 		oct_Uword errorCode; // change this to a type that has an error code and an error message string?
-		oct_OReadable readable;
+		oct_Any result;
 	};
 } oct_ReadResult;
 
