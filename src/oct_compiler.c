@@ -3,7 +3,6 @@
 #include "oct_namespace.h"
 #include "oct_context.h"
 #include "oct_runtime.h"
-#include "oct_readable.h"
 #include "oct_pointertype.h"
 
 // DEBUG
@@ -23,7 +22,6 @@
 
 // One creation form for each kind of data type.
 // prototype -> create prototype
-// template  -> create template (not needed?)
 // variadic  -> create variadic type
 // struct    -> create struct
 // array     -> create array or fixed size array (overload)
@@ -41,7 +39,7 @@ static oct_Bool eval_sym(struct oct_Context* ctx, oct_Symbol* sym, oct_AnyOption
 	return oct_Namespace_lookup(ctx, ns, bsym, out_result);
 }
 
-static oct_Bool eval_def(struct oct_Context* ctx, oct_BReadableList args, oct_AnyOption* out_result) {
+static oct_Bool eval_def(struct oct_Context* ctx, oct_Seq args, oct_AnyOption* out_result) {
 	// (def <symbol>)
 	// (def <symbol> <value>)
 	oct_BNamespace ns;
