@@ -2,7 +2,6 @@
 #include "oct_runtime.h"
 #include "oct_type.h"
 #include "oct_context.h"
-#include "oct_readable_pointers.h"
 #include "oct_exchangeheap.h"
 #include "oct_managedheap.h"
 
@@ -134,11 +133,11 @@ oct_Bool oct_List_prepend(struct oct_Context* ctx, oct_OList lst, oct_Any obj, o
 	out_lst->ptr->next.list.ptr = lst.ptr;
 
 	out_lst->ptr->data.variant = OCT_ANYOPTION_ANY;
-	if(!oct_Any_move(ctx, obj, &out_lst->ptr->data.any)) {
+	if(!oct_Any_assign(ctx, obj, &out_lst->ptr->data.any)) {
 		oct_List_destroyOwned(ctx, *out_lst);
 		return oct_False;
 	}
-	return oct_True;
+	return oct_Any_dtor(ctx, obj);
 }
 
 oct_Bool oct_List_append(struct oct_Context* ctx, oct_BList lst, oct_Any obj) {
@@ -147,7 +146,7 @@ oct_Bool oct_List_append(struct oct_Context* ctx, oct_BList lst, oct_Any obj) {
 		return oct_False;
 	}
 	if(b) {
-		if(!oct_Any_move(ctx, obj, &lst.ptr->data.any)) {
+		if(!oct_Any_assign(ctx, obj, &lst.ptr->data.any)) {
 			return oct_False;
 		}
 		lst.ptr->data.variant = OCT_ANYOPTION_ANY;
@@ -159,14 +158,14 @@ oct_Bool oct_List_append(struct oct_Context* ctx, oct_BList lst, oct_Any obj) {
 		if(!oct_List_createOwned(ctx, &lst.ptr->next.list)) {
 			return oct_False;
 		}
-		if(!oct_Any_move(ctx, obj, &lst.ptr->next.list.ptr->data.any)) {
+		if(!oct_Any_assign(ctx, obj, &lst.ptr->next.list.ptr->data.any)) {
 			oct_List_destroyOwned(ctx, lst.ptr->next.list);
 			return oct_False;
 		}
 		lst.ptr->next.list.ptr->data.variant = OCT_ANYOPTION_ANY;
 		lst.ptr->next.variant = OCT_LISTOPTION_LIST;
 	}
-	return oct_True;
+	return oct_Any_dtor(ctx, obj);
 }
 
 oct_Bool oct_List_emptyp(struct oct_Context* ctx, oct_BList lst, oct_Bool* out_result) {

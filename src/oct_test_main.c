@@ -40,9 +40,10 @@ static void StringTests() {
 	assert(oct_BStringStream_asCharStream(ctx, bss, &charStream));
 	reader.ptr = ctx->reader; // TODO: method for this
 	assert(oct_Reader_read(ctx, reader, charStream, &readResult));
-	assert(readResult.variant == OCT_READRESULT_READABLE);
-	assert(readResult.readable.ptr->variant == OCT_READABLE_STRING);
-	bs2.ptr = &readResult.readable.ptr->string;
+	assert(readResult.variant == OCT_READRESULT_ANY);
+	assert(oct_Any_stringp(ctx, readResult.result, &result));
+	assert(result);
+	assert(oct_Any_getPtr(ctx, readResult.result, (void**)&bs2.ptr));
 	assert(oct_OStringStream_destroy(ctx, ss));
 
 	assert(oct_OString_destroy(ctx, s1));
@@ -110,7 +111,6 @@ static void defTest() {
 	oct_BString bs1;
 	oct_BString bs2;
 	oct_ReadResult readResult;
-	oct_BReadable readable;
 	oct_BReader reader;
 	oct_BString bstr;
 	oct_OStringStream ss;
@@ -138,8 +138,7 @@ static void defTest() {
 	oct_BStringStream_asCharStream(ctx, bss, &stream);
 	reader.ptr = ctx->reader;
 	oct_Reader_read(ctx, reader, stream, &readResult);
-	readable.ptr = readResult.readable.ptr;
-	oct_Compiler_eval(ctx, readable, &evalResult);
+	oct_Compiler_eval(ctx, readResult.result, &evalResult);
 
 	// Lookup
 	oct_OString_createFromCString(ctx, "hello", &str);
@@ -167,7 +166,6 @@ int main(int argc, char** argv) {
 	oct_BString bstr;
 	oct_OStringStream ss;
 	oct_BStringStream bss;
-	oct_BReadable breadable;
 	oct_AnyOption evalResult;
 	reader.ptr = ctx->reader;
 
@@ -186,8 +184,7 @@ int main(int argc, char** argv) {
 		if(rr.variant == OCT_READRESULT_ERROR) {
 			break;
 		}
-		breadable.ptr = rr.readable.ptr;
-		oct_Compiler_eval(ctx, breadable, &evalResult);
+		oct_Compiler_eval(ctx, rr.result, &evalResult);
 		oct_ReadResult_dtor(ctx, &rr);
 		if(evalResult.variant == OCT_ANYOPTION_ANY) {
 			oct_Any_dtor(ctx, evalResult.any);
