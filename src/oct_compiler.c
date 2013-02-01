@@ -4,6 +4,7 @@
 #include "oct_context.h"
 #include "oct_runtime.h"
 #include "oct_pointertype.h"
+#include "oct_list.h"
 
 // DEBUG
 #include <stdio.h>
@@ -28,6 +29,8 @@
 // interface -> create interface
 // Pointer types are implicitly created for each type
 
+#define CHECK(X) if(!X) return oct_False;
+
 static oct_Bool eval_sym(struct oct_Context* ctx, oct_Symbol* sym, oct_AnyOption* out_result) {
 	oct_BNamespace ns;
 	oct_BSymbol bsym;
@@ -39,52 +42,56 @@ static oct_Bool eval_sym(struct oct_Context* ctx, oct_Symbol* sym, oct_AnyOption
 	return oct_Namespace_lookup(ctx, ns, bsym, out_result);
 }
 
-static oct_Bool eval_def(struct oct_Context* ctx, oct_Seq args, oct_AnyOption* out_result) {
+static oct_Bool symbolp(oct_Context* ctx, oct_AnyOption any) {
+    oct_BType check;
+    if(any.variant == OCT_ANYOPTION_NOTHING) {
+        return oct_False;
+    }
+    oct_Any_getType(ctx, any.any, &check);
+    return ctx->rt->builtInTypes.Symbol == check.ptr;
+}
+
+static oct_Bool eval_def(struct oct_Context* ctx, oct_Any form, oct_AnyOption* out_result) {
 	// (def <symbol>)
 	// (def <symbol> <value>)
 	oct_BNamespace ns;
-	oct_BReadable readable;
-	oct_OReadableOption first;
-	oct_OReadableOption second;
 	oct_Uword count;
 	oct_OSymbol sym;
+    oct_BList list;
+    oct_BListOption listOpt;
+    oct_AnyOption tmp;
 
 	printf("eval_def\n");
-
-	if(!oct_ReadableList_count(ctx, args, &count)) {
-		return oct_False;
-	}
-	if(count < 1 || count > 2) {
+    
+    CHECK(oct_Any_getPtr(ctx, form, (void**)&list.ptr));
+    CHECK(oct_List_count(ctx, list, &count));
+	if(count < 2 || count > 3) {
 		// wrong number of args
 		return oct_False;
 	}
-	if(!oct_ReadableList_first(ctx, args, &first)) {
-		return oct_False;
-	}
-	if(first.readable.ptr->variant != OCT_READABLE_SYMBOL) {
-		// expected symbol, was ... something else
-		return oct_False;
-	}
+    // Drop "def"
+    CHECK(oct_List_rest(ctx, list, &listOpt));
+    list.ptr = listOpt.list.ptr;
+    CHECK(oct_List_first(ctx, list, &tmp));
+    if(!symbolp(ctx, tmp)) {
+        // expected first element after def to be a symbol for the binding name
+        return oct_False;
+    }
+    CHECK(oct_Any_getPtr(ctx, tmp.any, (void**)&sym.ptr));
 	// eval second argument if we have one
-	if(count == 2) {
-		if(!oct_ReadableList_nth(ctx, args, 1, &second)) {
-			return oct_False;
-		}
-		readable.ptr = second.readable.ptr;
-		if(!oct_Compiler_eval(ctx, readable, out_result)) {
-			return oct_False;
-		}
+	if(count == 3) {
+        CHECK(oct_List_nth(ctx, list, 1, &tmp));
+		CHECK(oct_Compiler_eval(ctx, tmp.any, out_result));
 	}
 	else {
 		out_result->variant = OCT_ANYOPTION_NOTHING;
 	}
 	// bind in current namespace
 	ns.ptr = ctx->ns;
-	sym.ptr = &first.readable.ptr->symbol;
 	return oct_Namespace_bind(ctx, ns, sym, *out_result);
 }
 
-oct_Bool oct_Compiler_eval(struct oct_Context* ctx, oct_BReadable readable, oct_AnyOption* out_result) {
+oct_Bool oct_Compiler_eval(struct oct_Context* ctx, oct_Any form, oct_AnyOption* out_result) {
 	oct_BString bstring;
 	oct_OReadableOption first;
 	oct_BReadableList lst;
