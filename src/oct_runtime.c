@@ -108,9 +108,7 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	_oct_OAField_initType(mainCtx);
     _oct_AU8_initType(mainCtx);
 	_oct_String_initType(mainCtx);
-	_oct_Readable_initType(mainCtx);
 	_oct_Nothing_initType(mainCtx);
-	_oct_OptionT_initType(mainCtx);
 	_oct_Symbol_initType(mainCtx);
 	_oct_Any_initType(mainCtx);
 	_oct_NamespaceBinding_initType(mainCtx);

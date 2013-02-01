@@ -51,7 +51,7 @@ oct_Bool oct_Any_getPtr(struct oct_Context* ctx, oct_Any any, void** ptr);
 
 oct_Bool oct_Any_copy(struct oct_Context* ctx, oct_Any any, oct_Any* out_copy);
 oct_Bool oct_Any_move(struct oct_Context* ctx, oct_Any release, oct_Any* out_newOwner);
-// Assign does copy or move based on the default action for the contained pointer type
+// Assign does a simple assignment or a move based on the default action for the contained pointer type
 oct_Bool oct_Any_assign(struct oct_Context* ctx, oct_Any any, oct_Any* out_any);
 
 oct_Bool oct_Any_borrow(struct oct_Context* ctx, oct_Any any, oct_Any* out_borrowed);

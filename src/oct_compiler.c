@@ -31,33 +31,6 @@
 
 #define CHECK(X) if(!X) return oct_False;
 
-//static oct_Bool symbolp(oct_Context* ctx, oct_AnyOption any) {
-//    oct_BType check;
-//    if(any.variant == OCT_ANYOPTION_NOTHING) {
-//        return oct_False;
-//    }
-//    oct_Any_getType(ctx, any.any, &check);
-//    return ctx->rt->builtInTypes.Symbol == check.ptr;
-//}
-//
-//static oct_Bool listp(oct_Context* ctx, oct_AnyOption any) {
-//    oct_BType check;
-//    if(any.variant == OCT_ANYOPTION_NOTHING) {
-//        return oct_False;
-//    }
-//    oct_Any_getType(ctx, any.any, &check);
-//	return ctx->rt->builtInTypes.List == check.ptr;
-//}
-//
-//static oct_Bool stringp(oct_Context* ctx, oct_AnyOption any) {
-//    oct_BType check;
-//    if(any.variant == OCT_ANYOPTION_NOTHING) {
-//        return oct_False;
-//    }
-//    oct_Any_getType(ctx, any.any, &check);
-//	return ctx->rt->builtInTypes.String == check.ptr;
-//}
-
 static oct_Bool is_symbol(oct_Context* ctx, oct_BType t) {
 	return ctx->rt->builtInTypes.Symbol == t.ptr;
 }
