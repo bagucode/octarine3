@@ -352,7 +352,7 @@ static oct_Bool readString(struct oct_Context* ctx, oct_BReader reader, oct_Char
 		goto error;
 	}
 
-	printf("Read a String: \"%s\"\n", ((oct_String*)box)->utf8Data.ptr->data[0]);
+	printf("Read a String: \"%s\"\n", &((oct_String*)box)->utf8Data.ptr->data[0]);
 
 	goto end;
 error:
@@ -389,7 +389,7 @@ static oct_Bool readSymbol(struct oct_Context* ctx, oct_BReader reader, oct_Char
 		goto error;
 	}
 
-	printf("Read a Symbol: %s\n", ((oct_Symbol*)box)->name.ptr->utf8Data.ptr->data[0]);
+	printf("Read a Symbol: %s\n", &((oct_Symbol*)box)->name.ptr->utf8Data.ptr->data[0]);
 
 	goto end;
 error:
