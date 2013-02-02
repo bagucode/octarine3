@@ -109,7 +109,21 @@ oct_Bool oct_Namespace_create(struct oct_Context* ctx, oct_OSymbol name, oct_BNa
 oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_OSymbol sym, oct_AnyOption val) {
 	oct_Uword i, j;
 	oct_Uword newSize;
+    oct_Uword ptrKind;
 	oct_OANamespaceBinding newBindings;
+    
+    // Can't bind borrowed values because they may reside on the stack and NS bindings are global.
+    // TODO: error reporting
+    if(val.variant == OCT_ANYOPTION_ANY) {
+        if(!oct_Any_getPtrKind(ctx, val.any, &ptrKind)) {
+            // Internal error
+            return oct_False;
+        }
+        if(ptrKind == OCT_POINTER_BORROWED) {
+            // Can't bind borrowed values
+            return oct_False;
+        }
+    }
 
 	// TODO: lock bindings
 	for(i = 0; i < ns.ptr->bindings.ptr->size; ++i) {
@@ -146,7 +160,7 @@ oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_OSym
 ok:
 	ns.ptr->bindings.ptr->bindings[i].sym.variant = OCT_SYMBOLOPTION_SYMBOL;
 	ns.ptr->bindings.ptr->bindings[i].sym.sym = sym;
-	ns.ptr->bindings.ptr->bindings[i].obj = val; // TODO: copy/refcount/root if val is not owned
+    ns.ptr->bindings.ptr->bindings[i].obj = val;
 	return oct_True;
 }
 

@@ -131,14 +131,17 @@ static void defTest() {
 	ns.ptr = ctx->ns;
 
 	// Eval
-	oct_OString_createFromCString(ctx, "(def hello \"Hello\")", &str);
+	assert(oct_OString_createFromCString(ctx, "(def hello \"Hello\")", &str));
+    assert(str.ptr);
 	bstr.ptr = str.ptr;
-	oct_OStringStream_create(ctx, bstr, &ss);
+	assert(oct_OStringStream_create(ctx, bstr, &ss));
+    assert(ss.ptr);
 	bss.ptr = ss.ptr;
-	oct_BStringStream_asCharStream(ctx, bss, &stream);
+	assert(oct_BStringStream_asCharStream(ctx, bss, &stream));
+    assert(stream.vtable);
 	reader.ptr = ctx->reader;
-	oct_Reader_read(ctx, reader, stream, &readResult);
-	oct_Compiler_eval(ctx, readResult.result, &evalResult);
+	assert(oct_Reader_read(ctx, reader, stream, &readResult));
+	assert(oct_Compiler_eval(ctx, readResult.result, &evalResult));
 
 	// Lookup
 	oct_OString_createFromCString(ctx, "hello", &str);

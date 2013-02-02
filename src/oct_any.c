@@ -96,19 +96,22 @@ oct_Bool oct_Any_ctor(struct oct_Context* ctx, oct_Any* out_any) {
 oct_Bool oct_Any_symbolp(struct oct_Context* ctx, oct_Any any, oct_Bool* out_bool) {
 	oct_BType t;
     oct_Any_getType(ctx, any, &t);
-	return ctx->rt->builtInTypes.Symbol == t.ptr;
+	*out_bool = ctx->rt->builtInTypes.Symbol == t.ptr;
+    return oct_True;
 }
 
 oct_Bool oct_Any_stringp(struct oct_Context* ctx, oct_Any any, oct_Bool* out_bool) {
 	oct_BType t;
     oct_Any_getType(ctx, any, &t);
-	return ctx->rt->builtInTypes.String == t.ptr;
+	*out_bool = ctx->rt->builtInTypes.String == t.ptr;
+    return oct_True;
 }
 
 oct_Bool oct_Any_listp(struct oct_Context* ctx, oct_Any any, oct_Bool* out_bool) {
 	oct_BType t;
     oct_Any_getType(ctx, any, &t);
-	return ctx->rt->builtInTypes.List == t.ptr;
+	*out_bool = ctx->rt->builtInTypes.List == t.ptr;
+    return oct_True;
 }
 
 oct_Bool oct_Any_copy(struct oct_Context* ctx, oct_Any any, oct_Any* out_copy) {
