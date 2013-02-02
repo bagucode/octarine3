@@ -3,8 +3,8 @@
 #include "oct_runtime.h"
 #include "oct_field.h"
 #include "oct_context.h"
+#include "oct_exchangeheap.h"
 
-#include <stdlib.h>
 #include <stddef.h>
 
 // Private
@@ -54,11 +54,9 @@ oct_Bool _oct_OABType_initType(struct oct_Context* ctx) {
 
 oct_Bool oct_OABType_alloc(struct oct_Context* ctx, oct_Uword size, oct_OABType* out_result) {
 	oct_Uword i;
-	out_result->ptr = (oct_ABType*)malloc(sizeof(oct_ABType) + (sizeof(oct_BType) * size));
-	if(!out_result->ptr) {
-		// TODO: set OOM in ctx
-		return oct_False;
-	}
+    if(!oct_ExchangeHeap_alloc(ctx, sizeof(oct_ABType) + (sizeof(oct_BType) * size), (void**)&out_result->ptr)) {
+        return oct_False;
+    }
 	out_result->ptr->size = size;
 	// Initialize all to Nothing
 	for(i = 0; i < size; ++i) {

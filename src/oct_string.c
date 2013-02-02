@@ -3,6 +3,7 @@
 #include "oct_type.h"
 #include "oct_context.h"
 #include "oct_u8array.h"
+#include "oct_exchangeheap.h"
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -62,13 +63,11 @@ oct_Bool oct_String_ctorCharArray(struct oct_Context* ctx, oct_String* str, oct_
 }
 
 oct_Bool oct_OString_createFromCharArray(struct oct_Context* ctx, oct_OAChar chars, oct_Uword idx, oct_Uword len, oct_OString* out_str) {
-	out_str->ptr = (oct_String*)malloc(sizeof(oct_String));
-	if(out_str->ptr == NULL) {
-		// TODO: set OOM in ctx
-		return oct_False;
-	}
+    if(!oct_ExchangeHeap_alloc(ctx, sizeof(oct_String), (void**)&out_str->ptr)) {
+        return oct_False;
+    }
 	if(!oct_String_ctorCharArray(ctx, out_str->ptr, chars, idx, len)) {
-		free(out_str->ptr);
+        oct_ExchangeHeap_free(ctx, out_str->ptr);
 		out_str->ptr = NULL;
 		return oct_False;
 	}
@@ -81,15 +80,13 @@ oct_Bool oct_OString_createFromCString(struct oct_Context* ctx, const char* cstr
 
 oct_Bool oct_OString_createFromCStringLen(struct oct_Context* ctx, const char* cstr, oct_Uword strLen, oct_OString* out_str) {
 	oct_Bool result;
-	out_str->ptr = (oct_String*)malloc(sizeof(oct_String));
-	if(out_str->ptr == NULL) {
-		// TODO: set OOM in ctx
-		return oct_False;
-	}
+    if(!oct_ExchangeHeap_alloc(ctx, sizeof(oct_String), (void**)&out_str->ptr)) {
+        return oct_False;
+    }
 	out_str->ptr->size = strLen; // TODO: proper size
 	result = oct_OAU8_alloc(ctx, strLen + 1, &out_str->ptr->utf8Data);
 	if(!result) {
-		free(out_str->ptr);
+        oct_ExchangeHeap_free(ctx, out_str->ptr);
 		return oct_False;
 	}
 	memcpy(&out_str->ptr->utf8Data.ptr->data[0], cstr, strLen + 1);
@@ -98,7 +95,7 @@ oct_Bool oct_OString_createFromCStringLen(struct oct_Context* ctx, const char* c
 
 oct_Bool oct_OString_destroy(struct oct_Context* ctx, oct_OString str) {
 	oct_Bool result = oct_String_dtor(ctx, str.ptr);
-	free(str.ptr);
+    result = result && oct_ExchangeHeap_free(ctx, str.ptr);
 	return result;
 }
 
@@ -120,6 +117,7 @@ oct_Bool oct_String_ctor(struct oct_Context* ctx, oct_String* str, oct_OAU8 utf8
 }
 
 oct_Bool oct_String_dtor(struct oct_Context* ctx, oct_String* str) {
+    // TODO: proper free/dtor here
 	free(str->utf8Data.ptr);
 	return oct_True;
 }

@@ -35,6 +35,7 @@ static oct_Bool reader_pushChar(oct_Context* ctx, oct_BReader reader, oct_Char c
 			return oct_False;
 		}
 		memcpy(tmp.ptr->data, reader.ptr->readBuffer.ptr->data, reader.ptr->nchars * sizeof(oct_Char));
+        // TODO: remove this free
 		free(reader.ptr->readBuffer.ptr);
 		reader.ptr->readBuffer = tmp;
 	}
@@ -426,7 +427,7 @@ static oct_Bool readList(struct oct_Context* ctx, oct_BReader reader, oct_Charst
 	do {
 		CHECK(oct_Reader_read(ctx, reader, source, &content));
 		if(content.variant == OCT_READRESULT_ERROR) {
-			// TODO: free the list here
+			oct_List_destroyOwned(ctx, olist);
 			out_result->variant = content.variant;
 			out_result->errorCode = content.errorCode;
 			goto end;

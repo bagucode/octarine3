@@ -103,7 +103,6 @@ static oct_Bool eval_list(oct_Context* ctx, oct_Any alist, oct_AnyOption* out_re
 	oct_AnyOption aopt;
 	oct_Symbol* sym;
 	oct_BString bstr;
-	oct_BListOption rest;
 
 	CHECK(oct_Any_getPtr(ctx, alist, (void**)&list.ptr));
 	CHECK(oct_List_emptyp(ctx, list, &eq));

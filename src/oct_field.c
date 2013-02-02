@@ -2,8 +2,8 @@
 #include "oct_runtime.h"
 #include "oct_type.h"
 #include "oct_context.h"
+#include "oct_exchangeheap.h"
 
-#include <stdlib.h>
 #include <stddef.h>
 
 // Private
@@ -52,11 +52,10 @@ oct_Bool oct_Field_dtor(struct oct_Context* ctx, oct_Field* field) {
 
 oct_Bool oct_OAField_alloc(struct oct_Context* ctx, oct_Uword size, oct_OAField* out_result) {
 	oct_Uword i;
-	out_result->ptr = (oct_AField*)malloc(sizeof(oct_AField) + (sizeof(oct_Field) * size));
-	if(out_result->ptr == NULL) {
-		// TODO: set ctx error to OOM
-		return oct_False;
-	}
+    if(!oct_ExchangeHeap_alloc(ctx, sizeof(oct_AField) + (sizeof(oct_Field) * size), (void**)&out_result->ptr)) {
+        return oct_False;
+    }
+
 	out_result->ptr->size = size;
 	for(i = 0; i < size; ++i) {
 		oct_Field_ctor(ctx, &out_result->ptr->data[i]);
@@ -66,6 +65,6 @@ oct_Bool oct_OAField_alloc(struct oct_Context* ctx, oct_Uword size, oct_OAField*
 
 oct_Bool oct_OAField_free(struct oct_Context* ctx, oct_OAField oafield) {
 	// No need to call destructor since it does nothing
-	free(oafield.ptr);
+    oct_ExchangeHeap_free(ctx, oafield.ptr);
 	return oct_True;
 }

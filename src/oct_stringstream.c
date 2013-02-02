@@ -3,6 +3,8 @@
 #include "oct_pointertype.h"
 #include "oct_context.h"
 #include "oct_runtime.h"
+#include "oct_exchangeheap.h"
+
 #include <stdlib.h>
 
 // Private
@@ -46,17 +48,14 @@ oct_Bool oct_StringStream_dtor(struct oct_Context* ctx, oct_StringStream* stream
 }
 
 oct_Bool oct_OStringStream_create(struct oct_Context* ctx, oct_BString str, oct_OStringStream* out_stream) {
-	out_stream->ptr = (oct_StringStream*)malloc(sizeof(oct_StringStream));
-	if(out_stream->ptr == NULL) {
-		// OOM
-		return oct_False;
-	}
+    if(!oct_ExchangeHeap_alloc(ctx, sizeof(oct_StringStream), (void**)&out_stream->ptr)) {
+        return oct_False;
+    }
 	return oct_StringStream_ctor(ctx, out_stream->ptr, str);
 }
 
 oct_Bool oct_OStringStream_destroy(struct oct_Context* ctx, oct_OStringStream stream) {
-	free(stream.ptr);
-	return oct_True;
+    return oct_ExchangeHeap_free(ctx, stream.ptr);
 }
 
 oct_Bool oct_BStringStream_asCharStream(struct oct_Context* ctx, oct_BStringStream stream, oct_Charstream* out_cs) {

@@ -144,8 +144,7 @@ oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_OSym
 	for(i = 0; i < ns.ptr->bindings.ptr->size; ++i) {
 		newBindings.ptr->bindings[i] = ns.ptr->bindings.ptr->bindings[i];
 	}
-	j = i;
-	for(j = 0; j < newSize; ++j) {
+	for(j = i; j < newSize; ++j) {
 		newBindings.ptr->bindings[j].sym.variant = OCT_SYMBOLOPTION_NOTHING;
 		newBindings.ptr->bindings[j].sym.nothing.dummy = 0;
 		newBindings.ptr->bindings[j].obj.variant = OCT_ANYOPTION_NOTHING;

@@ -2,9 +2,9 @@
 #include "oct_runtime.h"
 #include "oct_type.h"
 #include "oct_context.h"
+#include "oct_exchangeheap.h"
 
 #include <stddef.h>
-#include <stdlib.h>
 
 // Private
 
@@ -54,16 +54,14 @@ oct_Bool oct_Symbol_ctor(struct oct_Context* ctx, oct_Symbol* sym, oct_OString n
 
 oct_Bool oct_Symbol_dtor(struct oct_Context* ctx, oct_Symbol* sym) {
 	oct_Bool result = oct_String_dtor(ctx, sym->name.ptr);
-	free(sym->name.ptr);
+    oct_ExchangeHeap_free(ctx, sym->name.ptr);
 	return result;
 }
 
 oct_Bool oct_OSymbol_alloc(struct oct_Context* ctx, oct_OString name, oct_OSymbol* out_result) {
-	out_result->ptr = (oct_Symbol*)malloc(sizeof(oct_Symbol));
-	if(!out_result->ptr) {
-		// TODO: set OOM in ctx
-		return oct_False;
-	}
+    if(!oct_ExchangeHeap_alloc(ctx, sizeof(oct_Symbol), (void**)&out_result->ptr)) {
+        return oct_False;
+    }
 	out_result->ptr->name = name;
 	return oct_True;
 }

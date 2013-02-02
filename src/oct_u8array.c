@@ -2,8 +2,8 @@
 #include "oct_runtime.h"
 #include "oct_type.h"
 #include "oct_context.h"
+#include "oct_exchangeheap.h"
 
-#include <stdlib.h>
 #include <memory.h>
 
 // Private
@@ -24,11 +24,9 @@ oct_Bool _oct_OAU8_initType(struct oct_Context* ctx) {
 // Public
 
 oct_Bool oct_OAU8_alloc(struct oct_Context* ctx, oct_Uword size, oct_OAU8* out_result) {
-	out_result->ptr = (oct_AU8*)malloc(sizeof(oct_AU8) + (sizeof(oct_U8) * size));
-	if(!out_result->ptr) {
-		// TODO: set OOM in ctx
-		return oct_False;
-	}
+    if(!oct_ExchangeHeap_alloc(ctx, sizeof(oct_AU8) + (sizeof(oct_U8) * size), (void**)&out_result->ptr)) {
+        return oct_False;
+    }
 	out_result->ptr->size = size;
 	// "construct"
 	memset(&out_result->ptr->data[0], 0, (sizeof(oct_U8) * size));
