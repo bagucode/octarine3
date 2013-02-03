@@ -159,13 +159,9 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	bind_type(mainCtx, octarine, "StructType", rt->builtInTypes.StructType);
 	bind_type(mainCtx, octarine, "ProtoType", rt->builtInTypes.ProtoType);
 	bind_type(mainCtx, octarine, "VariadicType", rt->builtInTypes.VariadicType);
-	bind_type(mainCtx, octarine, "TemplateType", rt->builtInTypes.TemplateType);
 	bind_type(mainCtx, octarine, "PointerType", rt->builtInTypes.PointerType);
 	bind_type(mainCtx, octarine, "ArrayType", rt->builtInTypes.ArrayType);
 	bind_type(mainCtx, octarine, "FixedSizeArrayType", rt->builtInTypes.FixedSizeArrayType);
-	bind_type(mainCtx, octarine, "TemplateParam", rt->builtInTypes.TemplateParam);
-	bind_type(mainCtx, octarine, "+TemplateParam", rt->builtInTypes.ATemplateParam);
-	bind_type(mainCtx, octarine, "~+TemplateParam", rt->builtInTypes.OATemplateParam);
 	bind_type(mainCtx, octarine, "Field", rt->builtInTypes.Field);
 	bind_type(mainCtx, octarine, "+Field", rt->builtInTypes.AField);
 	bind_type(mainCtx, octarine, "~+Field", rt->builtInTypes.OAField);
@@ -174,13 +170,8 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	bind_type(mainCtx, octarine, "~+&Type", rt->builtInTypes.OABType);
 	bind_type(mainCtx, octarine, "+U8", rt->builtInTypes.AU8);
 	bind_type(mainCtx, octarine, "~+U8", rt->builtInTypes.OAU8);
-	bind_type(mainCtx, octarine, "Readable", rt->builtInTypes.Readable);
 	bind_type(mainCtx, octarine, "OListOption", rt->builtInTypes.OListOption);
-	bind_type(mainCtx, octarine, "~Readable", rt->builtInTypes.OReadable);
-	// Don't like this syntax for the owned readable option:
-	bind_type(mainCtx, octarine, "~ReadableOption", rt->builtInTypes.OReadableOption);
 	bind_type(mainCtx, octarine, "Nothing", rt->builtInTypes.Nothing);
-	bind_type(mainCtx, octarine, "Option<>", rt->builtInTypes.OptionT);
 	bind_type(mainCtx, octarine, "Any", rt->builtInTypes.Any);
 	bind_type(mainCtx, octarine, "+Any", rt->builtInTypes.AAny);
 	bind_type(mainCtx, octarine, "~+Any", rt->builtInTypes.OAAny);

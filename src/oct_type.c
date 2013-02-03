@@ -15,18 +15,17 @@ oct_Bool _oct_Type_initType(struct oct_Context* ctx) {
 	t->variant = OCT_TYPE_VARIADIC;
 	t->variadicType.alignment = 0;
 	t->variadicType.size = sizeof(oct_Type);
-	result = oct_OABType_alloc(ctx, 8, &t->variadicType.types);
+	result = oct_OABType_alloc(ctx, 7, &t->variadicType.types);
 	if(!result) {
 		return result;
 	}
 	t->variadicType.types.ptr->data[0].ptr = ctx->rt->builtInTypes.ProtoType;
-	t->variadicType.types.ptr->data[1].ptr = ctx->rt->builtInTypes.TemplateType;
-	t->variadicType.types.ptr->data[2].ptr = ctx->rt->builtInTypes.VariadicType;
-	t->variadicType.types.ptr->data[3].ptr = ctx->rt->builtInTypes.StructType;
-	t->variadicType.types.ptr->data[4].ptr = ctx->rt->builtInTypes.ArrayType;
-	t->variadicType.types.ptr->data[5].ptr = ctx->rt->builtInTypes.FixedSizeArrayType;
-	t->variadicType.types.ptr->data[6].ptr = ctx->rt->builtInTypes.PointerType;
-	t->variadicType.types.ptr->data[7].ptr = ctx->rt->builtInTypes.InterfaceType;
+	t->variadicType.types.ptr->data[1].ptr = ctx->rt->builtInTypes.VariadicType;
+	t->variadicType.types.ptr->data[2].ptr = ctx->rt->builtInTypes.StructType;
+	t->variadicType.types.ptr->data[3].ptr = ctx->rt->builtInTypes.ArrayType;
+	t->variadicType.types.ptr->data[4].ptr = ctx->rt->builtInTypes.FixedSizeArrayType;
+	t->variadicType.types.ptr->data[5].ptr = ctx->rt->builtInTypes.PointerType;
+	t->variadicType.types.ptr->data[6].ptr = ctx->rt->builtInTypes.InterfaceType;
 	return oct_True;
 }
 

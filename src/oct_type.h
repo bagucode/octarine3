@@ -25,7 +25,7 @@ typedef struct oct_Type {
 		oct_VariadicType variadicType;
 		oct_StructType structType;
 		oct_ArrayType arrayType;
-		oct_FixedSizeArrayType fixedSizeoct_ArrayType;
+		oct_FixedSizeArrayType fixedSizeArray;
 		oct_PointerType pointerType;
 		oct_InterfaceType interfaceType;
 	};
