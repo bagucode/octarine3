@@ -21,14 +21,6 @@ typedef struct oct_OABType {
 	oct_ABType* ptr;
 } oct_OABType;
 
-//typedef struct oct_OType {
-//	struct oct_Type* ptr;
-//} oct_OType;
-//
-//typedef struct oct_MType {
-//	struct oct_Type* ptr;
-//} oct_MType;
-
 // Private
 
 struct oct_Context;
