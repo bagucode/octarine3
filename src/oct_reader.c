@@ -35,7 +35,7 @@ static oct_Bool reader_pushChar(oct_Context* ctx, oct_BReader reader, oct_Char c
 			return oct_False;
 		}
 		memcpy(tmp.ptr->data, reader.ptr->readBuffer.ptr->data, reader.ptr->nchars * sizeof(oct_Char));
-        // TODO: remove this free
+        // TODO: remove this free when OAChar has a proper destructor
 		free(reader.ptr->readBuffer.ptr);
 		reader.ptr->readBuffer = tmp;
 	}

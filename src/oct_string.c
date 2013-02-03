@@ -83,7 +83,7 @@ oct_Bool oct_OString_createFromCStringLen(struct oct_Context* ctx, const char* c
     if(!oct_ExchangeHeap_alloc(ctx, sizeof(oct_String), (void**)&out_str->ptr)) {
         return oct_False;
     }
-	out_str->ptr->size = strLen; // TODO: proper size
+	out_str->ptr->size = strLen; // TODO: proper size in unicode code points
 	result = oct_OAU8_alloc(ctx, strLen + 1, &out_str->ptr->utf8Data);
 	if(!result) {
         oct_ExchangeHeap_free(ctx, out_str->ptr);
@@ -111,7 +111,7 @@ oct_Bool oct_String_ctorCStringLen(struct oct_Context* ctx, oct_String* str, con
 }
 
 oct_Bool oct_String_ctor(struct oct_Context* ctx, oct_String* str, oct_OAU8 utf8Data) {
-	str->size = utf8Data.ptr->size - 1; // TODO: proper size
+	str->size = utf8Data.ptr->size - 1; // TODO: proper size in unicode codepoints
 	str->utf8Data = utf8Data;
 	return oct_True;
 }
