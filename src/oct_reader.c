@@ -26,6 +26,7 @@ oct_Bool oct_Reader_ctor(struct oct_Context* ctx, oct_Reader* reader) {
 }
 
 oct_Bool oct_ReadResult_dtor(struct oct_Context* ctx, oct_ReadResult* rr) {
+	return oct_True;
 }
 
 static oct_Bool reader_pushChar(oct_Context* ctx, oct_BReader reader, oct_Char c) {
@@ -445,7 +446,7 @@ static oct_Bool readList(struct oct_Context* ctx, oct_BReader reader, oct_Charst
 	DISCARD_CHAR;
 
 	oct_List_count(ctx, list, &DEBUG_I);
-	printf("LIST END: %llu ELEMENTS )\n", DEBUG_I);
+	printf("LIST END: %d ELEMENTS )\n", DEBUG_I);
 
 	goto end;
 error:
