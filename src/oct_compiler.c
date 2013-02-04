@@ -125,7 +125,7 @@ static oct_Bool eval_list(oct_Context* ctx, oct_Any alist, oct_AnyOption* out_re
 			}
 		}
 	}
-	return oct_False; // TODO: Finish implementing this function :)
+	return oct_True; // TODO: Finish implementing this function :)
 }
 
 static oct_Bool eval_string(oct_Context* ctx, oct_Any astr, oct_AnyOption* out_result) {
@@ -152,4 +152,6 @@ oct_Bool oct_Compiler_eval(struct oct_Context* ctx, oct_Any form, oct_AnyOption*
 	else if(is_string(ctx, t)) {
 		return eval_string(ctx, form, out_result);
 	}
+
+	return oct_True;  // TODO: Finish implementing this function :)
 }

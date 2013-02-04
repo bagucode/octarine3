@@ -39,5 +39,12 @@ oct_Bool _oct_Type_initType(struct oct_Context* ctx);
 
 // Public
 
+// Does a deep copy of an object graph and returns an owned copy
+// Will fail if the given graph contains any non-copyable objects.
+oct_Bool oct_Type_deepCopyGraphOwned(struct oct_Context* ctx, oct_Any root, oct_Any* out_ownedCopy);
+// Does a deep copy of an object graph and returns a managed copy
+// Will fail if the given graph contains any non-copyable objects.
+oct_Bool oct_Type_deepCopyGraphManaged(struct oct_Context* ctx, oct_Any root, oct_Any* out_managedCopy);
+
 
 #endif

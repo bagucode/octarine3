@@ -6,6 +6,8 @@
 #include "oct_exchangeheap.h"
 
 #include <stddef.h>
+#include <stdlib.h>
+#include <memory.h>
 
 // Private
 
@@ -63,3 +65,242 @@ oct_Bool oct_OABType_alloc(struct oct_Context* ctx, oct_Uword size, oct_OABType*
 	}
 	return oct_True;
 }
+
+// Helper code for copying object graphs. Need a space efficient hash table and a stack.
+
+// 
+
+//#ifdef OCTARINE32
+//#define FNV_PRIME 16777619U
+//#define FNV_OFFSET_BASIS 2166136261U
+//#else
+//#define FNV_PRIME 1099511628211U
+//#define FNV_OFFSET_BASIS 14695981039346656037U
+//#endif
+//
+//static uword fnv1a(const u8* data, uword datasize) {
+//uword hash = FNV_OFFSET_BASIS;
+//uword i;
+//for(i = 0; i < datasize; ++i) {
+//hash = hash ^ data[i];
+//hash = hash * FNV_PRIME;
+//}
+//return hash;
+//}
+
+
+
+// Cuckoo hash table for pointer translation during deep copy
+
+typedef struct PointerTranslationTableEntry {
+    void* key;
+    void* val;
+} PointerTranslationTableEntry;
+
+typedef struct PointerTranslationTable {
+	oct_Uword capacity;
+	oct_Uword size;
+	PointerTranslationTableEntry* table;
+} PointerTranslationTable;
+
+static oct_Uword nextp2(oct_Uword n) {
+	oct_Uword p2 = 2;
+	while(p2 < n) {
+		p2 <<= 1;
+	}
+	return p2;
+}
+
+static oct_Bool PointerTranslationTable_Create(oct_Uword initialCap, PointerTranslationTable* table) {
+	oct_Uword byteSize;
+    
+	table->capacity = nextp2(initialCap);
+	table->size = 0;
+	byteSize = table->capacity * sizeof(PointerTranslationTableEntry);
+	table->table = (PointerTranslationTableEntry*)malloc(byteSize);
+	if(table->table == NULL) {
+		return oct_False;
+	}
+	memset(table->table, 0, byteSize);
+    
+	return oct_True;
+}
+
+static void PointerTranslationTable_Destroy(PointerTranslationTable* table) {
+	free(table->table);
+	table->capacity = 0;
+	table->size = 0;
+	table->table = NULL;
+}
+
+static oct_Uword Hash1(oct_Uword h) {
+	return h;
+}
+
+static oct_Uword Hash2(oct_Uword h) {
+	return h >> 4;
+}
+
+static oct_Uword Hash3(oct_Uword h) {
+	return h * 31;
+}
+
+static oct_Bool PointerTranslationTable_TryPut(PointerTranslationTable* table, PointerTranslationTableEntry* entry) {
+	oct_Uword i, mask;
+    PointerTranslationTableEntry tmp;
+    
+	mask = table->capacity - 1;
+    
+	i = Hash1((oct_Uword)entry->key) & mask;
+	tmp = table->table[i];
+	table->table[i] = *entry;
+	if(tmp.key == NULL || tmp.key == entry->key) {
+		++table->size;
+		return oct_True;
+	}
+	*entry = tmp;
+
+	i = Hash2((oct_Uword)entry->key) & mask;
+	tmp = table->table[i];
+	table->table[i] = *entry;
+	if(tmp.key == NULL || tmp.key == entry->key) {
+		++table->size;
+		return oct_True;
+	}
+	*entry = tmp;
+
+	i = Hash3((oct_Uword)entry->key) & mask;
+	tmp = table->table[i];
+	table->table[i] = *entry;
+	if(tmp.key == NULL || tmp.key == entry->key) {
+		++table->size;
+		return oct_True;
+	}
+	*entry = tmp;
+
+	return oct_False;
+}
+
+static oct_Bool PointerTranslationTable_Grow(PointerTranslationTable* table) {
+	PointerTranslationTable bigger;
+	oct_Uword i, cap;
+
+	if(!PointerTranslationTable_Create(table->capacity + 1, &bigger)) {
+		return oct_False;
+	}
+	for(i = 0; i < table->capacity; ++i) {
+		if(table->table[i].key != NULL) {
+			// Try more than once here? Table might balloon?
+			if(PointerTranslationTable_TryPut(&bigger, &table->table[i]) == oct_False) {
+				cap = bigger.capacity + 1;
+				PointerTranslationTable_Destroy(&bigger);
+				if(!PointerTranslationTable_Create(cap, &bigger)) {
+					return oct_False;
+				}
+				i = 0;
+			}
+		}
+	}
+	PointerTranslationTable_Destroy(table);
+	(*table) = bigger;
+}
+
+static oct_Bool PointerTranslationTable_Put(PointerTranslationTable* table, void* key, void* val) {
+	oct_Uword i;
+	PointerTranslationTableEntry entry;
+
+	entry.key = key;
+	entry.val = val;
+	while(oct_True) {
+		for(i = 0; i < 5; ++i) {
+			if(PointerTranslationTable_TryPut(table, &entry)) {
+				return;
+			}
+		}
+		PointerTranslationTable_Grow(table);
+	}
+}
+
+static void* PointerTranslationTable_Get(PointerTranslationTable* table, void* key) {
+	oct_Uword i, mask;
+
+	mask = table->capacity - 1;
+
+	i = Hash1((oct_Uword)key) & mask;
+	if(table->table[i].key == key)
+		return table->table[i].val;
+
+	i = Hash2((oct_Uword)key) & mask;
+	if(table->table[i].key == key)
+		return table->table[i].val;
+
+	i = Hash3((oct_Uword)key) & mask;
+	if(table->table[i].key == key)
+		return table->table[i].val;
+
+	return NULL;
+}
+
+// Stack used to store call frames on the heap to prevent blowing the C stack when traversing large graphs
+
+typedef struct FrameStackEntry {
+	oct_Type* type;
+	void* object;
+} FrameStackEntry;
+
+typedef struct FrameStack {
+    oct_Uword capacity;
+    oct_Uword top;
+    FrameStackEntry* stack;
+} FrameStack;
+
+static oct_Bool FrameStack_Create(FrameStack* stack, oct_Uword initialCap) {
+    stack->capacity = initialCap;
+    stack->top = 0;
+    stack->stack = (FrameStackEntry*)malloc(sizeof(FrameStackEntry) * initialCap);
+	if(!stack->stack) {
+		return oct_False;
+	}
+    return oct_True;
+}
+
+static void FrameStack_Destroy(FrameStack* stack) {
+    free(stack->stack);
+	stack->capacity = 0;
+	stack->top = 0;
+	stack->stack = NULL;
+}
+
+static oct_Bool FrameStack_Push(FrameStack* stack, FrameStackEntry* entry) {
+    oct_Uword index;
+	FrameStack bigger;
+    
+    if(stack->capacity == stack->top) {
+		bigger = (*stack);
+		bigger.capacity *= 2;
+		bigger.stack = (FrameStackEntry*)malloc(sizeof(FrameStackEntry) * bigger.capacity);
+		if(!bigger.stack) {
+			return oct_False;
+		}
+		memcpy(bigger.stack, stack->stack, stack->capacity * sizeof(FrameStackEntry));
+		FrameStack_Destroy(stack);
+		(*stack) = bigger;
+    }
+    stack->stack[stack->top++] = (*entry);
+	return oct_True;
+}
+
+static oct_Bool FrameStack_Pop(FrameStack* stack, FrameStackEntry* out) {
+    if(stack->top == 0) {
+        return oct_False;
+    }
+	(*out) = stack->stack[--stack->top];
+    return oct_True;
+}
+
+// Does a deep copy of an object graph and returns an owned copy
+// Will fail if the given graph contains any non-copyable objects.
+oct_Bool oct_Type_deepCopyGraphOwned(struct oct_Context* ctx, oct_Any root, oct_Any* out_ownedCopy) {
+
+}
+
