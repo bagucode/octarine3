@@ -22,18 +22,18 @@ static void StringTests() {
 	assert(ctx);
 
 	// Equals
-	assert(oct_OString_createFromCString(ctx, "Hello", &s1));
-	assert(oct_OString_createFromCString(ctx, "Hello", &s2));
+	assert(oct_String_createOwnedFromCString(ctx, "Hello", &s1));
+	assert(oct_String_createOwnedFromCString(ctx, "Hello", &s2));
 	bs1.ptr = s1.ptr; // borrow s1
 	bs2.ptr = s2.ptr; // borrow s2
 	assert(oct_BString_equals(ctx, bs1, bs2, &result));
 	assert(result);
-	assert(oct_OString_destroy(ctx, s1));
-	assert(oct_OString_destroy(ctx, s2));
+	assert(oct_String_destroyOwned(ctx, s1));
+	assert(oct_String_destroyOwned(ctx, s2));
 	// END Equals
 
 	// Reading
-	assert(oct_OString_createFromCString(ctx, "\"Hello\"", &s1));
+	assert(oct_String_createOwnedFromCString(ctx, "\"Hello\"", &s1));
 	bs1.ptr = s1.ptr; // borrow s1
 	assert(oct_OStringStream_create(ctx, bs1, &ss));
 	bss.ptr = ss.ptr;
@@ -46,13 +46,13 @@ static void StringTests() {
 	assert(oct_Any_getPtr(ctx, readResult.result, (void**)&bs2.ptr));
 	assert(oct_OStringStream_destroy(ctx, ss));
 
-	assert(oct_OString_destroy(ctx, s1));
-	assert(oct_OString_createFromCString(ctx, "Hello", &s1));
+	assert(oct_String_destroyOwned(ctx, s1));
+	assert(oct_String_createOwnedFromCString(ctx, "Hello", &s1));
 	bs1.ptr = s1.ptr; // borrow s1
 
 	assert(oct_BString_equals(ctx, bs1, bs2, &result));
 	assert(result);
-	assert(oct_OString_destroy(ctx, s1));
+	assert(oct_String_destroyOwned(ctx, s1));
 	assert(oct_ReadResult_dtor(ctx, &readResult));
 	// END Reading
 
@@ -80,8 +80,8 @@ static void NamespaceTests() {
 	ns.ptr = ctx->ns;
 
 	// Binding
-	assert(oct_OString_createFromCString(ctx, "theName", &name));
-	assert(oct_OString_createFromCString(ctx, "theValue", &valStr));
+	assert(oct_String_createOwnedFromCString(ctx, "theName", &name));
+	assert(oct_String_createOwnedFromCString(ctx, "theValue", &valStr));
 	assert(oct_OSymbol_alloc(ctx, name, &sym));
 	val.variant = OCT_ANYOPTION_ANY;
 	assert(oct_Any_setPtrKind(ctx, &val.any, OCT_POINTER_OWNED));
@@ -131,7 +131,7 @@ static void defTest() {
 	ns.ptr = ctx->ns;
 
 	// Eval
-	assert(oct_OString_createFromCString(ctx, "(def hello \"Hello\")", &str));
+	assert(oct_String_createOwnedFromCString(ctx, "(def hello \"Hello\")", &str));
     assert(str.ptr);
 	bstr.ptr = str.ptr;
 	assert(oct_OStringStream_create(ctx, bstr, &ss));
@@ -144,12 +144,12 @@ static void defTest() {
 	assert(oct_Compiler_eval(ctx, readResult.result, &evalResult));
 
 	// Lookup
-	assert(oct_OString_createFromCString(ctx, "hello", &str));
+	assert(oct_String_createOwnedFromCString(ctx, "hello", &str));
 	assert(oct_OSymbol_alloc(ctx, str, &osym));
 	bsym.ptr = osym.ptr;
 	assert(oct_Namespace_lookup(ctx, ns, bsym, &lookedUp));
 	assert(oct_Any_getPtr(ctx, lookedUp.any, &outStr));
-	assert(oct_OString_createFromCString(ctx, "Hello", &str));
+	assert(oct_String_createOwnedFromCString(ctx, "Hello", &str));
 	bs1.ptr = str.ptr;
 	bs2.ptr = (oct_String*)outStr;
 	assert(oct_BString_equals(ctx, bs1, bs2, &result));
@@ -172,7 +172,7 @@ int main(int argc, char** argv) {
 	oct_AnyOption evalResult;
 	reader.ptr = ctx->reader;
 
-	oct_OString_createFromCString(ctx, "- . ! ? 1 2 3 -37 1.5 0.34 .34 1e16 -0.8 -.8 -.main .main -main { [ hello \"hej\" \"hell o workdl\" (this is a (nested) \"list\" of 8 readables ) (def mac \"mac\")", &str);
+	oct_String_createOwnedFromCString(ctx, "- . ! ? 1 2 3 -37 1.5 0.34 .34 1e16 -0.8 -.8 -.main .main -main { [ hello \"hej\" \"hell o workdl\" (this is a (nested) \"list\" of 8 readables ) (def mac \"mac\")", &str);
 
 	// Borrow string pointer
 	bstr.ptr = str.ptr;
@@ -196,7 +196,7 @@ int main(int argc, char** argv) {
 
 	// End of scope, destroy in reverse order.
 	oct_OStringStream_destroy(ctx, ss);
-	oct_OString_destroy(ctx, str);
+	oct_String_destroyOwned(ctx, str);
 	oct_Runtime_destroy(rt, &error);
 
 	StringTests();

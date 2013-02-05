@@ -74,11 +74,11 @@ oct_Bool oct_OString_createFromCharArray(struct oct_Context* ctx, oct_OAChar cha
 	return oct_True;
 }
 
-oct_Bool oct_OString_createFromCString(struct oct_Context* ctx, const char* cstr, oct_OString* out_str) {
-	return oct_OString_createFromCStringLen(ctx, cstr, strlen(cstr), out_str);
+oct_Bool oct_String_createOwnedFromCString(struct oct_Context* ctx, const char* cstr, oct_OString* out_str) {
+	return oct_String_createOwnedFromCStringLen(ctx, cstr, strlen(cstr), out_str);
 }
 
-oct_Bool oct_OString_createFromCStringLen(struct oct_Context* ctx, const char* cstr, oct_Uword strLen, oct_OString* out_str) {
+oct_Bool oct_String_createOwnedFromCStringLen(struct oct_Context* ctx, const char* cstr, oct_Uword strLen, oct_OString* out_str) {
 	oct_Bool result;
     if(!oct_ExchangeHeap_alloc(ctx, sizeof(oct_String), (void**)&out_str->ptr)) {
         return oct_False;
@@ -93,7 +93,7 @@ oct_Bool oct_OString_createFromCStringLen(struct oct_Context* ctx, const char* c
 	return oct_True;
 }
 
-oct_Bool oct_OString_destroy(struct oct_Context* ctx, oct_OString str) {
+oct_Bool oct_String_destroyOwned(struct oct_Context* ctx, oct_OString str) {
 	oct_Bool result = oct_String_dtor(ctx, str.ptr);
     result = result && oct_ExchangeHeap_free(ctx, str.ptr);
 	return result;

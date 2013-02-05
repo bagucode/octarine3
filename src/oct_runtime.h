@@ -77,6 +77,9 @@ typedef struct oct_BuiltInTypes {
 	struct oct_Type* AChar;
 	struct oct_Type* OAChar;
 	struct oct_Type* BStringStream;
+	struct oct_Type* Error;
+	struct oct_Type* OError;
+	struct oct_Type* ErrorOption;
 	/* TODO: TYPE HASH! Structurally equal types should be same! */
 } oct_BuiltInTypes;
 

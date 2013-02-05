@@ -380,13 +380,13 @@ static oct_Bool readSymbol(struct oct_Context* ctx, oct_BReader reader, oct_Char
 		goto error;
 	}
 	if(!oct_Symbol_ctor(ctx, (oct_Symbol*)box, name)) {
-		oct_OString_destroy(ctx, name);
+		oct_String_destroyOwned(ctx, name);
 		oct_ExchangeHeap_free(ctx, box);
 		goto error;
 	}
 	bt.ptr = ctx->rt->builtInTypes.Symbol;
 	if(!oct_Any_setAll(ctx, &out_result->result, OCT_POINTER_OWNED, bt, box)) {
-		oct_OString_destroy(ctx, name);
+		oct_String_destroyOwned(ctx, name);
 		oct_ExchangeHeap_free(ctx, box);
 		goto error;
 	}

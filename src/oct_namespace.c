@@ -39,6 +39,7 @@ oct_Bool _oct_OANamespaceBinding_initType(struct oct_Context* ctx) {
 oct_Bool _oct_Namespace_initType(struct oct_Context* ctx) {
 	oct_Type* t = ctx->rt->builtInTypes.Namespace;
 	oct_Bool result;
+
 	t->variant = OCT_TYPE_STRUCT;
 	t->structType.alignment = 0;
 	t->structType.size = sizeof(oct_Namespace);
@@ -61,11 +62,17 @@ oct_Bool _oct_BNamespace_initType(struct oct_Context* ctx) {
 oct_Bool oct_Namespace_create(struct oct_Context* ctx, oct_OSymbol name, oct_BNamespace* out_ns) {
 	oct_NamespaceList *newNode, *lastNode;
 	oct_Uword i;
+	oct_OString message;
+	oct_OError error;
+
 	// TODO: Lock namespace collection
 	// TODO: just return existing namespace if there is a name clash
 	newNode = (oct_NamespaceList*)malloc(sizeof(oct_NamespaceList));
 	if(!newNode) {
-		// TODO: set OOM in ctx
+		// TODO: this may also fail because of OOM, need to pre-allocate the OOM error object during runtime startup
+		oct_String_createOwnedFromCString(ctx, "Out of memory", &message);
+		oct_Error_createOwned(ctx, message, &error);
+		oct_Context_setError(ctx, error);
 		// TODO: unlock namespace collection
 		return oct_False;
 	}

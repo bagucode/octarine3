@@ -2,6 +2,7 @@
 #define oct_context
 
 #include "oct_primitives.h"
+#include "oct_error.h"
 
 struct oct_Runtime;
 struct oct_Reader;
@@ -11,10 +12,16 @@ typedef struct oct_Context {
 	struct oct_Runtime* rt;
 	struct oct_Reader* reader;
 	struct oct_Namespace* ns;
+	oct_ErrorOption err;
 } oct_Context;
 
 // Private
 
 oct_Bool _oct_Context_initType(oct_Context* ctx);
+
+// Public
+
+oct_Bool oct_Context_setError(oct_Context* ctx, oct_OError err);
+oct_Bool oct_Context_getError(oct_Context* ctx, oct_ErrorOption* out_err);
 
 #endif

@@ -39,7 +39,7 @@ static oct_Bool bind_type(oct_Context* ctx, oct_BNamespace ns, const char* name,
 	btype.ptr = ctx->rt->builtInTypes.Type;
 	val.variant = OCT_ANYOPTION_ANY;
 
-	if(!oct_OString_createFromCString(ctx, name, &str)) return oct_False;
+	if(!oct_String_createOwnedFromCString(ctx, name, &str)) return oct_False;
 	if(!oct_OSymbol_alloc(ctx, str, &sym)) return oct_False;
 	if(!oct_Any_setPtrKind(ctx, &val.any, OCT_POINTER_BORROWED)) return oct_False;
 	if(!oct_Any_setType(ctx, &val.any, btype)) return oct_False;
@@ -129,7 +129,7 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 
 	// *** 3. Create octarine namespace.
 
-	oct_OString_createFromCString(mainCtx, "octarine", &str);
+	oct_String_createOwnedFromCString(mainCtx, "octarine", &str);
 	oct_OSymbol_alloc(mainCtx, str, &sym);
 	oct_Namespace_create(mainCtx, sym, &octarine);
 	mainCtx->ns = octarine.ptr;
@@ -183,6 +183,9 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	bind_type(mainCtx, octarine, "Reader", rt->builtInTypes.Reader);
 	bind_type(mainCtx, octarine, "ReadResult", rt->builtInTypes.ReadResult);
 	bind_type(mainCtx, octarine, "InterfaceType", rt->builtInTypes.InterfaceType);
+	bind_type(mainCtx, octarine, "Error", rt->builtInTypes.Error);
+	bind_type(mainCtx, octarine, "~Error", rt->builtInTypes.OError);
+	bind_type(mainCtx, octarine, "ErrorOption", rt->builtInTypes.ErrorOption);
 
 	return rt;
 }
