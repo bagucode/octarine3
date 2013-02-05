@@ -2,20 +2,21 @@
 #include "oct_runtime.h"
 #include "oct_type.h"
 #include "oct_context.h"
+#include "oct_string.h"
+#include "oct_error.h"
 
 #include <stddef.h>
 #include <stdlib.h>
 
+#define CHECK(X) if(!X) return oct_False;
+
 oct_Bool _oct_NamespaceBinding_initType(struct oct_Context* ctx) {
 	oct_Type* t = ctx->rt->builtInTypes.NamespaceBinding;
-	oct_Bool result;
+
 	t->variant = OCT_TYPE_STRUCT;
 	t->structType.alignment = 0;
 	t->structType.size = sizeof(oct_NamespaceBinding);
-	result = oct_OAField_alloc(ctx, 2, &t->structType.fields);
-	if(!result) {
-		return result;
-	}
+	CHECK(oct_OAField_alloc(ctx, 2, &t->structType.fields));
 	t->structType.fields.ptr->data[0].offset = offsetof(oct_NamespaceBinding, sym);
 	t->structType.fields.ptr->data[0].type.ptr = ctx->rt->builtInTypes.Symbol;
 	t->structType.fields.ptr->data[1].offset = offsetof(oct_NamespaceBinding, obj);
@@ -38,15 +39,11 @@ oct_Bool _oct_OANamespaceBinding_initType(struct oct_Context* ctx) {
 
 oct_Bool _oct_Namespace_initType(struct oct_Context* ctx) {
 	oct_Type* t = ctx->rt->builtInTypes.Namespace;
-	oct_Bool result;
 
 	t->variant = OCT_TYPE_STRUCT;
 	t->structType.alignment = 0;
 	t->structType.size = sizeof(oct_Namespace);
-	result = oct_OAField_alloc(ctx, 1, &t->structType.fields);
-	if(!result) {
-		return result;
-	}
+	CHECK(oct_OAField_alloc(ctx, 1, &t->structType.fields));
 	t->structType.fields.ptr->data[0].offset = offsetof(oct_Namespace, bindings);
 	t->structType.fields.ptr->data[0].type.ptr = ctx->rt->builtInTypes.OANamespaceBinding;
 	return oct_True;
@@ -62,17 +59,12 @@ oct_Bool _oct_BNamespace_initType(struct oct_Context* ctx) {
 oct_Bool oct_Namespace_create(struct oct_Context* ctx, oct_OSymbol name, oct_BNamespace* out_ns) {
 	oct_NamespaceList *newNode, *lastNode;
 	oct_Uword i;
-	oct_OString message;
-	oct_OError error;
 
 	// TODO: Lock namespace collection
 	// TODO: just return existing namespace if there is a name clash
 	newNode = (oct_NamespaceList*)malloc(sizeof(oct_NamespaceList));
 	if(!newNode) {
-		// TODO: this may also fail because of OOM, need to pre-allocate the OOM error object during runtime startup
-		oct_String_createOwnedFromCString(ctx, "Out of memory", &message);
-		oct_Error_createOwned(ctx, message, &error);
-		oct_Context_setError(ctx, error);
+		oct_Context_setErrorOOM(ctx);
 		// TODO: unlock namespace collection
 		return oct_False;
 	}
@@ -83,7 +75,7 @@ oct_Bool oct_Namespace_create(struct oct_Context* ctx, oct_OSymbol name, oct_BNa
 	newNode->ns.bindings.ptr = (oct_ANamespaceBinding*)malloc(sizeof(oct_ANamespaceBinding) + (sizeof(oct_NamespaceBinding) * 10));
 	if(!newNode->ns.bindings.ptr) {
 		free(newNode);
-		// TODO: set OOM in ctx
+		oct_Context_setErrorOOM(ctx);
 		// TODO: unlock namespace collection
 		return oct_False;
 	}
@@ -120,14 +112,10 @@ oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_OSym
 	oct_OANamespaceBinding newBindings;
     
     // Can't bind borrowed values because they may reside on the stack and NS bindings are global.
-    // TODO: error reporting
     if(val.variant == OCT_ANYOPTION_ANY) {
-        if(!oct_Any_getPtrKind(ctx, val.any, &ptrKind)) {
-            // Internal error
-            return oct_False;
-        }
-        if(ptrKind == OCT_POINTER_BORROWED) {
-            // Can't bind borrowed values
+        CHECK(oct_Any_getPtrKind(ctx, val.any, &ptrKind));
+        if(ptrKind != OCT_POINTER_OWNED) {
+        	CHECK(oct_Context_setErrorWithCMessage(ctx, "Can only bind owned values"));
             return oct_False;
         }
     }
@@ -144,6 +132,7 @@ oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_OSym
 	newSize = ns.ptr->bindings.ptr->size * 2;
 	newBindings.ptr = (oct_ANamespaceBinding*)malloc(sizeof(oct_ANamespaceBinding) + (sizeof(oct_NamespaceBinding) * newSize));
 	if(newBindings.ptr == NULL) {
+		oct_Context_setErrorOOM(ctx);
 		// TODO: unlock bindings
 		return oct_False; // OOM
 	}

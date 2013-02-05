@@ -34,17 +34,7 @@ oct_Bool oct_Any_setPtrKind(struct oct_Context* ctx, oct_Any* any, oct_Uword ptr
 	// clear old
 	any->data[0] &= (~0x7);
 	// set new
-	switch(ptrKind) {
-	case OCT_POINTER_BORROWED:
-		any->data[0] |= 0x1;
-		break;
-	case OCT_POINTER_MANAGED:
-		any->data[0] |= 0x2;
-		break;
-	case OCT_POINTER_OWNED:
-		any->data[0] |= 0x4;
-		break;
-	}
+	any->data[0] |= ptrKind;
 	return oct_True;
 }
 
