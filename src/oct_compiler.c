@@ -71,7 +71,7 @@ static oct_Bool eval_def(struct oct_Context* ctx, oct_Any form, oct_AnyOption* o
     CHECK(oct_Any_getPtr(ctx, form, (void**)&list.ptr));
     CHECK(oct_List_count(ctx, list, &count));
 	if(count < 2 || count > 3) {
-		// wrong number of args
+		CHECK(oct_Context_setErrorWithCMessage(ctx, "Wrong number of arguments to def"));
 		return oct_False;
 	}
     // Drop "def"
@@ -80,7 +80,7 @@ static oct_Bool eval_def(struct oct_Context* ctx, oct_Any form, oct_AnyOption* o
     CHECK(oct_List_first(ctx, list, &tmp));
 	CHECK(oct_Any_symbolp(ctx, tmp.any, &b));
     if(!b) {
-        // expected first element after def to be a symbol for the binding name
+    	CHECK(oct_Context_setErrorWithCMessage(ctx, "First argument to def must be a Symbol"));
         return oct_False;
     }
     CHECK(oct_Any_getPtr(ctx, tmp.any, (void**)&sym.ptr));

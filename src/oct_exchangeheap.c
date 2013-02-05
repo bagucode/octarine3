@@ -4,7 +4,7 @@
 oct_Bool oct_ExchangeHeap_alloc(struct oct_Context* ctx, oct_Uword size, void** out_box) {
 	*out_box = malloc(size);
 	if(!*out_box) {
-		// OOM
+		oct_Context_setErrorOOM(ctx);
 		return oct_False;
 	}
 	return oct_True;

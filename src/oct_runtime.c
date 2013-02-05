@@ -41,7 +41,10 @@ static oct_Bool bind_type(oct_Context* ctx, oct_BNamespace ns, const char* name,
 
 	if(!oct_String_createOwnedFromCString(ctx, name, &str)) return oct_False;
 	if(!oct_OSymbol_alloc(ctx, str, &sym)) return oct_False;
-	if(!oct_Any_setPtrKind(ctx, &val.any, OCT_POINTER_BORROWED)) return oct_False;
+	// TODO: Special case when binding types and functions?
+	// They should not really be stored as owned, or at least not be copied like bound values
+	// when looked up and used locally.
+	if(!oct_Any_setPtrKind(ctx, &val.any, OCT_POINTER_OWNED)) return oct_False;
 	if(!oct_Any_setType(ctx, &val.any, btype)) return oct_False;
 	if(!oct_Any_setPtr(ctx, &val.any, type)) return oct_False;
 	return oct_Namespace_bind(ctx, ns, sym, val);
