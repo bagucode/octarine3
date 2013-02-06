@@ -1,5 +1,10 @@
 #include "octarine.h"
+
+#include <stdio.h>
 #include <assert.h>
+#include <stdlib.h>
+
+#define TEST(X) if(!X) { printf("%s\n", &ctx->err.error.ptr->message.ptr->utf8Data.ptr->data[0]); abort(); }
 
 static void StringTests() {
 	oct_Runtime* rt;
@@ -22,41 +27,41 @@ static void StringTests() {
 	assert(ctx);
 
 	// Equals
-	assert(oct_String_createOwnedFromCString(ctx, "Hello", &s1));
-	assert(oct_String_createOwnedFromCString(ctx, "Hello", &s2));
+	TEST(oct_String_createOwnedFromCString(ctx, "Hello", &s1));
+	TEST(oct_String_createOwnedFromCString(ctx, "Hello", &s2));
 	bs1.ptr = s1.ptr; // borrow s1
 	bs2.ptr = s2.ptr; // borrow s2
-	assert(oct_BString_equals(ctx, bs1, bs2, &result));
-	assert(result);
-	assert(oct_String_destroyOwned(ctx, s1));
-	assert(oct_String_destroyOwned(ctx, s2));
+	TEST(oct_BString_equals(ctx, bs1, bs2, &result));
+	TEST(result);
+	TEST(oct_String_destroyOwned(ctx, s1));
+	TEST(oct_String_destroyOwned(ctx, s2));
 	// END Equals
 
 	// Reading
-	assert(oct_String_createOwnedFromCString(ctx, "\"Hello\"", &s1));
+	TEST(oct_String_createOwnedFromCString(ctx, "\"Hello\"", &s1));
 	bs1.ptr = s1.ptr; // borrow s1
-	assert(oct_OStringStream_create(ctx, bs1, &ss));
+	TEST(oct_OStringStream_create(ctx, bs1, &ss));
 	bss.ptr = ss.ptr;
-	assert(oct_BStringStream_asCharStream(ctx, bss, &charStream));
+	TEST(oct_BStringStream_asCharStream(ctx, bss, &charStream));
 	reader.ptr = ctx->reader; // TODO: method for this
-	assert(oct_Reader_read(ctx, reader, charStream, &readResult));
-	assert(readResult.variant == OCT_READRESULT_ANY);
-	assert(oct_Any_stringp(ctx, readResult.result, &result));
-	assert(result);
-	assert(oct_Any_getPtr(ctx, readResult.result, (void**)&bs2.ptr));
-	assert(oct_OStringStream_destroy(ctx, ss));
+	TEST(oct_Reader_read(ctx, reader, charStream, &readResult));
+	TEST(readResult.variant == OCT_READRESULT_ANY);
+	TEST(oct_Any_stringp(ctx, readResult.result, &result));
+	TEST(result);
+	TEST(oct_Any_getPtr(ctx, readResult.result, (void**)&bs2.ptr));
+	TEST(oct_OStringStream_destroy(ctx, ss));
 
-	assert(oct_String_destroyOwned(ctx, s1));
-	assert(oct_String_createOwnedFromCString(ctx, "Hello", &s1));
+	TEST(oct_String_destroyOwned(ctx, s1));
+	TEST(oct_String_createOwnedFromCString(ctx, "Hello", &s1));
 	bs1.ptr = s1.ptr; // borrow s1
 
-	assert(oct_BString_equals(ctx, bs1, bs2, &result));
-	assert(result);
-	assert(oct_String_destroyOwned(ctx, s1));
-	assert(oct_ReadResult_dtor(ctx, &readResult));
+	TEST(oct_BString_equals(ctx, bs1, bs2, &result));
+	TEST(result);
+	TEST(oct_String_destroyOwned(ctx, s1));
+	TEST(oct_ReadResult_dtor(ctx, &readResult));
 	// END Reading
 
-	assert(oct_Runtime_destroy(rt, &error));
+	TEST(oct_Runtime_destroy(rt, &error));
 }
 
 static void NamespaceTests() {
@@ -80,26 +85,26 @@ static void NamespaceTests() {
 	ns.ptr = ctx->ns;
 
 	// Binding
-	assert(oct_String_createOwnedFromCString(ctx, "theName", &name));
-	assert(oct_String_createOwnedFromCString(ctx, "theValue", &valStr));
-	assert(oct_OSymbol_alloc(ctx, name, &sym));
+	TEST(oct_String_createOwnedFromCString(ctx, "theName", &name));
+	TEST(oct_String_createOwnedFromCString(ctx, "theValue", &valStr));
+	TEST(oct_OSymbol_alloc(ctx, name, &sym));
 	val.variant = OCT_ANYOPTION_ANY;
-	assert(oct_Any_setPtrKind(ctx, &val.any, OCT_POINTER_OWNED));
-	assert(oct_Any_setPtr(ctx, &val.any, valStr.ptr));
+	TEST(oct_Any_setPtrKind(ctx, &val.any, OCT_POINTER_OWNED));
+	TEST(oct_Any_setPtr(ctx, &val.any, valStr.ptr));
 	type.ptr = ctx->rt->builtInTypes.String;
-	assert(oct_Any_setType(ctx, &val.any, type));
-	assert(oct_Namespace_bind(ctx, ns, sym, val));
+	TEST(oct_Any_setType(ctx, &val.any, type));
+	TEST(oct_Namespace_bind(ctx, ns, sym, val));
 	// End Binding
 
 	// Lookup
 	bsym.ptr = sym.ptr;
-	assert(oct_Namespace_lookup(ctx, ns, bsym, &lookedUp));
-	assert(lookedUp.variant == val.variant);
-	assert(lookedUp.any.data[0] == val.any.data[0]);
-	assert(lookedUp.any.data[1] == val.any.data[1]);
+	TEST(oct_Namespace_lookup(ctx, ns, bsym, &lookedUp));
+	TEST(lookedUp.variant == val.variant);
+	TEST(lookedUp.any.data[0] == val.any.data[0]);
+	TEST(lookedUp.any.data[1] == val.any.data[1]);
 	// End Lookup
 
-	assert(oct_Runtime_destroy(rt, &error));
+	TEST(oct_Runtime_destroy(rt, &error));
 }
 
 static void defTest() {
@@ -131,31 +136,31 @@ static void defTest() {
 	ns.ptr = ctx->ns;
 
 	// Eval
-	assert(oct_String_createOwnedFromCString(ctx, "(def hello \"Hello\")", &str));
-    assert(str.ptr);
+	TEST(oct_String_createOwnedFromCString(ctx, "(def hello \"Hello\")", &str));
+    TEST(str.ptr);
 	bstr.ptr = str.ptr;
-	assert(oct_OStringStream_create(ctx, bstr, &ss));
-    assert(ss.ptr);
+	TEST(oct_OStringStream_create(ctx, bstr, &ss));
+    TEST(ss.ptr);
 	bss.ptr = ss.ptr;
-	assert(oct_BStringStream_asCharStream(ctx, bss, &stream));
-    assert(stream.vtable);
+	TEST(oct_BStringStream_asCharStream(ctx, bss, &stream));
+    TEST(stream.vtable);
 	reader.ptr = ctx->reader;
-	assert(oct_Reader_read(ctx, reader, stream, &readResult));
-	assert(oct_Compiler_eval(ctx, readResult.result, &evalResult));
+	TEST(oct_Reader_read(ctx, reader, stream, &readResult));
+	TEST(oct_Compiler_eval(ctx, readResult.result, &evalResult));
 
 	// Lookup
-	assert(oct_String_createOwnedFromCString(ctx, "hello", &str));
-	assert(oct_OSymbol_alloc(ctx, str, &osym));
+	TEST(oct_String_createOwnedFromCString(ctx, "hello", &str));
+	TEST(oct_OSymbol_alloc(ctx, str, &osym));
 	bsym.ptr = osym.ptr;
-	assert(oct_Namespace_lookup(ctx, ns, bsym, &lookedUp));
-	assert(oct_Any_getPtr(ctx, lookedUp.any, &outStr));
-	assert(oct_String_createOwnedFromCString(ctx, "Hello", &str));
+	TEST(oct_Namespace_lookup(ctx, ns, bsym, &lookedUp));
+	TEST(oct_Any_getPtr(ctx, lookedUp.any, &outStr));
+	TEST(oct_String_createOwnedFromCString(ctx, "Hello", &str));
 	bs1.ptr = str.ptr;
 	bs2.ptr = (oct_String*)outStr;
-	assert(oct_BString_equals(ctx, bs1, bs2, &result));
-	assert(result);
+	TEST(oct_BString_equals(ctx, bs1, bs2, &result));
+	TEST(result);
 
-	assert(oct_Runtime_destroy(rt, &error));
+	TEST(oct_Runtime_destroy(rt, &error));
 }
 
 int main(int argc, char** argv) {
