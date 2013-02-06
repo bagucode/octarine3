@@ -333,6 +333,7 @@ static oct_Bool readString(struct oct_Context* ctx, oct_BReader reader, oct_Char
 	}
 	bt.ptr = ctx->rt->builtInTypes.String;
 	if(!oct_Any_setAll(ctx, &out_result->result, OCT_POINTER_OWNED, bt, box)) {
+		oct_String_dtor(ctx, (oct_String*)box);
 		oct_ExchangeHeap_free(ctx, box);
 		goto error;
 	}
