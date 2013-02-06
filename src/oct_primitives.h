@@ -25,6 +25,7 @@ typedef oct_I32 oct_Char;
 typedef oct_I64 oct_Word;
 typedef oct_U64 oct_Uword;
 #else
+#define OCT32
 typedef oct_I32 oct_Word;
 typedef oct_U32 oct_Uword;
 #endif
@@ -55,6 +56,7 @@ typedef oct_I32 oct_Char;
 typedef oct_I64 oct_Word;
 typedef oct_U64 oct_Uword;
 #else
+#define OCT32
 typedef oct_I32 oct_Word;
 typedef oct_U32 oct_Uword;
 #endif

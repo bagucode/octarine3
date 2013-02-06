@@ -68,28 +68,6 @@ oct_Bool oct_OABType_alloc(struct oct_Context* ctx, oct_Uword size, oct_OABType*
 
 // Helper code for copying object graphs. Need a space efficient hash table and a stack.
 
-// 
-
-//#ifdef OCTARINE32
-//#define FNV_PRIME 16777619U
-//#define FNV_OFFSET_BASIS 2166136261U
-//#else
-//#define FNV_PRIME 1099511628211U
-//#define FNV_OFFSET_BASIS 14695981039346656037U
-//#endif
-//
-//static uword fnv1a(const u8* data, uword datasize) {
-//uword hash = FNV_OFFSET_BASIS;
-//uword i;
-//for(i = 0; i < datasize; ++i) {
-//hash = hash ^ data[i];
-//hash = hash * FNV_PRIME;
-//}
-//return hash;
-//}
-
-
-
 // Cuckoo hash table for pointer translation during deep copy
 
 typedef struct PointerTranslationTableEntry {
@@ -109,6 +87,28 @@ static oct_Uword nextp2(oct_Uword n) {
 		p2 <<= 1;
 	}
 	return p2;
+}
+
+#ifdef OCT64
+#define FNV_PRIME 1099511628211U
+#define FNV_OFFSET_BASIS 14695981039346656037U
+#else
+#define FNV_PRIME 16777619U
+#define FNV_OFFSET_BASIS 2166136261U
+#endif
+
+static oct_Uword fnv1a(const oct_U8* data, oct_Uword datasize) {
+	oct_Uword hash = FNV_OFFSET_BASIS;
+	oct_Uword i;
+	for(i = 0; i < datasize; ++i) {
+		hash = hash ^ data[i];
+		hash = hash * FNV_PRIME;
+	}
+	return hash;
+}
+
+static oct_Uword hashPointer(void* ptr) {
+	return fnv1a((const oct_U8*)ptr, sizeof(void*));
 }
 
 static oct_Bool PointerTranslationTable_Create(oct_Uword initialCap, PointerTranslationTable* table) {
@@ -133,15 +133,15 @@ static void PointerTranslationTable_Destroy(PointerTranslationTable* table) {
 	table->table = NULL;
 }
 
-static oct_Uword Hash1(oct_Uword h) {
+static oct_Uword hash1(oct_Uword h) {
 	return h;
 }
 
-static oct_Uword Hash2(oct_Uword h) {
+static oct_Uword hash2(oct_Uword h) {
 	return h >> 4;
 }
 
-static oct_Uword Hash3(oct_Uword h) {
+static oct_Uword hash3(oct_Uword h) {
 	return h * 31;
 }
 
@@ -151,7 +151,7 @@ static oct_Bool PointerTranslationTable_TryPut(PointerTranslationTable* table, P
     
 	mask = table->capacity - 1;
     
-	i = Hash1((oct_Uword)entry->key) & mask;
+	i = hash1(hashPointer(entry->key)) & mask;
 	tmp = table->table[i];
 	table->table[i] = *entry;
 	if(tmp.key == NULL || tmp.key == entry->key) {
@@ -160,7 +160,7 @@ static oct_Bool PointerTranslationTable_TryPut(PointerTranslationTable* table, P
 	}
 	*entry = tmp;
 
-	i = Hash2((oct_Uword)entry->key) & mask;
+	i = hash2(hashPointer(entry->key)) & mask;
 	tmp = table->table[i];
 	table->table[i] = *entry;
 	if(tmp.key == NULL || tmp.key == entry->key) {
@@ -169,7 +169,7 @@ static oct_Bool PointerTranslationTable_TryPut(PointerTranslationTable* table, P
 	}
 	*entry = tmp;
 
-	i = Hash3((oct_Uword)entry->key) & mask;
+	i = hash3(hashPointer(entry->key)) & mask;
 	tmp = table->table[i];
 	table->table[i] = *entry;
 	if(tmp.key == NULL || tmp.key == entry->key) {
@@ -222,19 +222,20 @@ static oct_Bool PointerTranslationTable_Put(PointerTranslationTable* table, void
 }
 
 static void* PointerTranslationTable_Get(PointerTranslationTable* table, void* key) {
-	oct_Uword i, mask;
+	oct_Uword i, mask, ptrHash;
 
 	mask = table->capacity - 1;
+	ptrHash = hashPointer(key);
 
-	i = Hash1((oct_Uword)key) & mask;
+	i = hash1(ptrHash) & mask;
 	if(table->table[i].key == key)
 		return table->table[i].val;
 
-	i = Hash2((oct_Uword)key) & mask;
+	i = hash2(ptrHash) & mask;
 	if(table->table[i].key == key)
 		return table->table[i].val;
 
-	i = Hash3((oct_Uword)key) & mask;
+	i = hash3(ptrHash) & mask;
 	if(table->table[i].key == key)
 		return table->table[i].val;
 
