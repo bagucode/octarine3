@@ -4,6 +4,7 @@
 #include "oct_primitives.h"
 #include "oct_type_pointers.h"
 
+// These have to be 1-bit flags or oct_Any will break
 #define OCT_POINTER_BORROWED 0
 #define OCT_POINTER_OWNED 1
 #define OCT_POINTER_MANAGED 2
