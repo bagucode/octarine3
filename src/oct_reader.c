@@ -211,7 +211,7 @@ static oct_Bool readI32(struct oct_Context* ctx, oct_BReader reader, oct_Charstr
 	oct_BType bt;
 
 	if(reader_nChars(reader) > 19) {
-		// too many chars TODO: error reporting
+		oct_Context_setErrorWithCMessage(ctx, "I32 parse error - too many characters");
 		goto error;
 	}
 
@@ -243,7 +243,6 @@ static oct_Bool readI32(struct oct_Context* ctx, oct_BReader reader, oct_Charstr
 	// OK
 	out_result->variant = OCT_READRESULT_ANY;
 	if(!oct_ExchangeHeap_alloc(ctx, sizeof(oct_I32), &box)) {
-		// OOM
 		goto error;
 	}
 	bt.ptr = ctx->rt->builtInTypes.I32;
@@ -272,7 +271,7 @@ static oct_Bool readF32(struct oct_Context* ctx, oct_BReader reader, oct_Charstr
 	oct_BType bt;
 
 	if(reader_nChars(reader) > 14) {
-		// too many chars TODO: error reporting
+		oct_Context_setErrorWithCMessage(ctx, "F32 parse error - too many characters");
 		goto error;
 	}
 
@@ -299,7 +298,6 @@ static oct_Bool readF32(struct oct_Context* ctx, oct_BReader reader, oct_Charstr
 	// OK
 	out_result->variant = OCT_READRESULT_ANY;
 	if(!oct_ExchangeHeap_alloc(ctx, sizeof(oct_F32), &box)) {
-		// OOM
 		goto error;
 	}
 	bt.ptr = ctx->rt->builtInTypes.F32;
@@ -341,7 +339,6 @@ static oct_Bool readString(struct oct_Context* ctx, oct_BReader reader, oct_Char
 
 	out_result->variant = OCT_READRESULT_ANY;
 	if(!oct_ExchangeHeap_alloc(ctx, sizeof(oct_String), &box)) {
-		// OOM
 		goto error;
 	}
 	if(!oct_String_ctorCharArray(ctx, (oct_String*)box, reader.ptr->readBuffer, 0, reader.ptr->nchars)) {
@@ -372,7 +369,6 @@ static oct_Bool readSymbol(struct oct_Context* ctx, oct_BReader reader, oct_Char
 
 	out_result->variant = OCT_READRESULT_ANY;
 	if(!oct_ExchangeHeap_alloc(ctx, sizeof(oct_Symbol), &box)) {
-		// OOM
 		goto error;
 	}
 	if(!oct_OString_createFromCharArray(ctx, reader.ptr->readBuffer, 0, reader.ptr->nchars, &name)) {
@@ -425,7 +421,15 @@ static oct_Bool readList(struct oct_Context* ctx, oct_BReader reader, oct_Charst
 	printf("LIST START (\n");
 
 	// Call read for each token inside the list
-	do {
+	while(oct_True) {
+		PEEK_CHAR(&next);
+		while(isspace(next)) {
+			DISCARD_CHAR;
+			PEEK_CHAR(&next);
+		}
+		if(next == -1 || next == ')') {
+			break;
+		}
 		CHECK(oct_Reader_read(ctx, reader, source, &content));
 		if(content.variant == OCT_READRESULT_ERROR) {
 			oct_List_destroyOwned(ctx, olist);
@@ -434,13 +438,7 @@ static oct_Bool readList(struct oct_Context* ctx, oct_BReader reader, oct_Charst
 			goto end;
 		}
 		CHECK(oct_List_append(ctx, list, content.result));
-		//CHECK(oct_ReadableList_append(ctx, bList, content.readable));
-		PEEK_CHAR(&next);
-		while(isspace(next)) {
-			DISCARD_CHAR;
-			PEEK_CHAR(&next);
-		}
-	} while(next != -1 && next != ')');
+	}
 	// TODO: error if EOF before )
 	// discard ending )
 	DISCARD_CHAR;
