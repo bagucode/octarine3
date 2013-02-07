@@ -245,12 +245,64 @@ static void* PointerTranslationTable_Get(PointerTranslationTable* table, void* k
 	return NULL;
 }
 
+// Util function to find embedded pointers in an object and return them in an array
+
+typedef struct FieldPointer {
+	oct_Type* type;
+	void* object;
+	oct_Uword ptrKind;
+} FieldPointer;
+
+typedef struct Pointer {
+	void* ptr;
+} Pointer;
+
+typedef struct Variadic {
+	oct_Uword variant;
+	oct_U8 Union[];
+} Variadic;
+
+static oct_Bool findEmbeddedPointers(oct_Context* ctx, oct_Type* type, void* object, FieldPointer** pointerArray) {
+	Pointer* ptr;
+	Variadic* var;
+
+	switch(type->variant) {
+	case OCT_TYPE_PROTO:
+	case OCT_TYPE_INTERFACE:
+		oct_Context_setErrorWithCMessage(ctx, "Runtime internal error: attempt to find pointers in Prototype or Interface instance");
+		return oct_False;
+	case OCT_TYPE_POINTER:
+		ptr = (Pointer*)object;
+		*pointerArray = (FieldPointer*)malloc(sizeof(FieldPointer) * 1);
+		if(!(*pointerArray)) {
+			oct_Context_setErrorOOM(ctx);
+			return oct_False;
+		}
+		(*pointerArray)->object = ptr->ptr;
+		(*pointerArray)->type = type->pointerType.type.ptr;
+		(*pointerArray)->ptrKind = type->pointerType.kind;
+		return oct_True;
+	case OCT_TYPE_VARIADIC:
+		// Recursively call this function again for the actual variant of the variadic
+		var = (Variadic*)object;
+		return findEmbeddedPointers(ctx, type->variadicType.types.ptr->data[var->variant].ptr, (void*)&var->Union[0], pointerArray);
+	case OCT_TYPE_STRUCT:
+		Don't recurse to OCT_TYPE_POINTER, just build the array right here.
+	case OCT_TYPE_FIXED_SIZE_ARRAY:
+		
+	case OCT_TYPE_ARRAY:
+		
+	}
+	return 0;
+}
+
 // Stack used to store call frames on the heap to prevent blowing the C stack when traversing large graphs
 
 typedef struct FrameStackEntry {
 	void* object;
 	void* copy;
 	oct_Type* type;
+	FieldPointer* fieldPointers;
 	oct_Uword fieldIndex;
 } FrameStackEntry;
 
@@ -272,6 +324,13 @@ static oct_Bool FrameStack_Create(oct_Context* ctx, FrameStack* stack, oct_Uword
 }
 
 static void FrameStack_Destroy(FrameStack* stack) {
+	oct_Uword i;
+
+	for(i = 0; i < stack->capacity; ++i) {
+		if(stack->stack[i].fieldPointers) {
+			free(stack->stack[i].fieldPointers);
+		}
+	}
     free(stack->stack);
 	stack->capacity = 0;
 	stack->top = 0;
@@ -303,6 +362,7 @@ static oct_Bool FrameStack_Pop(FrameStack* stack, FrameStackEntry* out) {
         return oct_False;
     }
 	(*out) = stack->stack[--stack->top];
+	stack->stack[stack->top].fieldPointers = NULL; // prevent double free in FrameStack_Destroy
     return oct_True;
 }
 
@@ -399,8 +459,6 @@ oct_Bool oct_Type_deepCopyGraphOwned(struct oct_Context* ctx, oct_Any root, oct_
 	// responsible object is copied.
 
 loop:
-
-
 
 error:
 	result = oct_False;
