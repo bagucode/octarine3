@@ -111,7 +111,7 @@ static oct_Uword hashPointer(void* ptr) {
 	return fnv1a((const oct_U8*)ptr, sizeof(void*));
 }
 
-static oct_Bool PointerTranslationTable_Create(oct_Uword initialCap, PointerTranslationTable* table) {
+static oct_Bool PointerTranslationTable_Create(oct_Context* ctx, oct_Uword initialCap, PointerTranslationTable* table) {
 	oct_Uword byteSize;
     
 	table->capacity = nextp2(initialCap);
@@ -119,6 +119,7 @@ static oct_Bool PointerTranslationTable_Create(oct_Uword initialCap, PointerTran
 	byteSize = table->capacity * sizeof(PointerTranslationTableEntry);
 	table->table = (PointerTranslationTableEntry*)malloc(byteSize);
 	if(table->table == NULL) {
+		oct_Context_setErrorOOM(ctx);
 		return oct_False;
 	}
 	memset(table->table, 0, byteSize);
@@ -181,11 +182,11 @@ static oct_Bool PointerTranslationTable_TryPut(PointerTranslationTable* table, P
 	return oct_False;
 }
 
-static oct_Bool PointerTranslationTable_Grow(PointerTranslationTable* table) {
+static oct_Bool PointerTranslationTable_Grow(oct_Context* ctx, PointerTranslationTable* table) {
 	PointerTranslationTable bigger;
 	oct_Uword i, cap;
 
-	if(!PointerTranslationTable_Create(table->capacity + 1, &bigger)) {
+	if(!PointerTranslationTable_Create(ctx, table->capacity + 1, &bigger)) {
 		return oct_False;
 	}
 	for(i = 0; i < table->capacity; ++i) {
@@ -194,7 +195,7 @@ static oct_Bool PointerTranslationTable_Grow(PointerTranslationTable* table) {
 			if(PointerTranslationTable_TryPut(&bigger, &table->table[i]) == oct_False) {
 				cap = bigger.capacity + 1;
 				PointerTranslationTable_Destroy(&bigger);
-				if(!PointerTranslationTable_Create(cap, &bigger)) {
+				if(!PointerTranslationTable_Create(ctx, cap, &bigger)) {
 					return oct_False;
 				}
 				i = 0;
@@ -205,7 +206,7 @@ static oct_Bool PointerTranslationTable_Grow(PointerTranslationTable* table) {
 	(*table) = bigger;
 }
 
-static oct_Bool PointerTranslationTable_Put(PointerTranslationTable* table, void* key, void* val) {
+static oct_Bool PointerTranslationTable_Put(oct_Context* ctx, PointerTranslationTable* table, void* key, void* val) {
 	oct_Uword i;
 	PointerTranslationTableEntry entry;
 
@@ -214,10 +215,12 @@ static oct_Bool PointerTranslationTable_Put(PointerTranslationTable* table, void
 	while(oct_True) {
 		for(i = 0; i < 5; ++i) {
 			if(PointerTranslationTable_TryPut(table, &entry)) {
-				return;
+				return oct_True;
 			}
 		}
-		PointerTranslationTable_Grow(table);
+		if(!PointerTranslationTable_Grow(ctx, table)) {
+			return oct_False;
+		}
 	}
 }
 
@@ -245,8 +248,10 @@ static void* PointerTranslationTable_Get(PointerTranslationTable* table, void* k
 // Stack used to store call frames on the heap to prevent blowing the C stack when traversing large graphs
 
 typedef struct FrameStackEntry {
-	oct_Type* type;
 	void* object;
+	void* copy;
+	oct_Type* type;
+	oct_Uword fieldIndex;
 } FrameStackEntry;
 
 typedef struct FrameStack {
@@ -255,11 +260,12 @@ typedef struct FrameStack {
     FrameStackEntry* stack;
 } FrameStack;
 
-static oct_Bool FrameStack_Create(FrameStack* stack, oct_Uword initialCap) {
+static oct_Bool FrameStack_Create(oct_Context* ctx, FrameStack* stack, oct_Uword initialCap) {
     stack->capacity = initialCap;
     stack->top = 0;
     stack->stack = (FrameStackEntry*)malloc(sizeof(FrameStackEntry) * initialCap);
 	if(!stack->stack) {
+		oct_Context_setErrorOOM(ctx);
 		return oct_False;
 	}
     return oct_True;
@@ -272,7 +278,7 @@ static void FrameStack_Destroy(FrameStack* stack) {
 	stack->stack = NULL;
 }
 
-static oct_Bool FrameStack_Push(FrameStack* stack, FrameStackEntry* entry) {
+static oct_Bool FrameStack_Push(oct_Context* ctx, FrameStack* stack, FrameStackEntry* entry) {
     oct_Uword index;
 	FrameStack bigger;
     
@@ -281,6 +287,7 @@ static oct_Bool FrameStack_Push(FrameStack* stack, FrameStackEntry* entry) {
 		bigger.capacity *= 2;
 		bigger.stack = (FrameStackEntry*)malloc(sizeof(FrameStackEntry) * bigger.capacity);
 		if(!bigger.stack) {
+			oct_Context_setErrorOOM(ctx);
 			return oct_False;
 		}
 		memcpy(bigger.stack, stack->stack, stack->capacity * sizeof(FrameStackEntry));
@@ -299,9 +306,111 @@ static oct_Bool FrameStack_Pop(FrameStack* stack, FrameStackEntry* out) {
     return oct_True;
 }
 
+static oct_Uword getTypeSize(oct_Type* type) {
+	switch(type->variant) {
+	case OCT_TYPE_PROTO:
+		return sizeof(void*);
+	case OCT_TYPE_INTERFACE:
+		return sizeof(void*) * 2;
+	case OCT_TYPE_POINTER:
+		return sizeof(void*);
+	case OCT_TYPE_VARIADIC:
+		return type->variadicType.size;
+	case OCT_TYPE_STRUCT:
+		return type->structType.size;
+	case OCT_TYPE_FIXED_SIZE_ARRAY:
+		return type->fixedSizeArray.size * getTypeSize(type->fixedSizeArray.elementType.ptr);
+	case OCT_TYPE_ARRAY:
+		return 0; // incorrect, but the actual size is unknown without looking at the instance
+	}
+	return 0;
+}
+
+static oct_Bool copyObjectOwned(oct_Context* ctx, oct_Type* type, void* object, void** copy) {
+	oct_Uword size = 0;
+
+	switch(type->variant) {
+	case OCT_TYPE_PROTO:
+		{
+			oct_Context_setErrorWithCMessage(ctx, "Runtime internal error: Trying to copy object of type Prototype");
+			return oct_False;
+		}
+	case OCT_TYPE_INTERFACE:
+		{
+			// TODO: this is probably ok? For the "interface objects" expression problem solution
+			oct_Context_setErrorWithCMessage(ctx, "Runtime internal error: Trying to copy object of type Interface");
+			return oct_False;
+		}
+	case OCT_TYPE_POINTER:
+		{
+			oct_Context_setErrorWithCMessage(ctx, "Runtime internal error: Trying to copy object of type Pointer");
+			return oct_False;
+		}
+	case OCT_TYPE_VARIADIC:
+	case OCT_TYPE_STRUCT:
+	case OCT_TYPE_FIXED_SIZE_ARRAY:
+		size = getTypeSize(type);
+		break;
+	case OCT_TYPE_ARRAY:
+		size = sizeof(oct_Uword) + ( (*((oct_Uword*)object)) * getTypeSize(type->arrayType.elementType.ptr) );
+		break;
+	}
+
+	if(size == 0) {
+		oct_Context_setErrorWithCMessage(ctx, "Runtime internal error: Fell through copyObjectOwned switch statement");
+		return oct_False;
+	}
+	else {
+		if(!oct_ExchangeHeap_alloc(ctx, size, copy)) {
+			return oct_False;
+		}
+		memcpy(*copy, object, size);
+		return oct_True;
+	}
+}
+
+#define CHECK(X) if(!X) goto error;
+
 // Does a deep copy of an object graph and returns an owned copy
 // Will fail if the given graph contains any non-copyable objects.
 oct_Bool oct_Type_deepCopyGraphOwned(struct oct_Context* ctx, oct_Any root, oct_Any* out_ownedCopy) {
+	PointerTranslationTable ptt;
+	FrameStack stack;
+	FrameStackEntry currentFrame;
+	oct_Bool result;
+	oct_BType bt;
 
+	ptt.table = NULL;
+	stack.stack = NULL;
+	result = oct_True;
+
+	// TODO: move these instances to the context instead so that they are not re-created during every graph copy
+	CHECK(FrameStack_Create(ctx, &stack, 500));
+	CHECK(PointerTranslationTable_Create(ctx, 1000, &ptt));
+
+	CHECK(oct_Any_getPtr(ctx, root, &currentFrame.object));
+	CHECK(oct_Any_getType(ctx, root, &bt));
+	currentFrame.type = bt.ptr;
+	currentFrame.fieldIndex = 0;
+
+	// TODO: check that the type is actually deeply copyable? What could prevent it from being so?
+	// The presence of a destructor might inhibit copying becuase the destructor could be used to
+	// release or clean up some global resource and that could then be done more than once if the
+	// responsible object is copied.
+
+loop:
+
+
+
+error:
+	result = oct_False;
+end:
+	if(stack.stack) {
+		FrameStack_Destroy(&stack);
+	}
+	if(ptt.table) {
+		PointerTranslationTable_Destroy(&ptt);
+	}
+	return result;
 }
 
