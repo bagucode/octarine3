@@ -245,13 +245,59 @@ static void* PointerTranslationTable_Get(PointerTranslationTable* table, void* k
 	return NULL;
 }
 
-// Util function to find embedded pointers in an object and return them in an array
+// Util functions to find embedded pointers in an object and return them in an array
 
 typedef struct FieldPointer {
 	oct_Type* type;
-	void* object;
 	oct_Uword ptrKind;
+	void* value;
+	oct_Uword offset;
 } FieldPointer;
+
+typedef struct FieldPointerArray {
+	oct_Uword size;
+	oct_Uword capacity;
+	FieldPointer* data;
+} FieldPointerArray;
+
+static oct_Bool FieldPointerArray_Create(oct_Context* ctx, FieldPointerArray* fpa, oct_Uword initialCap) {
+	fpa->data = (FieldPointer*)malloc(sizeof(FieldPointer) * initialCap);
+	if(!fpa->data) {
+		oct_Context_setErrorOOM(ctx);
+		return oct_False;
+	}
+	fpa->capacity = initialCap;
+	fpa->size = 0;
+	return oct_True;
+}
+
+static void FieldPointerArray_Destroy(FieldPointerArray* fpa) {
+	free(fpa->data);
+	fpa->capacity = 0;
+	fpa->data = NULL;
+	fpa->size = 0;
+}
+
+static oct_Bool FieldPointerArray_Add(oct_Context* ctx, FieldPointerArray* fpa, FieldPointer fp) {
+	oct_Uword newCap;
+	FieldPointer* newArray;
+
+	if(fpa->size == fpa->capacity) {
+		newCap = fpa->capacity *= 2;
+		newArray = (FieldPointer*)malloc(sizeof(FieldPointer) * newCap);
+		if(!newArray) {
+			oct_Context_setErrorOOM(ctx);
+			return oct_False;
+		}
+		memcpy(newArray, fpa->data, fpa->capacity);
+		free(fpa->data);
+		fpa->capacity = newCap;
+		fpa->data = newArray;
+	}
+
+	fpa->data[fpa->size++] = fp;
+	return oct_True;
+}
 
 typedef struct Pointer {
 	void* ptr;
@@ -262,38 +308,87 @@ typedef struct Variadic {
 	oct_U8 Union[];
 } Variadic;
 
-static oct_Bool findEmbeddedPointers(oct_Context* ctx, oct_Type* type, void* object, FieldPointer** pointerArray) {
+typedef struct Array {
+	oct_Uword size;
+	oct_U8 data[];
+} Array;
+
+static oct_Uword getTypeSize(oct_Type* type) {
+	switch(type->variant) {
+	case OCT_TYPE_PROTO:
+		return sizeof(void*);
+	case OCT_TYPE_INTERFACE:
+		return sizeof(void*) * 2;
+	case OCT_TYPE_POINTER:
+		return sizeof(void*);
+	case OCT_TYPE_VARIADIC:
+		return type->variadicType.size;
+	case OCT_TYPE_STRUCT:
+		return type->structType.size;
+	case OCT_TYPE_FIXED_SIZE_ARRAY:
+		return type->fixedSizeArray.size * getTypeSize(type->fixedSizeArray.elementType.ptr);
+	case OCT_TYPE_ARRAY:
+		return 0; // incorrect, but the actual size is unknown without looking at the instance
+	}
+	return 0;
+}
+
+static oct_Bool findEmbeddedPointers(oct_Context* ctx, oct_Type* type, void* object, FieldPointerArray* pointerArray, oct_Uword offset) {
 	Pointer* ptr;
 	Variadic* var;
+	Array* arr;
+	oct_Uword i;
+	oct_AField* fields;
+	FieldPointer fp;
+	oct_Uword elemSize;
 
 	switch(type->variant) {
 	case OCT_TYPE_PROTO:
 	case OCT_TYPE_INTERFACE:
+		// TODO: it's probably ok to do this to an interface object.
 		oct_Context_setErrorWithCMessage(ctx, "Runtime internal error: attempt to find pointers in Prototype or Interface instance");
 		return oct_False;
 	case OCT_TYPE_POINTER:
 		ptr = (Pointer*)object;
-		*pointerArray = (FieldPointer*)malloc(sizeof(FieldPointer) * 1);
-		if(!(*pointerArray)) {
-			oct_Context_setErrorOOM(ctx);
-			return oct_False;
-		}
-		(*pointerArray)->object = ptr->ptr;
-		(*pointerArray)->type = type->pointerType.type.ptr;
-		(*pointerArray)->ptrKind = type->pointerType.kind;
-		return oct_True;
+		fp.value = ptr->ptr;
+		fp.offset = offset;
+		fp.type = type->pointerType.type.ptr;
+		fp.ptrKind = type->pointerType.kind;
+		return FieldPointerArray_Add(ctx, pointerArray, fp);
 	case OCT_TYPE_VARIADIC:
-		// Recursively call this function again for the actual variant of the variadic
 		var = (Variadic*)object;
-		return findEmbeddedPointers(ctx, type->variadicType.types.ptr->data[var->variant].ptr, (void*)&var->Union[0], pointerArray);
+		offset += sizeof(oct_Uword);
+		return findEmbeddedPointers(ctx, type->variadicType.types.ptr->data[var->variant].ptr, (void*)&var->Union[0], pointerArray, offset);
 	case OCT_TYPE_STRUCT:
-		Don't recurse to OCT_TYPE_POINTER, just build the array right here.
+		fields = type->structType.fields.ptr;
+		for(i = 0; i < fields->size; ++i) {
+			if(!findEmbeddedPointers(ctx, fields->data[i].type.ptr, (void*)(((char*)object) + fields->data[i].offset), pointerArray, offset + fields->data[i].offset)) {
+				return oct_False;
+			}
+		}
+		return oct_True;
 	case OCT_TYPE_FIXED_SIZE_ARRAY:
-		
+		elemSize = getTypeSize(type->fixedSizeArray.elementType.ptr);
+		for(i = 0; i < type->fixedSizeArray.size; ++i) {
+			offset += elemSize * i;
+			if(!findEmbeddedPointers(ctx, type->fixedSizeArray.elementType.ptr, object, pointerArray, offset)) {
+				return oct_False;
+			}
+		}
+		return oct_True;
 	case OCT_TYPE_ARRAY:
-		
+		arr = (Array*)object;
+		elemSize = getTypeSize(type->arrayType.elementType.ptr);
+		for(i = 0; i < arr->size; ++i) {
+			offset += elemSize * i;
+			if(!findEmbeddedPointers(ctx, type->arrayType.elementType.ptr, &arr->data[0], pointerArray, offset)) {
+				return oct_False;
+			}
+		}
+		return oct_True;
 	}
-	return 0;
+	oct_Context_setErrorWithCMessage(ctx, "Runtime internal error: Fell through switch statement in findEmbeddedPointers");
+	return oct_False;
 }
 
 // Stack used to store call frames on the heap to prevent blowing the C stack when traversing large graphs
@@ -366,26 +461,6 @@ static oct_Bool FrameStack_Pop(FrameStack* stack, FrameStackEntry* out) {
     return oct_True;
 }
 
-static oct_Uword getTypeSize(oct_Type* type) {
-	switch(type->variant) {
-	case OCT_TYPE_PROTO:
-		return sizeof(void*);
-	case OCT_TYPE_INTERFACE:
-		return sizeof(void*) * 2;
-	case OCT_TYPE_POINTER:
-		return sizeof(void*);
-	case OCT_TYPE_VARIADIC:
-		return type->variadicType.size;
-	case OCT_TYPE_STRUCT:
-		return type->structType.size;
-	case OCT_TYPE_FIXED_SIZE_ARRAY:
-		return type->fixedSizeArray.size * getTypeSize(type->fixedSizeArray.elementType.ptr);
-	case OCT_TYPE_ARRAY:
-		return 0; // incorrect, but the actual size is unknown without looking at the instance
-	}
-	return 0;
-}
-
 static oct_Bool copyObjectOwned(oct_Context* ctx, oct_Type* type, void* object, void** copy) {
 	oct_Uword size = 0;
 
@@ -412,7 +487,7 @@ static oct_Bool copyObjectOwned(oct_Context* ctx, oct_Type* type, void* object, 
 		size = getTypeSize(type);
 		break;
 	case OCT_TYPE_ARRAY:
-		size = sizeof(oct_Uword) + ( (*((oct_Uword*)object)) * getTypeSize(type->arrayType.elementType.ptr) );
+		size = sizeof(oct_Uword) + ( ((Array*)object)->size * getTypeSize(type->arrayType.elementType.ptr) );
 		break;
 	}
 
@@ -459,6 +534,7 @@ oct_Bool oct_Type_deepCopyGraphOwned(struct oct_Context* ctx, oct_Any root, oct_
 	// responsible object is copied.
 
 loop:
+
 
 error:
 	result = oct_False;
