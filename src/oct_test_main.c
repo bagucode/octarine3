@@ -163,6 +163,26 @@ static void defTest() {
 	TEST(oct_Runtime_destroy(rt, &error));
 }
 
+static void graphCopyOwnedTest() {
+	oct_Runtime* rt;
+	oct_Context* ctx;
+	oct_ReadResult readResult;
+	oct_BReader reader;
+	const char* error;
+    oct_Any copy;
+    
+	rt = oct_Runtime_create(&error);
+	assert(rt);
+	ctx = oct_Runtime_currentContext(rt);
+	assert(ctx);
+
+    reader.ptr = ctx->reader;
+    TEST(oct_Reader_readFromCString(ctx, reader, "(a list of symbols)", &readResult));
+    TEST(oct_Type_deepCopyGraphOwned(ctx, readResult.result, &copy));
+    
+	TEST(oct_Runtime_destroy(rt, &error));
+}
+
 int main(int argc, char** argv) {
 	const char* error;
 	oct_Charstream stream;
@@ -207,6 +227,7 @@ int main(int argc, char** argv) {
 	StringTests();
 	NamespaceTests();
 	defTest();
+    graphCopyOwnedTest();
 
 	return 0;
 }

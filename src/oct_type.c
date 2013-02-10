@@ -117,7 +117,7 @@ static oct_Bool PointerTranslationTable_Create(oct_Context* ctx, oct_Uword initi
 	table->capacity = nextp2(initialCap);
 	table->size = 0;
 	byteSize = table->capacity * sizeof(PointerTranslationTableEntry);
-	table->table = (PointerTranslationTableEntry*)malloc(byteSize);
+	table->table = (PointerTranslationTableEntry*)calloc(1, byteSize);
 	if(table->table == NULL) {
 		oct_Context_setErrorOOM(ctx);
 		return oct_False;
@@ -204,6 +204,7 @@ static oct_Bool PointerTranslationTable_Grow(oct_Context* ctx, PointerTranslatio
 	}
 	PointerTranslationTable_Destroy(table);
 	(*table) = bigger;
+    return oct_True;
 }
 
 static oct_Bool PointerTranslationTable_Put(oct_Context* ctx, PointerTranslationTable* table, void* key, void* val) {
@@ -397,7 +398,7 @@ typedef struct FrameStackEntry {
 	void* object;
 	void* copy;
 	oct_Type* type;
-	FieldPointer* fieldPointers;
+	FieldPointerArray fieldPointers;
 	oct_Uword fieldIndex;
 } FrameStackEntry;
 
@@ -422,9 +423,7 @@ static void FrameStack_Destroy(FrameStack* stack) {
 	oct_Uword i;
 
 	for(i = 0; i < stack->capacity; ++i) {
-		if(stack->stack[i].fieldPointers) {
-			free(stack->stack[i].fieldPointers);
-		}
+        FieldPointerArray_Destroy(&stack->stack[i].fieldPointers);
 	}
     free(stack->stack);
 	stack->capacity = 0;
@@ -457,7 +456,7 @@ static oct_Bool FrameStack_Pop(FrameStack* stack, FrameStackEntry* out) {
         return oct_False;
     }
 	(*out) = stack->stack[--stack->top];
-	stack->stack[stack->top].fieldPointers = NULL; // prevent double free in FrameStack_Destroy
+	stack->stack[stack->top].fieldPointers.data = NULL; // prevent double free in FrameStack_Destroy
     return oct_True;
 }
 
@@ -514,6 +513,10 @@ oct_Bool oct_Type_deepCopyGraphOwned(struct oct_Context* ctx, oct_Any root, oct_
 	FrameStackEntry currentFrame;
 	oct_Bool result;
 	oct_BType bt;
+    void* object;
+    oct_Type* type;
+    oct_Uword i;
+    void** embeddedPtr;
 
 	ptt.table = NULL;
 	stack.stack = NULL;
@@ -523,18 +526,51 @@ oct_Bool oct_Type_deepCopyGraphOwned(struct oct_Context* ctx, oct_Any root, oct_
 	CHECK(FrameStack_Create(ctx, &stack, 500));
 	CHECK(PointerTranslationTable_Create(ctx, 1000, &ptt));
 
-	CHECK(oct_Any_getPtr(ctx, root, &currentFrame.object));
+    CHECK(oct_Any_getPtr(ctx, root, &currentFrame.object));
 	CHECK(oct_Any_getType(ctx, root, &bt));
 	currentFrame.type = bt.ptr;
 	currentFrame.fieldIndex = 0;
+    CHECK(copyObjectOwned(ctx, currentFrame.type, currentFrame.object, &currentFrame.copy));
+    CHECK(PointerTranslationTable_Put(ctx, &ptt, currentFrame.object, currentFrame.copy));
+    CHECK(FieldPointerArray_Create(ctx, &currentFrame.fieldPointers, 10));
+    CHECK(findEmbeddedPointers(ctx, currentFrame.type, currentFrame.object, &currentFrame.fieldPointers, 0));    
 
-	// TODO: check that the type is actually deeply copyable? What could prevent it from being so?
+    // TODO: check that the type is actually deeply copyable? What could prevent it from being so?
 	// The presence of a destructor might inhibit copying becuase the destructor could be used to
 	// release or clean up some global resource and that could then be done more than once if the
 	// responsible object is copied.
 
-loop:
-
+    while (oct_True) {
+        if(currentFrame.fieldIndex < currentFrame.fieldPointers.size) {
+            object = currentFrame.fieldPointers.data[currentFrame.fieldIndex].value;
+            type = currentFrame.fieldPointers.data[currentFrame.fieldIndex].type;
+            ++currentFrame.fieldIndex;
+            if(PointerTranslationTable_Get(&ptt, object) == NULL) {
+                // Go depth first so we can fix the child pointers in the same pass
+                CHECK(FrameStack_Push(ctx, &stack, &currentFrame));
+                currentFrame.object = object;
+                currentFrame.type = type;
+                currentFrame.fieldIndex = 0;
+                CHECK(copyObjectOwned(ctx, currentFrame.type, currentFrame.object, &currentFrame.copy));
+                CHECK(PointerTranslationTable_Put(ctx, &ptt, currentFrame.object, currentFrame.copy));
+                CHECK(FieldPointerArray_Create(ctx, &currentFrame.fieldPointers, 10));
+                CHECK(findEmbeddedPointers(ctx, currentFrame.type, currentFrame.object, &currentFrame.fieldPointers, 0));    
+            }
+        }
+        else {
+            // All children copied. Fix up the pointers.
+            for(i = 0; i < currentFrame.fieldPointers.size; ++i) {
+                embeddedPtr = (void**)(((char*)currentFrame.copy) + currentFrame.fieldPointers.data[i].offset);
+                *embeddedPtr = PointerTranslationTable_Get(&ptt, currentFrame.fieldPointers.data[i].value);
+            }
+            FieldPointerArray_Destroy(&currentFrame.fieldPointers);
+            // Pop previous frame off stack
+            if(FrameStack_Pop(&stack, &currentFrame) == oct_False) {
+                // All done!
+                goto end;
+            }
+        }
+    }
 
 error:
 	result = oct_False;
@@ -543,8 +579,29 @@ end:
 		FrameStack_Destroy(&stack);
 	}
 	if(ptt.table) {
+        // TODO: release memory of any copies here if result is oct_False?
 		PointerTranslationTable_Destroy(&ptt);
 	}
 	return result;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

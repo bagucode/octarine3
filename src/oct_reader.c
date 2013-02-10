@@ -4,6 +4,7 @@
 #include "oct_pointertype.h"
 #include "oct_runtime.h"
 #include "oct_list.h"
+#include "oct_stringstream.h"
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -455,3 +456,61 @@ static oct_Bool readMap(struct oct_Context* ctx, oct_BReader reader, oct_Charstr
 	out_result->variant = OCT_READRESULT_ANY;
 	return oct_True;
 }
+
+oct_Bool oct_Reader_readFromCString(struct oct_Context* ctx, oct_BReader reader, const char* source, oct_ReadResult* out_result) {
+	oct_OString str;
+	oct_BString bstr;
+	oct_OStringStream ss;
+	oct_BStringStream bss;
+	oct_Charstream stream;
+    oct_Bool result = oct_True;
+    
+    str.ptr = NULL;
+    ss.ptr = NULL;
+    
+    CHECK(oct_String_createOwnedFromCString(ctx, source, &str));
+	bstr.ptr = str.ptr;
+	CHECK(oct_OStringStream_create(ctx, bstr, &ss));
+	bss.ptr = ss.ptr;
+	CHECK(oct_BStringStream_asCharStream(ctx, bss, &stream));
+	CHECK(oct_Reader_read(ctx, reader, stream, out_result));
+    
+    goto end;
+error:
+    result = oct_False;
+end:
+    if(str.ptr) {
+        oct_String_destroyOwned(ctx, str);
+    }
+    if(ss.ptr) {
+        oct_OStringStream_destroy(ctx, ss);
+    }
+    return result;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
