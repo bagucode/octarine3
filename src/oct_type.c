@@ -284,7 +284,7 @@ static oct_Bool FieldPointerArray_Add(oct_Context* ctx, FieldPointerArray* fpa, 
 	FieldPointer* newArray;
 
 	if(fpa->size == fpa->capacity) {
-		newCap = fpa->capacity *= 2;
+		newCap = fpa->capacity * 2;
 		newArray = (FieldPointer*)malloc(sizeof(FieldPointer) * newCap);
 		if(!newArray) {
 			oct_Context_setErrorOOM(ctx);
@@ -432,7 +432,6 @@ static void FrameStack_Destroy(FrameStack* stack) {
 }
 
 static oct_Bool FrameStack_Push(oct_Context* ctx, FrameStack* stack, FrameStackEntry* entry) {
-    oct_Uword index;
 	FrameStack bigger;
     
     if(stack->capacity == stack->top) {
