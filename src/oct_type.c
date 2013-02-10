@@ -422,7 +422,7 @@ static oct_Bool FrameStack_Create(oct_Context* ctx, FrameStack* stack, oct_Uword
 static void FrameStack_Destroy(FrameStack* stack) {
 	oct_Uword i;
 
-	for(i = 0; i < stack->capacity; ++i) {
+	for(i = 0; i < stack->top; ++i) {
         FieldPointerArray_Destroy(&stack->stack[i].fieldPointers);
 	}
     free(stack->stack);
@@ -455,7 +455,6 @@ static oct_Bool FrameStack_Pop(FrameStack* stack, FrameStackEntry* out) {
         return oct_False;
     }
 	(*out) = stack->stack[--stack->top];
-	stack->stack[stack->top].fieldPointers.data = NULL; // prevent double free in FrameStack_Destroy
     return oct_True;
 }
 

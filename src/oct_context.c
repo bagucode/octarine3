@@ -5,6 +5,7 @@
 oct_Bool _oct_Context_initType(oct_Context* ctx) {
 	// Should this even be used?
 	// The context might not be good to expose in-language?
+    return oct_True;
 }
 
 oct_Bool oct_Context_setError(oct_Context* ctx, oct_OError err) {

@@ -36,6 +36,7 @@ struct oct_Context;
 oct_Bool _oct_Any_initType(struct oct_Context* ctx);
 oct_Bool _oct_AAny_initType(struct oct_Context* ctx);
 oct_Bool _oct_OAAny_initType(struct oct_Context* ctx);
+oct_Bool _oct_AnyOption_initType(struct oct_Context* ctx);
 
 // Public
 

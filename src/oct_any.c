@@ -27,6 +27,19 @@ oct_Bool _oct_OAAny_initType(struct oct_Context* ctx) {
 	return oct_True;
 }
 
+oct_Bool _oct_AnyOption_initType(struct oct_Context* ctx) {
+	oct_Type* t = ctx->rt->builtInTypes.AnyOption;
+	t->variant = OCT_TYPE_VARIADIC;
+	t->variadicType.alignment = 0;
+	t->variadicType.size = sizeof(oct_AnyOption);
+	if(!oct_OABType_alloc(ctx, 2, &t->variadicType.types)) {
+		return oct_False;
+	}
+	t->variadicType.types.ptr->data[0].ptr = ctx->rt->builtInTypes.Nothing;
+	t->variadicType.types.ptr->data[1].ptr = ctx->rt->builtInTypes.Any;
+	return oct_True;
+}
+
 // data[0] holds type pointer and pointer kind
 // data[1] holds object pointer
 
@@ -108,6 +121,7 @@ oct_Bool oct_Any_listp(struct oct_Context* ctx, oct_Any any, oct_Bool* out_bool)
 oct_Bool oct_Any_copy(struct oct_Context* ctx, oct_Any any, oct_Any* out_copy) {
 	// TODO: check if type is copyable
 	// TODO: implement deep copy of types
+    return oct_True;
 }
 
 oct_Bool oct_Any_move(struct oct_Context* ctx, oct_Any release, oct_Any* out_newOwner) {

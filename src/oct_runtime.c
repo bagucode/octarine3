@@ -126,6 +126,7 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	_oct_OABFunction_initType(mainCtx);
 	_oct_AChar_initType(mainCtx);
 	_oct_OAChar_initType(mainCtx);
+    _oct_AnyOption_initType(mainCtx);
 
 	//_oct_ReadResult_initType(mainCtx);
 	//_oct_Reader_initType(mainCtx);
@@ -189,6 +190,7 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	bind_type(mainCtx, octarine, "Error", rt->builtInTypes.Error);
 	bind_type(mainCtx, octarine, "~Error", rt->builtInTypes.OError);
 	bind_type(mainCtx, octarine, "ErrorOption", rt->builtInTypes.ErrorOption);
+    bind_type(mainCtx, octarine, "AnyOption", rt->builtInTypes.AnyOption);
 
 	return rt;
 }
