@@ -9,6 +9,9 @@
 #include <stdlib.h>
 #include <memory.h>
 
+// DEBUG
+#include <stdio.h>
+
 // Private
 
 oct_Bool _oct_Type_initType(struct oct_Context* ctx) {
@@ -89,26 +92,8 @@ static oct_Uword nextp2(oct_Uword n) {
 	return p2;
 }
 
-#ifdef OCT64
-#define FNV_PRIME 1099511628211U
-#define FNV_OFFSET_BASIS 14695981039346656037U
-#else
-#define FNV_PRIME 16777619U
-#define FNV_OFFSET_BASIS 2166136261U
-#endif
-
-static oct_Uword fnv1a(const oct_U8* data, oct_Uword datasize) {
-	oct_Uword hash = FNV_OFFSET_BASIS;
-	oct_Uword i;
-	for(i = 0; i < datasize; ++i) {
-		hash = hash ^ data[i];
-		hash = hash * FNV_PRIME;
-	}
-	return hash;
-}
-
 static oct_Uword hashPointer(void* ptr) {
-	return fnv1a((const oct_U8*)ptr, sizeof(void*));
+	return (oct_Uword)ptr;
 }
 
 static oct_Bool PointerTranslationTable_Create(oct_Context* ctx, oct_Uword initialCap, PointerTranslationTable* table) {
@@ -338,10 +323,12 @@ static oct_Bool findEmbeddedPointers(oct_Context* ctx, oct_Type* type, void* obj
 	Pointer* ptr;
 	Variadic* var;
 	Array* arr;
+    oct_Any* any;
 	oct_Uword i;
 	oct_AField* fields;
 	FieldPointer fp;
 	oct_Uword elemSize;
+    oct_BType bt;
 
 	switch(type->variant) {
 	case OCT_TYPE_PROTO:
@@ -361,13 +348,26 @@ static oct_Bool findEmbeddedPointers(oct_Context* ctx, oct_Type* type, void* obj
 		offset += sizeof(oct_Uword);
 		return findEmbeddedPointers(ctx, type->variadicType.types.ptr->data[var->variant].ptr, (void*)&var->Union[0], pointerArray, offset);
 	case OCT_TYPE_STRUCT:
-		fields = type->structType.fields.ptr;
-		for(i = 0; i < fields->size; ++i) {
-			if(!findEmbeddedPointers(ctx, fields->data[i].type.ptr, (void*)(((char*)object) + fields->data[i].offset), pointerArray, offset + fields->data[i].offset)) {
-				return oct_False;
-			}
-		}
-		return oct_True;
+        if(ctx->rt->builtInTypes.Any == type) {
+            // Special case for Any
+            any = (oct_Any*)object;
+            oct_Any_getPtr(ctx, *any, &fp.value);
+            oct_Any_getType(ctx, *any, &bt);
+            fp.type = bt.ptr;
+            oct_Any_getPtrKind(ctx, *any, &fp.ptrKind);
+            fp.offset = offset + sizeof(oct_Uword);
+            return FieldPointerArray_Add(ctx, pointerArray, fp);
+        }
+        else {
+            // General struct case
+            fields = type->structType.fields.ptr;
+            for(i = 0; i < fields->size; ++i) {
+                if(!findEmbeddedPointers(ctx, fields->data[i].type.ptr, (void*)(((char*)object) + fields->data[i].offset), pointerArray, offset + fields->data[i].offset)) {
+                    return oct_False;
+                }
+            }
+            return oct_True;
+        }
 	case OCT_TYPE_FIXED_SIZE_ARRAY:
 		elemSize = getTypeSize(type->fixedSizeArray.elementType.ptr);
 		for(i = 0; i < type->fixedSizeArray.size; ++i) {
@@ -461,6 +461,22 @@ static oct_Bool FrameStack_Pop(FrameStack* stack, FrameStackEntry* out) {
 static oct_Bool copyObjectOwned(oct_Context* ctx, oct_Type* type, void* object, void** copy) {
 	oct_Uword size = 0;
 
+    if(type == ctx->rt->builtInTypes.List) {
+        printf("Copying List\n");
+    }
+    if(type == ctx->rt->builtInTypes.Symbol) {
+        printf("Copying Symbol\n");
+    }
+    if(type == ctx->rt->builtInTypes.String) {
+        printf("Copying String\n");
+    }
+    if(type == ctx->rt->builtInTypes.Any) {
+        printf("Copying Any\n");
+    }
+    if(type == ctx->rt->builtInTypes.AU8) {
+        printf("Copying AU8\n");
+    }
+    
 	switch(type->variant) {
 	case OCT_TYPE_PROTO:
 		{
@@ -559,7 +575,7 @@ oct_Bool oct_Type_deepCopyGraphOwned(struct oct_Context* ctx, oct_Any root, oct_
             // All children copied. Fix up the pointers.
             for(i = 0; i < currentFrame.fieldPointers.size; ++i) {
                 embeddedPtr = (void**)(((char*)currentFrame.copy) + currentFrame.fieldPointers.data[i].offset);
-                *embeddedPtr = PointerTranslationTable_Get(&ptt, currentFrame.fieldPointers.data[i].value);
+                *embeddedPtr = PointerTranslationTable_Get(&ptt, *embeddedPtr);//currentFrame.fieldPointers.data[i].value);
             }
             FieldPointerArray_Destroy(&currentFrame.fieldPointers);
             // Pop previous frame off stack

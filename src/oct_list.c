@@ -60,7 +60,7 @@ oct_Bool _oct_OListOption_initType(struct oct_Context* ctx) {
         return oct_False;
     }
     t->variadicType.types.ptr->data[0].ptr = ctx->rt->builtInTypes.Nothing;
-    t->variadicType.types.ptr->data[0].ptr = ctx->rt->builtInTypes.OList;
+    t->variadicType.types.ptr->data[1].ptr = ctx->rt->builtInTypes.OList;
     return oct_True;
 }
 

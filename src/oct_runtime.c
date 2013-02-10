@@ -94,8 +94,6 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
     _oct_MList_initType(mainCtx);
     _oct_BList_initType(mainCtx);
     _oct_OListOption_initType(mainCtx);
-	
-    // old
     _oct_ArrayType_initType(mainCtx);
 	_oct_FixedSizeArrayType_initType(mainCtx);
 	_oct_PointerType_initType(mainCtx);
@@ -110,6 +108,7 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	_oct_AField_initType(mainCtx);
 	_oct_OAField_initType(mainCtx);
     _oct_AU8_initType(mainCtx);
+    _oct_OAU8_initType(mainCtx);
 	_oct_String_initType(mainCtx);
 	_oct_Nothing_initType(mainCtx);
 	_oct_Symbol_initType(mainCtx);
@@ -127,6 +126,7 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	_oct_AChar_initType(mainCtx);
 	_oct_OAChar_initType(mainCtx);
     _oct_AnyOption_initType(mainCtx);
+    _oct_OString_initType(mainCtx);
 
 	//_oct_ReadResult_initType(mainCtx);
 	//_oct_Reader_initType(mainCtx);
