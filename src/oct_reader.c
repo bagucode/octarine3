@@ -291,7 +291,7 @@ static oct_Bool readF32(struct oct_Context* ctx, oct_BReader reader, oct_Charstr
 	if(!oct_Any_setAll(ctx, &out_result->result, OCT_POINTER_OWNED, bt, box)) {
 		goto error;
 	}
-	*((oct_F32*)box) = d;
+	*((oct_F32*)box) = (oct_F32)d;
 
 	printf("Read an F32: %f\n", *((oct_F32*)box));
 
