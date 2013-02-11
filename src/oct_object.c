@@ -1,6 +1,7 @@
 #include "oct_object.h"
 #include "oct_context.h"
 #include "oct_runtime.h"
+#include "oct_object_vtable.h"
 
 oct_Bool _oct_Object_initType(struct oct_Context* ctx) {
 }
