@@ -118,7 +118,7 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	_oct_OANamespaceBinding_initType(mainCtx);
 	_oct_Namespace_initType(mainCtx);
 	_oct_OSymbolOption_initType(mainCtx);
-	_oct_Interface_initType(mainCtx);
+	_oct_Protocol_initType(mainCtx);
 	_oct_Function_initType(mainCtx);
 	_oct_BFunction_initType(mainCtx);
 	_oct_ABFunction_initType(mainCtx);
@@ -186,7 +186,7 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	bind_type(mainCtx, octarine, "&Namespace", rt->builtInTypes.BNamespace);
 	bind_type(mainCtx, octarine, "Reader", rt->builtInTypes.Reader);
 	bind_type(mainCtx, octarine, "ReadResult", rt->builtInTypes.ReadResult);
-	bind_type(mainCtx, octarine, "InterfaceType", rt->builtInTypes.InterfaceType);
+	bind_type(mainCtx, octarine, "ProtocolType", rt->builtInTypes.ProtocolType);
 	bind_type(mainCtx, octarine, "Error", rt->builtInTypes.Error);
 	bind_type(mainCtx, octarine, "~Error", rt->builtInTypes.OError);
 	bind_type(mainCtx, octarine, "ErrorOption", rt->builtInTypes.ErrorOption);

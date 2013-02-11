@@ -9,9 +9,6 @@
 #include <stdlib.h>
 #include <memory.h>
 
-// DEBUG
-#include <stdio.h>
-
 // Private
 
 oct_Bool _oct_Type_initType(struct oct_Context* ctx) {
@@ -30,7 +27,7 @@ oct_Bool _oct_Type_initType(struct oct_Context* ctx) {
 	t->variadicType.types.ptr->data[3].ptr = ctx->rt->builtInTypes.ArrayType;
 	t->variadicType.types.ptr->data[4].ptr = ctx->rt->builtInTypes.FixedSizeArrayType;
 	t->variadicType.types.ptr->data[5].ptr = ctx->rt->builtInTypes.PointerType;
-	t->variadicType.types.ptr->data[6].ptr = ctx->rt->builtInTypes.InterfaceType;
+	t->variadicType.types.ptr->data[6].ptr = ctx->rt->builtInTypes.ProtocolType;
 	return oct_True;
 }
 
@@ -303,7 +300,7 @@ static oct_Uword getTypeSize(oct_Type* type) {
 	switch(type->variant) {
 	case OCT_TYPE_PROTO:
 		return sizeof(void*);
-	case OCT_TYPE_INTERFACE:
+	case OCT_TYPE_PROTOCOL:
 		return sizeof(void*) * 2;
 	case OCT_TYPE_POINTER:
 		return sizeof(void*);
@@ -332,9 +329,9 @@ static oct_Bool findEmbeddedPointers(oct_Context* ctx, oct_Type* type, void* obj
 
 	switch(type->variant) {
 	case OCT_TYPE_PROTO:
-	case OCT_TYPE_INTERFACE:
-		// TODO: it's probably ok to do this to an interface object.
-		oct_Context_setErrorWithCMessage(ctx, "Runtime internal error: attempt to find pointers in Prototype or Interface instance");
+	case OCT_TYPE_PROTOCOL:
+		// TODO: it's probably ok to do this to a protocol object.
+		oct_Context_setErrorWithCMessage(ctx, "Runtime internal error: attempt to find pointers in Prototype or Protocol instance");
 		return oct_False;
 	case OCT_TYPE_POINTER:
 		ptr = (Pointer*)object;
@@ -460,22 +457,6 @@ static oct_Bool FrameStack_Pop(FrameStack* stack, FrameStackEntry* out) {
 
 static oct_Bool copyObjectOwned(oct_Context* ctx, oct_Type* type, void* object, void** copy) {
 	oct_Uword size = 0;
-
-    if(type == ctx->rt->builtInTypes.List) {
-        printf("Copying List\n");
-    }
-    if(type == ctx->rt->builtInTypes.Symbol) {
-        printf("Copying Symbol\n");
-    }
-    if(type == ctx->rt->builtInTypes.String) {
-        printf("Copying String\n");
-    }
-    if(type == ctx->rt->builtInTypes.Any) {
-        printf("Copying Any\n");
-    }
-    if(type == ctx->rt->builtInTypes.AU8) {
-        printf("Copying AU8\n");
-    }
     
 	switch(type->variant) {
 	case OCT_TYPE_PROTO:
@@ -483,10 +464,10 @@ static oct_Bool copyObjectOwned(oct_Context* ctx, oct_Type* type, void* object, 
 			oct_Context_setErrorWithCMessage(ctx, "Runtime internal error: Trying to copy object of type Prototype");
 			return oct_False;
 		}
-	case OCT_TYPE_INTERFACE:
+	case OCT_TYPE_PROTOCOL:
 		{
-			// TODO: this is probably ok? For the "interface objects" expression problem solution
-			oct_Context_setErrorWithCMessage(ctx, "Runtime internal error: Trying to copy object of type Interface");
+			// TODO: this is probably ok? For the "protocol objects" expression problem solution
+			oct_Context_setErrorWithCMessage(ctx, "Runtime internal error: Trying to copy object of type Protocol");
 			return oct_False;
 		}
 	case OCT_TYPE_POINTER:
@@ -575,7 +556,7 @@ oct_Bool oct_Type_deepCopyGraphOwned(struct oct_Context* ctx, oct_Any root, oct_
             // All children copied. Fix up the pointers.
             for(i = 0; i < currentFrame.fieldPointers.size; ++i) {
                 embeddedPtr = (void**)(((char*)currentFrame.copy) + currentFrame.fieldPointers.data[i].offset);
-                *embeddedPtr = PointerTranslationTable_Get(&ptt, *embeddedPtr);//currentFrame.fieldPointers.data[i].value);
+                *embeddedPtr = PointerTranslationTable_Get(&ptt, *embeddedPtr);
             }
             FieldPointerArray_Destroy(&currentFrame.fieldPointers);
             // Pop previous frame off stack
@@ -588,12 +569,12 @@ oct_Bool oct_Type_deepCopyGraphOwned(struct oct_Context* ctx, oct_Any root, oct_
 
 error:
 	result = oct_False;
+    // TODO: release memory of any copies made if there is an error
 end:
 	if(stack.stack) {
 		FrameStack_Destroy(&stack);
 	}
 	if(ptt.table) {
-        // TODO: release memory of any copies here if result is oct_False?
 		PointerTranslationTable_Destroy(&ptt);
 	}
 	return result;

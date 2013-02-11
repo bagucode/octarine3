@@ -26,7 +26,7 @@
 // variadic  -> create variadic type
 // struct    -> create struct
 // array     -> create array or fixed size array (overload)
-// interface -> create interface
+// protocol -> create protocol
 // Pointer types are implicitly created for each type
 
 #define CHECK(X) if(!X) return oct_False;

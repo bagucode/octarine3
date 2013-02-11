@@ -5,7 +5,7 @@
 #include "oct_any.h"
 #include "oct_primitive_pointers.h"
 
-// Charstream interface. Used by the reader
+// Charstream protocol. Used by the reader
 
 typedef struct oct_CharstreamVTable {
 	oct_Bool (*read)(struct oct_Context* ctx, void* b_self /*borrowed*/, oct_Char* out_read);

@@ -8,7 +8,7 @@
 #include "oct_structtype.h"
 #include "oct_arraytype.h"
 #include "oct_pointertype.h"
-#include "oct_interfacetype.h"
+#include "oct_protocoltype.h"
 
 #define OCT_TYPE_PROTO 0
 #define OCT_TYPE_VARIADIC 1
@@ -16,7 +16,7 @@
 #define OCT_TYPE_ARRAY 3
 #define OCT_TYPE_FIXED_SIZE_ARRAY 4
 #define OCT_TYPE_POINTER 5
-#define OCT_TYPE_INTERFACE 6
+#define OCT_TYPE_PROTOCOL 6
 
 typedef struct oct_Type {
 	oct_Uword variant; // OCT_TYPE_*
@@ -27,7 +27,7 @@ typedef struct oct_Type {
 		oct_ArrayType arrayType;
 		oct_FixedSizeArrayType fixedSizeArray;
 		oct_PointerType pointerType;
-		oct_InterfaceType interfaceType;
+		oct_ProtocolType protocolType;
 	};
 } oct_Type;
 

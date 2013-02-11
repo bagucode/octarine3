@@ -69,7 +69,7 @@ typedef struct oct_BuiltInTypes {
 	struct oct_Type* OANamespaceBinding;
 	struct oct_Type* Namespace;
 	struct oct_Type* BNamespace;
-	struct oct_Type* InterfaceType;
+	struct oct_Type* ProtocolType;
 	struct oct_Type* Function;
 	struct oct_Type* BFunction;
 	struct oct_Type* ABFunction;
