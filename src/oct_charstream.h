@@ -4,16 +4,18 @@
 #include "oct_function.h"
 #include "oct_any.h"
 #include "oct_primitive_pointers.h"
+#include "oct_type_pointers.h"
 
 // Charstream protocol. Used by the reader
 
 typedef struct oct_CharstreamVTable {
+	oct_BType instanceType;
 	oct_Bool (*read)(struct oct_Context* ctx, void* b_self /*borrowed*/, oct_Char* out_read);
 	oct_Bool (*peek)(struct oct_Context* ctx, void* b_self /*borrowed*/, oct_Char* out_peeked);
 } oct_CharstreamVTable;
 
 typedef struct oct_Charstream {
-	oct_Any object;
+	void* object;
 	oct_CharstreamVTable* vtable;
 } oct_Charstream;
 

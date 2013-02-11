@@ -58,20 +58,12 @@ static oct_Char reader_getChar(oct_BReader reader, oct_Uword idx) {
 }
 
 static oct_Bool stream_peekChar(oct_Context* ctx, oct_Charstream source, oct_Char* c_out) {
-	void* obj;
-	if(!oct_Any_getPtr(ctx, source.object, &obj)) {
-		return oct_False;
-	}
-	return source.vtable->peek(ctx, obj, c_out);
+	return source.vtable->peek(ctx, source.object, c_out);
 }
 
 static oct_Bool stream_discardChar(oct_Context* ctx, oct_Charstream source) {
 	oct_Char c;
-	void* obj;
-	if(!oct_Any_getPtr(ctx, source.object, &obj)) {
-		return oct_False;
-	}
-	return source.vtable->read(ctx, obj, &c);
+	return source.vtable->read(ctx, source.object, &c);
 }
 
 typedef oct_Bool(*readFn)(struct oct_Context*, oct_BReader, oct_Charstream, oct_ReadResult*);

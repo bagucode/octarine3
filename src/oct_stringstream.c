@@ -59,25 +59,18 @@ oct_Bool oct_OStringStream_destroy(struct oct_Context* ctx, oct_OStringStream st
 }
 
 oct_Bool oct_BStringStream_asCharStream(struct oct_Context* ctx, oct_BStringStream stream, oct_Charstream* out_cs) {
-	oct_BType t;
 	oct_CharstreamVTable* vtable;
-	if(!oct_Any_setPtr(ctx, &out_cs->object, stream.ptr)) {
-		return oct_False;
-	}
-	if(!oct_Any_setPtrKind(ctx, &out_cs->object, OCT_POINTER_BORROWED)) {
-		return oct_False;
-	}
-	t.ptr = ctx->rt->builtInTypes.BStringStream;
-	if(!oct_Any_setType(ctx, &out_cs->object, t)) {
-		return oct_False;
-	}
 	// TODO: Do not malloc and construct the vtable here. It is supposed to be stored with the type info somehow...
 	vtable = (oct_CharstreamVTable*)malloc(sizeof(oct_CharstreamVTable));
 	if(!vtable) {
 		return oct_False;
 	}
+	vtable->instanceType.ptr = ctx->rt->builtInTypes.BStringStream;
 	vtable->read = (oct_Bool(*)(struct oct_Context*, void*, oct_Char*)) oct_BStringStream_readChar;
 	vtable->peek = (oct_Bool(*)(struct oct_Context*, void*, oct_Char*)) oct_BStringStream_peekChar;
+
+	out_cs->object = stream.ptr;
 	out_cs->vtable = vtable;
+
 	return oct_True;
 }
