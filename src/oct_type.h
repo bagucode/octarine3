@@ -46,5 +46,4 @@ oct_Bool oct_Type_deepCopyGraphOwned(struct oct_Context* ctx, oct_BObject root, 
 // Will fail if the given graph contains any non-copyable objects.
 oct_Bool oct_Type_deepCopyGraphManaged(struct oct_Context* ctx, oct_BObject root, oct_MObject* out_managedCopy);
 
-
 #endif

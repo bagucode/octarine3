@@ -87,7 +87,7 @@ static void NamespaceTests() {
 	// Binding
 	TEST(oct_String_createOwnedFromCString(ctx, "theName", &name));
 	TEST(oct_String_createOwnedFromCString(ctx, "theValue", &valStr));
-	TEST(oct_OSymbol_alloc(ctx, name, &sym));
+	TEST(oct_Symbol_createOwned(ctx, name, &sym));
 	val.variant = OCT_OBJECTOPTION_OBJECT;
 	TEST(oct_Any_setPtrKind(ctx, &val.any, OCT_POINTER_OWNED));
 	TEST(oct_Any_setPtr(ctx, &val.any, valStr.ptr));

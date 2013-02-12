@@ -1,6 +1,7 @@
 #include "oct_runtime.h"
 #include "oct_primitives.h"
 #include "oct_type.h"
+#include "oct_type_pointers.h"
 #include "oct_arraytype.h"
 #include "oct_pointertype.h"
 #include "oct_u8array.h"
@@ -34,19 +35,18 @@ static oct_Bool bind_type(oct_Context* ctx, oct_BNamespace ns, const char* name,
 	oct_OString str;
 	oct_OSymbol sym;
 	oct_OObjectOption val;
-	oct_BType btype;
+    oct_OType otype;
 	
-	btype.ptr = ctx->rt->builtInTypes.Type;
-	val.variant = OCT_OBJECTOPTION_OBJECT;
-
 	if(!oct_String_createOwnedFromCString(ctx, name, &str)) return oct_False;
-	if(!oct_OSymbol_alloc(ctx, str, &sym)) return oct_False;
+	if(!oct_Symbol_createOwned(ctx, str, &sym)) return oct_False;
 	// TODO: Special case when binding types and functions?
 	// They should not really be stored as owned, or at least not be copied like bound values
 	// when looked up and used locally.
-	if(!oct_Any_setPtrKind(ctx, &val.any, OCT_POINTER_OWNED)) return oct_False;
-	if(!oct_Any_setType(ctx, &val.any, btype)) return oct_False;
-	if(!oct_Any_setPtr(ctx, &val.any, type)) return oct_False;
+    otype.ptr = type;
+    val.variant = OCT_OBJECTOPTION_OBJECT;
+    if(!oct_Type_asObject(ctx, otype, &val.object)) {
+        return oct_False;
+    }
 	return oct_Namespace_bind(ctx, ns, sym, val);
 }
 
@@ -112,7 +112,6 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	_oct_String_initType(mainCtx);
 	_oct_Nothing_initType(mainCtx);
 	_oct_Symbol_initType(mainCtx);
-	_oct_Any_initType(mainCtx);
 	_oct_NamespaceBinding_initType(mainCtx);
 	_oct_ANamespaceBinding_initType(mainCtx);
 	_oct_OANamespaceBinding_initType(mainCtx);
@@ -125,7 +124,7 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	_oct_OABFunction_initType(mainCtx);
 	_oct_AChar_initType(mainCtx);
 	_oct_OAChar_initType(mainCtx);
-    _OCT_OOBJECTOPTION_initType(mainCtx);
+    _oct_OObjectOption_initType(mainCtx);
     _oct_OString_initType(mainCtx);
 
 	//_oct_ReadResult_initType(mainCtx);
@@ -134,7 +133,7 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	// *** 3. Create octarine namespace.
 
 	oct_String_createOwnedFromCString(mainCtx, "octarine", &str);
-	oct_OSymbol_alloc(mainCtx, str, &sym);
+	oct_Symbol_createOwned(mainCtx, str, &sym);
 	oct_Namespace_create(mainCtx, sym, &octarine);
 	mainCtx->ns = octarine.ptr;
 
@@ -176,9 +175,6 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	bind_type(mainCtx, octarine, "~+U8", rt->builtInTypes.OAU8);
 	bind_type(mainCtx, octarine, "OListOption", rt->builtInTypes.OListOption);
 	bind_type(mainCtx, octarine, "Nothing", rt->builtInTypes.Nothing);
-	bind_type(mainCtx, octarine, "Any", rt->builtInTypes.Any);
-	bind_type(mainCtx, octarine, "+Any", rt->builtInTypes.AAny);
-	bind_type(mainCtx, octarine, "~+Any", rt->builtInTypes.OAAny);
 	bind_type(mainCtx, octarine, "NamespaceBinding", rt->builtInTypes.NamespaceBinding);
 	bind_type(mainCtx, octarine, "+NamespaceBinding", rt->builtInTypes.ANamespaceBinding);
 	bind_type(mainCtx, octarine, "~+NamespaceBinding", rt->builtInTypes.OANamespaceBinding);
@@ -190,7 +186,6 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	bind_type(mainCtx, octarine, "Error", rt->builtInTypes.Error);
 	bind_type(mainCtx, octarine, "~Error", rt->builtInTypes.OError);
 	bind_type(mainCtx, octarine, "ErrorOption", rt->builtInTypes.ErrorOption);
-    bind_type(mainCtx, octarine, "AnyOption", rt->builtInTypes.AnyOption);
 
 	return rt;
 }

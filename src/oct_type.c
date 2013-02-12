@@ -55,7 +55,7 @@ oct_Bool _oct_OABType_initType(struct oct_Context* ctx) {
 
 oct_Bool oct_OABType_alloc(struct oct_Context* ctx, oct_Uword size, oct_OABType* out_result) {
 	oct_Uword i;
-    if(!oct_ExchangeHeap_alloc(ctx, sizeof(oct_ABType) + (sizeof(oct_BType) * size), (void**)&out_result->ptr)) {
+    if(!oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_ABType) + (sizeof(oct_BType) * size), (void**)&out_result->ptr)) {
         return oct_False;
     }
 	out_result->ptr->size = size;
@@ -320,12 +320,10 @@ static oct_Bool findEmbeddedPointers(oct_Context* ctx, oct_Type* type, void* obj
 	Pointer* ptr;
 	Variadic* var;
 	Array* arr;
-    oct_Any* any;
 	oct_Uword i;
 	oct_AField* fields;
 	FieldPointer fp;
 	oct_Uword elemSize;
-    oct_BType bt;
 
 	switch(type->variant) {
 	case OCT_TYPE_PROTO:
@@ -345,26 +343,13 @@ static oct_Bool findEmbeddedPointers(oct_Context* ctx, oct_Type* type, void* obj
 		offset += sizeof(oct_Uword);
 		return findEmbeddedPointers(ctx, type->variadicType.types.ptr->data[var->variant].ptr, (void*)&var->Union[0], pointerArray, offset);
 	case OCT_TYPE_STRUCT:
-        if(ctx->rt->builtInTypes.Any == type) {
-            // Special case for Any
-            any = (oct_Any*)object;
-            oct_Any_getPtr(ctx, *any, &fp.value);
-            oct_Any_getType(ctx, *any, &bt);
-            fp.type = bt.ptr;
-            oct_Any_getPtrKind(ctx, *any, &fp.ptrKind);
-            fp.offset = offset + sizeof(oct_Uword);
-            return FieldPointerArray_Add(ctx, pointerArray, fp);
-        }
-        else {
-            // General struct case
-            fields = type->structType.fields.ptr;
-            for(i = 0; i < fields->size; ++i) {
-                if(!findEmbeddedPointers(ctx, fields->data[i].type.ptr, (void*)(((char*)object) + fields->data[i].offset), pointerArray, offset + fields->data[i].offset)) {
-                    return oct_False;
-                }
+        fields = type->structType.fields.ptr;
+        for(i = 0; i < fields->size; ++i) {
+            if(!findEmbeddedPointers(ctx, fields->data[i].type.ptr, (void*)(((char*)object) + fields->data[i].offset), pointerArray, offset + fields->data[i].offset)) {
+                return oct_False;
             }
-            return oct_True;
         }
+        return oct_True;
 	case OCT_TYPE_FIXED_SIZE_ARRAY:
 		elemSize = getTypeSize(type->fixedSizeArray.elementType.ptr);
 		for(i = 0; i < type->fixedSizeArray.size; ++i) {
@@ -490,7 +475,7 @@ static oct_Bool copyObjectOwned(oct_Context* ctx, oct_Type* type, void* object, 
 		return oct_False;
 	}
 	else {
-		if(!oct_ExchangeHeap_alloc(ctx, size, copy)) {
+		if(!oct_ExchangeHeap_allocRaw(ctx, size, copy)) {
 			return oct_False;
 		}
 		memcpy(*copy, object, size);
@@ -500,9 +485,14 @@ static oct_Bool copyObjectOwned(oct_Context* ctx, oct_Type* type, void* object, 
 
 #define CHECK(X) if(!X) goto error;
 
+typedef struct VTable {
+    oct_BType type;
+    oct_U8 data[];
+} VTable;
+
 // Does a deep copy of an object graph and returns an owned copy
 // Will fail if the given graph contains any non-copyable objects.
-oct_Bool oct_Type_deepCopyGraphOwned(struct oct_Context* ctx, oct_Any root, oct_Any* out_ownedCopy) {
+oct_Bool oct_Type_deepCopyGraphOwned(struct oct_Context* ctx, oct_BObject root, oct_OObject* out_ownedCopy) {
 	PointerTranslationTable ptt;
 	FrameStack stack;
 	FrameStackEntry currentFrame;
@@ -521,8 +511,8 @@ oct_Bool oct_Type_deepCopyGraphOwned(struct oct_Context* ctx, oct_Any root, oct_
 	CHECK(FrameStack_Create(ctx, &stack, 500));
 	CHECK(PointerTranslationTable_Create(ctx, 1000, &ptt));
 
-    CHECK(oct_Any_getPtr(ctx, root, &currentFrame.object));
-	CHECK(oct_Any_getType(ctx, root, &bt));
+    object = root.object.object;
+    type = ((VTable*)root.object.vtable)->type.ptr;
 	currentFrame.type = bt.ptr;
 	currentFrame.fieldIndex = 0;
     CHECK(copyObjectOwned(ctx, currentFrame.type, currentFrame.object, &currentFrame.copy));

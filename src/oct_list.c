@@ -21,7 +21,7 @@ oct_Bool _oct_List_initType(struct oct_Context* ctx) {
 		return result;
 	}
 	t->structType.fields.ptr->data[0].offset = offsetof(oct_List, data);
-	t->structType.fields.ptr->data[0].type.ptr = ctx->rt->builtInTypes.AnyOption;
+	t->structType.fields.ptr->data[0].type.ptr = ctx->rt->builtInTypes.OObjectOption;
 	t->structType.fields.ptr->data[1].offset = offsetof(oct_List, next);
 	t->structType.fields.ptr->data[1].type.ptr = ctx->rt->builtInTypes.OListOption;
 	return oct_True;

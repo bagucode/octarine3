@@ -20,7 +20,7 @@ oct_Bool _oct_NamespaceBinding_initType(struct oct_Context* ctx) {
 	t->structType.fields.ptr->data[0].offset = offsetof(oct_NamespaceBinding, sym);
 	t->structType.fields.ptr->data[0].type.ptr = ctx->rt->builtInTypes.Symbol;
 	t->structType.fields.ptr->data[1].offset = offsetof(oct_NamespaceBinding, obj);
-	t->structType.fields.ptr->data[1].type.ptr = ctx->rt->builtInTypes.AnyOption;
+	t->structType.fields.ptr->data[1].type.ptr = ctx->rt->builtInTypes.OObjectOption;
 	return oct_True;
 }
 

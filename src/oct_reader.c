@@ -417,7 +417,7 @@ static oct_Bool readList(struct oct_Context* ctx, oct_BReader reader, oct_Charst
 			out_result->errorCode = content.errorCode;
 			goto end;
 		}
-		CHECK(oct_List_append(ctx, list, content.result));
+		CHECK(oct_List_append(ctx, list, content.result.object));
 	}
 	// TODO: error if EOF before )
 	// discard ending )

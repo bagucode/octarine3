@@ -63,7 +63,7 @@ oct_Bool oct_String_ctorCharArray(struct oct_Context* ctx, oct_String* str, oct_
 }
 
 oct_Bool oct_OString_createFromCharArray(struct oct_Context* ctx, oct_OAChar chars, oct_Uword idx, oct_Uword len, oct_OString* out_str) {
-    if(!oct_ExchangeHeap_alloc(ctx, sizeof(oct_String), (void**)&out_str->ptr)) {
+    if(!oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_String), (void**)&out_str->ptr)) {
         return oct_False;
     }
 	if(!oct_String_ctorCharArray(ctx, out_str->ptr, chars, idx, len)) {
@@ -80,7 +80,7 @@ oct_Bool oct_String_createOwnedFromCString(struct oct_Context* ctx, const char* 
 
 oct_Bool oct_String_createOwnedFromCStringLen(struct oct_Context* ctx, const char* cstr, oct_Uword strLen, oct_OString* out_str) {
 	oct_Bool result;
-    if(!oct_ExchangeHeap_alloc(ctx, sizeof(oct_String), (void**)&out_str->ptr)) {
+    if(!oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_String), (void**)&out_str->ptr)) {
         return oct_False;
     }
 	out_str->ptr->size = strLen; // TODO: proper size in unicode code points

@@ -3,13 +3,23 @@
 
 #include <stdlib.h>
 
-oct_Bool oct_ExchangeHeap_alloc(struct oct_Context* ctx, oct_Uword size, void** out_box) {
+oct_Bool oct_ExchangeHeap_allocRaw(struct oct_Context* ctx, oct_Uword size, void** out_box) {
 	*out_box = malloc(size);
 	if(!*out_box) {
 		oct_Context_setErrorOOM(ctx);
 		return oct_False;
 	}
 	return oct_True;
+}
+
+oct_Bool oct_ExchangeHeap_alloc(struct oct_Context* ctx, oct_BType type, void** out_box) {
+//	*out_box = malloc(size);
+//	if(!*out_box) {
+//		oct_Context_setErrorOOM(ctx);
+//		return oct_False;
+//	}
+//	return oct_True;
+    return oct_True;
 }
 
 oct_Bool oct_ExchangeHeap_free(struct oct_Context* ctx, void* box) {

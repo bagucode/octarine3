@@ -60,10 +60,6 @@ typedef struct oct_BuiltInTypes {
 	struct oct_Type* Reader;
 	struct oct_Type* ReadResult;
 	struct oct_Type* Nothing;
-	struct oct_Type* Any;
-	struct oct_Type* AAny;
-	struct oct_Type* OAAny;
-	struct oct_Type* AnyOption;
 	struct oct_Type* NamespaceBinding;
 	struct oct_Type* ANamespaceBinding;
 	struct oct_Type* OANamespaceBinding;
@@ -80,6 +76,12 @@ typedef struct oct_BuiltInTypes {
 	struct oct_Type* Error;
 	struct oct_Type* OError;
 	struct oct_Type* ErrorOption;
+    struct oct_Type* Object;
+    struct oct_Type* OObject;
+    struct oct_Type* MObject;
+    struct oct_Type* BObject;
+    struct oct_Type* OObjectOption;
+    struct oct_Type* BObjectOption;
 	/* TODO: TYPE HASH! Structurally equal types should be same! */
 } oct_BuiltInTypes;
 
