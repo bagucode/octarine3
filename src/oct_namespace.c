@@ -111,15 +111,6 @@ oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_OSym
     oct_Uword ptrKind;
 	oct_OANamespaceBinding newBindings;
     
-    // Can't bind borrowed values because they may reside on the stack and NS bindings are global.
-    if(val.variant == OCT_OBJECTOPTION_OBJECT) {
-        CHECK(oct_Any_getPtrKind(ctx, val.any, &ptrKind));
-        if(ptrKind != OCT_POINTER_OWNED) {
-        	CHECK(oct_Context_setErrorWithCMessage(ctx, "Can only bind owned values"));
-            return oct_False;
-        }
-    }
-
 	// TODO: lock bindings
 	for(i = 0; i < ns.ptr->bindings.ptr->size; ++i) {
 		if(ns.ptr->bindings.ptr->bindings[i].sym.variant == OCT_SYMBOLOPTION_NOTHING) {

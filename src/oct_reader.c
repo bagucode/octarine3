@@ -220,8 +220,8 @@ static oct_Bool readI32(struct oct_Context* ctx, oct_BReader reader, oct_Charstr
 		return readF32(ctx, reader, source, out_result);
 	}
 	// OK
-	out_result->variant = OCT_READRESULT_ANY;
-	if(!oct_ExchangeHeap_alloc(ctx, sizeof(oct_I32), &box)) {
+	out_result->variant = OCT_READRESULT_OBJECT;
+	if(!oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_I32), &box)) {
 		goto error;
 	}
 	bt.ptr = ctx->rt->builtInTypes.I32;
@@ -275,8 +275,8 @@ static oct_Bool readF32(struct oct_Context* ctx, oct_BReader reader, oct_Charstr
 		return readSymbol(ctx, reader, source, out_result);
 	}
 	// OK
-	out_result->variant = OCT_READRESULT_ANY;
-	if(!oct_ExchangeHeap_alloc(ctx, sizeof(oct_F32), &box)) {
+	out_result->variant = OCT_READRESULT_OBJECT;
+	if(!oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_F32), &box)) {
 		goto error;
 	}
 	bt.ptr = ctx->rt->builtInTypes.F32;
@@ -316,8 +316,8 @@ static oct_Bool readString(struct oct_Context* ctx, oct_BReader reader, oct_Char
 	// discard ending "
 	DISCARD_CHAR;
 
-	out_result->variant = OCT_READRESULT_ANY;
-	if(!oct_ExchangeHeap_alloc(ctx, sizeof(oct_String), &box)) {
+	out_result->variant = OCT_READRESULT_OBJECT;
+	if(!oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_String), &box)) {
 		goto error;
 	}
 	if(!oct_String_ctorCharArray(ctx, (oct_String*)box, reader.ptr->readBuffer, 0, reader.ptr->nchars)) {
@@ -347,8 +347,8 @@ static oct_Bool readSymbol(struct oct_Context* ctx, oct_BReader reader, oct_Char
 	oct_BType bt;
 	oct_OString name;
 
-	out_result->variant = OCT_READRESULT_ANY;
-	if(!oct_ExchangeHeap_alloc(ctx, sizeof(oct_Symbol), &box)) {
+	out_result->variant = OCT_READRESULT_OBJECT;
+	if(!oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_Symbol), &box)) {
 		goto error;
 	}
 	if(!oct_OString_createFromCharArray(ctx, reader.ptr->readBuffer, 0, reader.ptr->nchars, &name)) {
@@ -389,7 +389,7 @@ static oct_Bool readList(struct oct_Context* ctx, oct_BReader reader, oct_Charst
 
 	list.ptr = NULL;
 
-	out_result->variant = OCT_READRESULT_ANY;
+	out_result->variant = OCT_READRESULT_OBJECT;
 	CHECK(oct_List_createOwned(ctx, &olist));
 	list.ptr = olist.ptr;
 	bt.ptr = ctx->rt->builtInTypes.List;
@@ -439,13 +439,13 @@ end:
 
 static oct_Bool readVector(struct oct_Context* ctx, oct_BReader reader, oct_Charstream source, oct_ReadResult* out_result) {
 	reader_clearChars(reader);
-	out_result->variant = OCT_READRESULT_ANY;
+	out_result->variant = OCT_READRESULT_OBJECT;
 	return oct_True;
 }
 
 static oct_Bool readMap(struct oct_Context* ctx, oct_BReader reader, oct_Charstream source, oct_ReadResult* out_result) {
 	reader_clearChars(reader);
-	out_result->variant = OCT_READRESULT_ANY;
+	out_result->variant = OCT_READRESULT_OBJECT;
 	return oct_True;
 }
 

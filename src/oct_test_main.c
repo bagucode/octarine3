@@ -45,7 +45,7 @@ static void StringTests() {
 	TEST(oct_BStringStream_asCharStream(ctx, bss, &charStream));
 	reader.ptr = ctx->reader; // TODO: method for this
 	TEST(oct_Reader_read(ctx, reader, charStream, &readResult));
-	TEST(readResult.variant == OCT_READRESULT_ANY);
+	TEST(readResult.variant == OCT_READRESULT_OBJECT);
 	TEST(oct_Any_stringp(ctx, readResult.result, &result));
 	TEST(result);
 	TEST(oct_Any_getPtr(ctx, readResult.result, (void**)&bs2.ptr));
