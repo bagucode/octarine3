@@ -95,8 +95,7 @@ oct_Bool oct_String_createOwnedFromCStringLen(struct oct_Context* ctx, const cha
 
 oct_Bool oct_String_destroyOwned(struct oct_Context* ctx, oct_OString str) {
 	oct_Bool result = oct_String_dtor(ctx, str.ptr);
-    result = result && oct_ExchangeHeap_free(ctx, str.ptr);
-	return result;
+    return oct_ExchangeHeap_free(ctx, str.ptr) && result;
 }
 
 oct_Bool oct_String_ctorCStringLen(struct oct_Context* ctx, oct_String* str, const char* cstr, oct_Uword strlen) {

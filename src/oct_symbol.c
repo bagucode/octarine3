@@ -53,15 +53,18 @@ oct_Bool oct_Symbol_ctor(struct oct_Context* ctx, oct_Symbol* sym, oct_OString n
 }
 
 oct_Bool oct_Symbol_dtor(struct oct_Context* ctx, oct_Symbol* sym) {
-	oct_Bool result = oct_String_dtor(ctx, sym->name.ptr);
-    oct_ExchangeHeap_free(ctx, sym->name.ptr);
-	return result;
+	return oct_String_destroyOwned(ctx, sym->name);
 }
 
-oct_Bool oct_OSymbol_alloc(struct oct_Context* ctx, oct_OString name, oct_OSymbol* out_result) {
-    if(!oct_ExchangeHeap_alloc(ctx, sizeof(oct_Symbol), (void**)&out_result->ptr)) {
+oct_Bool oct_Symbol_createOwned(struct oct_Context* ctx, oct_OString name, oct_OSymbol* out_result) {
+    if(!oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_Symbol), (void**)&out_result->ptr)) {
         return oct_False;
     }
 	out_result->ptr->name = name;
 	return oct_True;
+}
+
+oct_Bool oct_Symbol_destroyOwned(struct oct_Context* ctx, oct_OSymbol sym) {
+	oct_Bool result = oct_Symbol_dtor(ctx, sym.ptr);
+	return oct_ExchangeHeap_free(ctx, sym.ptr) && result;
 }

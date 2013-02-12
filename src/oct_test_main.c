@@ -45,7 +45,7 @@ static void StringTests() {
 	TEST(oct_BStringStream_asCharStream(ctx, bss, &charStream));
 	reader.ptr = ctx->reader; // TODO: method for this
 	TEST(oct_Reader_read(ctx, reader, charStream, &readResult));
-	TEST(readResult.variant == OCT_READRESULT_ANY);
+	TEST(readResult.variant == OCT_READRESULT_OBJECT);
 	TEST(oct_Any_stringp(ctx, readResult.result, &result));
 	TEST(result);
 	TEST(oct_Any_getPtr(ctx, readResult.result, (void**)&bs2.ptr));
@@ -68,8 +68,8 @@ static void NamespaceTests() {
 	oct_Runtime* rt;
 	oct_Context* ctx;
 	oct_BNamespace ns;
-	oct_AnyOption val;
-	oct_AnyOption lookedUp;
+	oct_OObjectOption val;
+	oct_OObjectOption lookedUp;
 	oct_OSymbol sym;
 	oct_BSymbol bsym;
 	oct_OString name;
@@ -88,7 +88,7 @@ static void NamespaceTests() {
 	TEST(oct_String_createOwnedFromCString(ctx, "theName", &name));
 	TEST(oct_String_createOwnedFromCString(ctx, "theValue", &valStr));
 	TEST(oct_OSymbol_alloc(ctx, name, &sym));
-	val.variant = OCT_ANYOPTION_ANY;
+	val.variant = OCT_OBJECTOPTION_OBJECT;
 	TEST(oct_Any_setPtrKind(ctx, &val.any, OCT_POINTER_OWNED));
 	TEST(oct_Any_setPtr(ctx, &val.any, valStr.ptr));
 	type.ptr = ctx->rt->builtInTypes.String;
@@ -111,7 +111,7 @@ static void defTest() {
 	oct_Runtime* rt;
 	oct_Context* ctx;
 	oct_BNamespace ns;
-	oct_AnyOption lookedUp;
+	oct_OObjectOption lookedUp;
 	oct_OString str;
 	oct_BString bs1;
 	oct_BString bs2;
@@ -124,7 +124,7 @@ static void defTest() {
 	oct_BSymbol bsym;
 	oct_OSymbol osym;
 	oct_Bool result;
-	oct_AnyOption evalResult;
+	oct_OObjectOption evalResult;
 	void* outStr;
 	const char* error;
 
@@ -194,7 +194,7 @@ int main(int argc, char** argv) {
 	oct_BString bstr;
 	oct_OStringStream ss;
 	oct_BStringStream bss;
-	oct_AnyOption evalResult;
+	oct_OObjectOption evalResult;
 	reader.ptr = ctx->reader;
 
 	oct_String_createOwnedFromCString(ctx, "- . ! ? 1 2 3 -37 1.5 0.34 .34 1e16 -0.8 -.8 -.main .main -main { [ hello \"hej\" \"hell o workdl\" (this is a (nested) \"list\" of 8 readables ) ()", &str);
@@ -214,7 +214,7 @@ int main(int argc, char** argv) {
 		}
 		oct_Compiler_eval(ctx, rr.result, &evalResult);
 		oct_ReadResult_dtor(ctx, &rr);
-		if(evalResult.variant == OCT_ANYOPTION_ANY) {
+		if(evalResult.variant == OCT_OBJECTOPTION_OBJECT) {
 			oct_Any_dtor(ctx, evalResult.any);
 		}
 	};

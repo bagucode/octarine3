@@ -5,6 +5,7 @@
 #include "oct_runtime.h"
 #include "oct_pointertype.h"
 #include "oct_list.h"
+#include "oct_object.h"
 
 // DEBUG
 #include <stdio.h>
@@ -29,7 +30,7 @@
 // protocol -> create protocol
 // Pointer types are implicitly created for each type
 
-#define CHECK(X) if(!X) return oct_False;
+#define CHECK(X) if(!X) goto error;
 
 static oct_Bool is_symbol(oct_Context* ctx, oct_BType t) {
 	return ctx->rt->builtInTypes.Symbol == t.ptr;
@@ -43,115 +44,153 @@ static oct_Bool is_list(oct_Context* ctx, oct_BType t) {
 	return ctx->rt->builtInTypes.List == t.ptr;
 }
 
-static oct_Bool eval_sym(struct oct_Context* ctx, oct_Any asym, oct_AnyOption* out_result) {
+static oct_Bool eval_sym(struct oct_Context* ctx, oct_OSymbol sym, oct_OObjectOption* out_result) {
 	oct_BNamespace ns;
 	oct_BSymbol bsym;
+	oct_Bool result = oct_True;
 
 	printf("eval_sym\n");
 
-    CHECK(oct_Any_getPtr(ctx, asym, (void**)&bsym.ptr));
 	ns.ptr = ctx->ns;
+	bsym.ptr = sym.ptr;
 	CHECK(oct_Namespace_lookup(ctx, ns, bsym, out_result));
-	return oct_Any_dtor(ctx, asym);
+	goto end;
+error:
+	result = oct_False;
+end:
+	return oct_Symbol_destroyOwned(ctx, sym) && result;
 }
 
-static oct_Bool eval_def(struct oct_Context* ctx, oct_Any form, oct_AnyOption* out_result) {
+static oct_Bool eval_def(struct oct_Context* ctx, oct_OList olist, oct_OObjectOption* out_result) {
 	// (def <symbol>)
 	// (def <symbol> <value>)
 	oct_BNamespace ns;
 	oct_Uword count;
 	oct_OSymbol sym;
-    oct_BList list;
-    oct_BListOption listOpt;
-    oct_AnyOption tmp;
+    oct_BList blist;
+    oct_OListOption listOpt;
+    oct_OObjectOption tmp;
+	oct_BObject bob;
 	oct_Bool b;
+	oct_Bool result = oct_True;
 
 	printf("eval_def\n");
     
-    CHECK(oct_Any_getPtr(ctx, form, (void**)&list.ptr));
-    CHECK(oct_List_count(ctx, list, &count));
+	blist.ptr = olist.ptr;
+    CHECK(oct_List_count(ctx, blist, &count));
 	if(count < 2 || count > 3) {
-		CHECK(oct_Context_setErrorWithCMessage(ctx, "Wrong number of arguments to def"));
-		return oct_False;
+		oct_Context_setErrorWithCMessage(ctx, "Wrong number of arguments to def");
+		goto error;
 	}
     // Drop "def"
-    CHECK(oct_List_rest(ctx, list, &listOpt));
-    list.ptr = listOpt.list.ptr;
-    CHECK(oct_List_first(ctx, list, &tmp));
-	CHECK(oct_Any_symbolp(ctx, tmp.any, &b));
-    if(!b) {
-    	CHECK(oct_Context_setErrorWithCMessage(ctx, "First argument to def must be a Symbol"));
-        return oct_False;
+    CHECK(oct_List_rest(ctx, blist, &listOpt));
+    olist.ptr = listOpt.list.ptr;
+    CHECK(oct_List_first(ctx, olist, &tmp, &olist));
+	bob.object = tmp.object.object;
+	CHECK(oct_Object_symbolp(ctx, bob, &b));
+	if(!b) {
+    	oct_Context_setErrorWithCMessage(ctx, "First argument to def must be a Symbol");
+		goto error;
     }
-    CHECK(oct_Any_getPtr(ctx, tmp.any, (void**)&sym.ptr));
+	sym.ptr = (oct_Symbol*)bob.object.object;
 	// eval second argument if we have one
 	if(count == 3) {
-        CHECK(oct_List_nth(ctx, list, 1, &tmp));
-		CHECK(oct_Compiler_eval(ctx, tmp.any, out_result));
+        CHECK(oct_List_nth(ctx, olist, 1, &tmp, &olist));
+		CHECK(oct_Compiler_eval(ctx, tmp.object, out_result));
 	}
 	else {
-		out_result->variant = OCT_ANYOPTION_NOTHING;
+		out_result->variant = OCT_OBJECTOPTION_NOTHING;
 	}
-	// bind in current namespace
-	ns.ptr = ctx->ns;
-	return oct_Namespace_bind(ctx, ns, sym, *out_result);
+
+	goto end;
+error:
+	result = oct_False;
+end:
+	// clean up
+	result = oct_List_destroyOwned(ctx, olist) && result;
+	if(result) {
+		// bind in current namespace
+		ns.ptr = ctx->ns;
+		result = oct_Namespace_bind(ctx, ns, sym, *out_result) && result;
+	}
+	return result;
 }
 
-static oct_Bool eval_list(oct_Context* ctx, oct_Any alist, oct_AnyOption* out_result) {
-	oct_BList list;
+static oct_Bool eval_list(oct_Context* ctx, oct_OList olist, oct_OObjectOption* out_result) {
 	oct_Bool eq;
-	oct_AnyOption aopt;
-	oct_Symbol* sym;
+	oct_BObjectOption bopt;
+	oct_BObject bob;
 	oct_BString bstr;
+	oct_BList blist;
+	oct_BSymbol bsym;
+	oct_Bool result = oct_True;
 
-	CHECK(oct_Any_getPtr(ctx, alist, (void**)&list.ptr));
-	CHECK(oct_List_emptyp(ctx, list, &eq));
+	CHECK(oct_List_emptyp(ctx, blist, &eq));
 	if(eq) {
-		out_result->variant = OCT_ANYOPTION_ANY;
-		CHECK(oct_Any_assign(ctx, alist, &out_result->any));
-		return oct_Any_dtor(ctx, alist);
+		out_result->variant = OCT_OBJECTOPTION_OBJECT;
+		return oct_List_asObject(ctx, olist, &out_result->object);
 	}
-	CHECK(oct_List_first(ctx, list, &aopt));
-	if(aopt.variant == OCT_ANYOPTION_ANY) {
-		CHECK(oct_Any_symbolp(ctx, aopt.any, &eq));
+	blist.ptr = olist.ptr;
+	CHECK(oct_List_borrowFirst(ctx, blist, &bopt));
+	if(bopt.variant == OCT_OBJECTOPTION_OBJECT) {
+		bob.object = bopt.object.object;
+		CHECK(oct_Object_symbolp(ctx, bob, &eq));
 		// if the first element of the list is not a quote symbol then this is a function call
 		if(eq) {
-			CHECK(oct_Any_getPtr(ctx, aopt.any, (void**)&sym));
-			bstr.ptr = sym->name.ptr;
+			bsym.ptr = (oct_Symbol*)bob.object.object;
+			bstr.ptr = bsym.ptr->name.ptr;
 			// TODO: dispatch table for built ins
 			CHECK(oct_BStringCString_equals(ctx, bstr, "def", &eq));
 			if(eq) {
-				return eval_def(ctx, alist, out_result);
+				return eval_def(ctx, olist, out_result);
 			}
 		}
 	}
-	return oct_True; // TODO: Finish implementing this function :)
+
+	goto end;
+error:
+	result = oct_False;
+end:
+	return oct_List_destroyOwned(ctx, olist) && result; // TODO: Finish implementing this function :)
 }
 
-static oct_Bool eval_string(oct_Context* ctx, oct_Any astr, oct_AnyOption* out_result) {
-		out_result->variant = OCT_ANYOPTION_ANY;
-		CHECK(oct_Any_assign(ctx, astr, &out_result->any));
-		return oct_Any_dtor(ctx, astr);
+static oct_Bool eval_string(oct_Context* ctx, oct_OString ostr, oct_OObjectOption* out_result) {
+	out_result->variant = OCT_OBJECTOPTION_OBJECT;
+	return oct_String_asObject(ctx, ostr, &out_result->object);
 }
 
-oct_Bool oct_Compiler_eval(struct oct_Context* ctx, oct_Any form, oct_AnyOption* out_result) {
-	oct_AnyOption aopt;
+typedef struct VTable {
+	oct_BType type;
+	oct_U8 data[];
+} VTable;
+
+oct_Bool oct_Compiler_eval(struct oct_Context* ctx, oct_OObject form, oct_OObjectOption* out_result) {
 	oct_BType t;
+	oct_BObject bob;
+	oct_OSymbol sym;
+	oct_OString str;
+	oct_OList lst;
+	oct_Bool result = oct_True;
 
-	CHECK(oct_Any_getType(ctx, form, &t));
+	bob.object = form.object;
 
-	aopt.variant = OCT_ANYOPTION_ANY;
-	aopt.any = form;
-
+	t = ((VTable*)form.object.vtable)->type;
     if(is_symbol(ctx, t)) {
-        return eval_sym(ctx, form, out_result);
+		sym.ptr = (oct_Symbol*)form.object.object;
+        return eval_sym(ctx, sym, out_result);
     }
 	else if(is_list(ctx, t)) {
-		return eval_list(ctx, form, out_result);
+		lst.ptr = (oct_List*)form.object.object;
+		return eval_list(ctx, lst, out_result);
 	}
 	else if(is_string(ctx, t)) {
-		return eval_string(ctx, form, out_result);
+		str.ptr = (oct_String*)form.object.object;
+		return eval_string(ctx, str, out_result);
 	}
 
-	return oct_True;  // TODO: Finish implementing this function :)
+	goto end;
+error:
+	result = oct_False;
+end:
+	return result;  // TODO: Finish implementing this function :)
 }

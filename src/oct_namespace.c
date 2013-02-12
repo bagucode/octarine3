@@ -85,7 +85,7 @@ oct_Bool oct_Namespace_create(struct oct_Context* ctx, oct_OSymbol name, oct_BNa
 	for(i = 0; i < 10; ++i) {
 		newNode->ns.bindings.ptr->bindings[i].sym.variant = OCT_SYMBOLOPTION_NOTHING;
 		newNode->ns.bindings.ptr->bindings[i].sym.nothing.dummy = 0;
-		newNode->ns.bindings.ptr->bindings[i].obj.variant = OCT_ANYOPTION_NOTHING;
+		newNode->ns.bindings.ptr->bindings[i].obj.variant = OCT_OBJECTOPTION_NOTHING;
 		newNode->ns.bindings.ptr->bindings[i].obj.nothing.dummy = 0;
 	}
 
@@ -105,21 +105,12 @@ oct_Bool oct_Namespace_create(struct oct_Context* ctx, oct_OSymbol name, oct_BNa
 	return oct_True;
 }
 
-oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_OSymbol sym, oct_AnyOption val) {
+oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_OSymbol sym, oct_OObjectOption val) {
 	oct_Uword i, j;
 	oct_Uword newSize;
     oct_Uword ptrKind;
 	oct_OANamespaceBinding newBindings;
     
-    // Can't bind borrowed values because they may reside on the stack and NS bindings are global.
-    if(val.variant == OCT_ANYOPTION_ANY) {
-        CHECK(oct_Any_getPtrKind(ctx, val.any, &ptrKind));
-        if(ptrKind != OCT_POINTER_OWNED) {
-        	CHECK(oct_Context_setErrorWithCMessage(ctx, "Can only bind owned values"));
-            return oct_False;
-        }
-    }
-
 	// TODO: lock bindings
 	for(i = 0; i < ns.ptr->bindings.ptr->size; ++i) {
 		if(ns.ptr->bindings.ptr->bindings[i].sym.variant == OCT_SYMBOLOPTION_NOTHING) {
@@ -143,7 +134,7 @@ oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_OSym
 	for(j = i; j < newSize; ++j) {
 		newBindings.ptr->bindings[j].sym.variant = OCT_SYMBOLOPTION_NOTHING;
 		newBindings.ptr->bindings[j].sym.nothing.dummy = 0;
-		newBindings.ptr->bindings[j].obj.variant = OCT_ANYOPTION_NOTHING;
+		newBindings.ptr->bindings[j].obj.variant = OCT_OBJECTOPTION_NOTHING;
 		newBindings.ptr->bindings[j].obj.nothing.dummy = 0;
 	}
 
@@ -159,7 +150,7 @@ ok:
 	return oct_True;
 }
 
-oct_Bool oct_Namespace_lookup(struct oct_Context* ctx, oct_BNamespace ns, oct_BSymbol sym, oct_AnyOption* out_val) {
+oct_Bool oct_Namespace_lookup(struct oct_Context* ctx, oct_BNamespace ns, oct_BSymbol sym, oct_OObjectOption* out_val) {
 	oct_Uword i;
 	oct_BString n1;
 	oct_BString n2;
@@ -184,7 +175,7 @@ oct_Bool oct_Namespace_lookup(struct oct_Context* ctx, oct_BNamespace ns, oct_BS
 	}
 
 	// TODO: unlock bindings
-	out_val->variant = OCT_ANYOPTION_NOTHING;
+	out_val->variant = OCT_OBJECTOPTION_NOTHING;
 	out_val->nothing.dummy = 0;
 	return oct_True;
 }

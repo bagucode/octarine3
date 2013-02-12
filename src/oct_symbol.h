@@ -40,6 +40,7 @@ oct_Bool _oct_OSymbolOption_initType(struct oct_Context* ctx);
 
 oct_Bool oct_Symbol_ctor(struct oct_Context* ctx, oct_Symbol* sym, oct_OString name);
 oct_Bool oct_Symbol_dtor(struct oct_Context* ctx, oct_Symbol* sym);
-oct_Bool oct_OSymbol_alloc(struct oct_Context* ctx, oct_OString name, oct_OSymbol* out_result);
+oct_Bool oct_Symbol_createOwned(struct oct_Context* ctx, oct_OString name, oct_OSymbol* out_result);
+oct_Bool oct_Symbol_destroyOwned(struct oct_Context* ctx, oct_OSymbol sym);
 
 #endif

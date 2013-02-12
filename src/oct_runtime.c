@@ -9,7 +9,7 @@
 #include "oct_string.h"
 #include "oct_symbol.h"
 #include "oct_namespace.h"
-#include "oct_any.h"
+#include "oct_object.h"
 #include "oct_context.h"
 #include "oct_reader.h"
 #include "oct_primitive_pointers.h"
@@ -33,11 +33,11 @@ static void alloc_builtIn(oct_Runtime* rt) {
 static oct_Bool bind_type(oct_Context* ctx, oct_BNamespace ns, const char* name, oct_Type* type) {
 	oct_OString str;
 	oct_OSymbol sym;
-	oct_AnyOption val;
+	oct_OObjectOption val;
 	oct_BType btype;
 	
 	btype.ptr = ctx->rt->builtInTypes.Type;
-	val.variant = OCT_ANYOPTION_ANY;
+	val.variant = OCT_OBJECTOPTION_OBJECT;
 
 	if(!oct_String_createOwnedFromCString(ctx, name, &str)) return oct_False;
 	if(!oct_OSymbol_alloc(ctx, str, &sym)) return oct_False;
@@ -125,7 +125,7 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	_oct_OABFunction_initType(mainCtx);
 	_oct_AChar_initType(mainCtx);
 	_oct_OAChar_initType(mainCtx);
-    _oct_AnyOption_initType(mainCtx);
+    _OCT_OOBJECTOPTION_initType(mainCtx);
     _oct_OString_initType(mainCtx);
 
 	//_oct_ReadResult_initType(mainCtx);

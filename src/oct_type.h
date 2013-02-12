@@ -1,7 +1,7 @@
 #ifndef oct_type
 #define oct_type
 
-#include "oct_any.h"
+#include "oct_object.h"
 #include "oct_primitives.h"
 #include "oct_prototype.h"
 #include "oct_variadictype.h"
@@ -41,10 +41,10 @@ oct_Bool _oct_Type_initType(struct oct_Context* ctx);
 
 // Does a deep copy of an object graph and returns an owned copy
 // Will fail if the given graph contains any non-copyable objects.
-oct_Bool oct_Type_deepCopyGraphOwned(struct oct_Context* ctx, oct_Any root, oct_Any* out_ownedCopy);
+oct_Bool oct_Type_deepCopyGraphOwned(struct oct_Context* ctx, oct_BObject root, oct_OObject* out_ownedCopy);
 // Does a deep copy of an object graph and returns a managed copy
 // Will fail if the given graph contains any non-copyable objects.
-oct_Bool oct_Type_deepCopyGraphManaged(struct oct_Context* ctx, oct_Any root, oct_Any* out_managedCopy);
+oct_Bool oct_Type_deepCopyGraphManaged(struct oct_Context* ctx, oct_BObject root, oct_MObject* out_managedCopy);
 
 
 #endif
