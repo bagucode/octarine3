@@ -3,6 +3,7 @@
 
 #include "oct_u8array.h"
 #include "oct_chararray.h"
+#include "oct_object.h"
 
 typedef struct oct_String {
 	oct_Uword size;
@@ -38,5 +39,8 @@ oct_Bool oct_String_destroyOwned(struct oct_Context* ctx, oct_OString str);
 
 oct_Bool oct_BString_equals(struct oct_Context* ctx, oct_BString x, oct_BString y, oct_Bool* out_result);
 oct_Bool oct_BStringCString_equals(struct oct_Context* ctx, oct_BString str, const char* cstr, oct_Bool* out_result);
+
+// Protocol casts
+oct_Bool oct_String_asObject(struct oct_Context* ctx, oct_OString str, oct_OObject* out_object);
 
 #endif

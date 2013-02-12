@@ -52,7 +52,7 @@ oct_Bool oct_Field_dtor(struct oct_Context* ctx, oct_Field* field) {
 
 oct_Bool oct_OAField_alloc(struct oct_Context* ctx, oct_Uword size, oct_OAField* out_result) {
 	oct_Uword i;
-    if(!oct_ExchangeHeap_alloc(ctx, sizeof(oct_AField) + (sizeof(oct_Field) * size), (void**)&out_result->ptr)) {
+    if(!oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_AField) + (sizeof(oct_Field) * size), (void**)&out_result->ptr)) {
         return oct_False;
     }
 

@@ -45,7 +45,7 @@ oct_Bool oct_Error_ctor(struct oct_Context* ctx, oct_OString message, oct_Error*
 }
 
 oct_Bool oct_Error_createOwned(struct oct_Context* ctx, oct_OString message, oct_OError* out_err) {
-	CHECK(oct_ExchangeHeap_alloc(ctx, sizeof(oct_Error), (void**)&out_err->ptr));
+	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_Error), (void**)&out_err->ptr));
 	out_err->ptr->message.ptr = message.ptr;
 	return oct_True;
 }

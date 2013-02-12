@@ -12,10 +12,13 @@
 struct oct_Context;
 
 oct_Bool _oct_Object_initType(struct oct_Context* ctx);
+
 oct_Bool _oct_BObject_initType(struct oct_Context* ctx);
 oct_Bool _oct_OObject_initType(struct oct_Context* ctx);
 oct_Bool _oct_MObject_initType(struct oct_Context* ctx);
+
 oct_Bool _oct_OObjectOption_initType(struct oct_Context* ctx);
+oct_Bool _oct_BObjectOption_initType(struct oct_Context* ctx);
 
 // Public
 
@@ -38,8 +41,8 @@ typedef struct oct_MObject {
 	oct_Object object;
 } oct_MObject;
 
-#define OCT_OOBJECTOPTION_NOTHING 0
-#define OCT_OOBJECTOPTION_OBJECT 1
+#define OCT_OBJECTOPTION_NOTHING 0
+#define OCT_OBJECTOPTION_OBJECT 1
 
 typedef struct oct_OObjectOption {
 	oct_Uword variant;
@@ -49,8 +52,12 @@ typedef struct oct_OObjectOption {
 	};
 } oct_OObjectOption;
 
-oct_Bool oct_Object_symbolp(struct oct_Context* ctx, oct_BObject obj, oct_Bool* out_bool);
-oct_Bool oct_Object_stringp(struct oct_Context* ctx, oct_BObject obj, oct_Bool* out_bool);
-oct_Bool oct_Object_listp(struct oct_Context* ctx, oct_BObject obj, oct_Bool* out_bool);
+typedef struct oct_BObjectOption {
+	oct_Uword variant;
+	union {
+		oct_Nothing nothing;
+		oct_BObject object;
+	};
+} oct_BObjectOption;
 
 #endif

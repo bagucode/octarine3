@@ -3,11 +3,11 @@
 
 #include "oct_primitives.h"
 #include "oct_symbol.h"
-#include "oct_any.h"
+#include "oct_object.h"
 
 typedef struct oct_NamespaceBinding {
 	oct_OSymbolOption sym;
-	oct_AnyOption obj;
+	oct_OObjectOption obj;
 } oct_NamespaceBinding;
 
 typedef struct oct_ANamespaceBinding {
@@ -44,7 +44,7 @@ oct_Bool _oct_BNamespace_initType(struct oct_Context* ctx);
 // Public
 
 oct_Bool oct_Namespace_create(struct oct_Context* ctx, oct_OSymbol name, oct_BNamespace* out_ns);
-oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_OSymbol sym, oct_AnyOption val);
-oct_Bool oct_Namespace_lookup(struct oct_Context* ctx, oct_BNamespace ns, oct_BSymbol sym, oct_AnyOption* out_val);
+oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_OSymbol sym, oct_OObjectOption val);
+oct_Bool oct_Namespace_lookup(struct oct_Context* ctx, oct_BNamespace ns, oct_BSymbol sym, oct_OObjectOption* out_val);
 
 #endif
