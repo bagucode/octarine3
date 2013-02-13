@@ -4,6 +4,7 @@
 #include "oct_primitives.h"
 #include "oct_string.h"
 #include "oct_nothing.h"
+#include "oct_object.h"
 
 typedef struct oct_Symbol {
 	oct_OString name;
@@ -42,5 +43,7 @@ oct_Bool oct_Symbol_ctor(struct oct_Context* ctx, oct_Symbol* sym, oct_OString n
 oct_Bool oct_Symbol_dtor(struct oct_Context* ctx, oct_Symbol* sym);
 oct_Bool oct_Symbol_createOwned(struct oct_Context* ctx, oct_OString name, oct_OSymbol* out_result);
 oct_Bool oct_Symbol_destroyOwned(struct oct_Context* ctx, oct_OSymbol sym);
+
+oct_Bool oct_Symbol_asObject(struct oct_Context* ctx, oct_OSymbol sym, oct_OObject* out_obj);
 
 #endif

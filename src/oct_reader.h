@@ -6,7 +6,7 @@
 #include "oct_object.h"
 
 #define OCT_READRESULT_ERROR 0
-#define OCT_READRESULT_OBJECT 1
+#define OCT_READRESULT_OK 1
 
 #define OCT_READERROR_NEED_MORE_DATA 0
 #define OCT_READERROR_IO_ERROR 1

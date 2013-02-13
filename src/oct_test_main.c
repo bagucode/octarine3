@@ -45,7 +45,7 @@ static void StringTests() {
 	TEST(oct_BStringStream_asCharStream(ctx, bss, &charStream));
 	reader.ptr = ctx->reader; // TODO: method for this
 	TEST(oct_Reader_read(ctx, reader, charStream, &readResult));
-	TEST(readResult.variant == OCT_READRESULT_OBJECT);
+	TEST(readResult.variant == OCT_READRESULT_OK);
 	TEST(oct_Any_stringp(ctx, readResult.result, &result));
 	TEST(result);
 	TEST(oct_Any_getPtr(ctx, readResult.result, (void**)&bs2.ptr));
@@ -89,10 +89,7 @@ static void NamespaceTests() {
 	TEST(oct_String_createOwnedFromCString(ctx, "theValue", &valStr));
 	TEST(oct_Symbol_createOwned(ctx, name, &sym));
 	val.variant = OCT_OBJECTOPTION_OBJECT;
-	TEST(oct_Any_setPtrKind(ctx, &val.any, OCT_POINTER_OWNED));
-	TEST(oct_Any_setPtr(ctx, &val.any, valStr.ptr));
-	type.ptr = ctx->rt->builtInTypes.String;
-	TEST(oct_Any_setType(ctx, &val.any, type));
+	TEST(oct_String_asObject(ctx, valStr, &val.object));
 	TEST(oct_Namespace_bind(ctx, ns, sym, val));
 	// End Binding
 
@@ -100,8 +97,7 @@ static void NamespaceTests() {
 	bsym.ptr = sym.ptr;
 	TEST(oct_Namespace_lookup(ctx, ns, bsym, &lookedUp));
 	TEST(lookedUp.variant == val.variant);
-	TEST(lookedUp.any.data[0] == val.any.data[0]);
-	TEST(lookedUp.any.data[1] == val.any.data[1]);
+	TEST((lookedUp.object.object.object == (void*)valStr.ptr));
 	// End Lookup
 
 	TEST(oct_Runtime_destroy(rt, &error));
@@ -125,7 +121,6 @@ static void defTest() {
 	oct_OSymbol osym;
 	oct_Bool result;
 	oct_OObjectOption evalResult;
-	void* outStr;
 	const char* error;
 
 	rt = oct_Runtime_create(&error);
@@ -146,17 +141,16 @@ static void defTest() {
     TEST(stream.vtable);
 	reader.ptr = ctx->reader;
 	TEST(oct_Reader_read(ctx, reader, stream, &readResult));
-	TEST(oct_Compiler_eval(ctx, readResult.result, &evalResult));
+	TEST(oct_Compiler_eval(ctx, readResult.result.object, &evalResult));
 
 	// Lookup
 	TEST(oct_String_createOwnedFromCString(ctx, "hello", &str));
-	TEST(oct_OSymbol_alloc(ctx, str, &osym));
+	TEST(oct_Symbol_createOwned(ctx, str, &osym));
 	bsym.ptr = osym.ptr;
 	TEST(oct_Namespace_lookup(ctx, ns, bsym, &lookedUp));
-	TEST(oct_Any_getPtr(ctx, lookedUp.any, &outStr));
 	TEST(oct_String_createOwnedFromCString(ctx, "Hello", &str));
 	bs1.ptr = str.ptr;
-	bs2.ptr = (oct_String*)outStr;
+	bs2.ptr = (oct_String*)lookedUp.object.object.object;
 	TEST(oct_BString_equals(ctx, bs1, bs2, &result));
 	TEST(result);
 
@@ -169,7 +163,8 @@ static void graphCopyOwnedTest() {
 	oct_ReadResult readResult;
 	oct_BReader reader;
 	const char* error;
-    oct_Any copy;
+    oct_OObject copy;
+	oct_BObject bob;
     
 	rt = oct_Runtime_create(&error);
 	assert(rt);
@@ -178,7 +173,8 @@ static void graphCopyOwnedTest() {
 
     reader.ptr = ctx->reader;
     TEST(oct_Reader_readFromCString(ctx, reader, "(a list of symbols)", &readResult));
-    TEST(oct_Type_deepCopyGraphOwned(ctx, readResult.result, &copy));
+	bob.object = readResult.result.object.object;
+    TEST(oct_Type_deepCopyGraphOwned(ctx, bob, &copy));
     
 	TEST(oct_Runtime_destroy(rt, &error));
 }
@@ -212,10 +208,10 @@ int main(int argc, char** argv) {
 		if(rr.variant == OCT_READRESULT_ERROR) {
 			break;
 		}
-		oct_Compiler_eval(ctx, rr.result, &evalResult);
+		oct_Compiler_eval(ctx, rr.result.object, &evalResult);
 		oct_ReadResult_dtor(ctx, &rr);
 		if(evalResult.variant == OCT_OBJECTOPTION_OBJECT) {
-			oct_Any_dtor(ctx, evalResult.any);
+			oct_Object_destroyOwned(ctx, evalResult.object);
 		}
 	};
 

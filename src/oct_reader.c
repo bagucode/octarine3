@@ -5,6 +5,9 @@
 #include "oct_runtime.h"
 #include "oct_list.h"
 #include "oct_stringstream.h"
+#include "oct_object.h"
+#include "oct_object_vtable.h"
+#include "oct_primitives_functions.h"
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -186,8 +189,9 @@ static oct_Bool readI32(struct oct_Context* ctx, oct_BReader reader, oct_Charstr
 	oct_Uword i = 0;
 	char convertBuf[20];
 	oct_Bool result = oct_True;
-	void* box;
-	oct_BType bt;
+	oct_OI32 instance;
+
+	instance.ptr = NULL;
 
 	if(reader_nChars(reader) > 19) {
 		oct_Context_setErrorWithCMessage(ctx, "I32 parse error - too many characters");
@@ -220,21 +224,20 @@ static oct_Bool readI32(struct oct_Context* ctx, oct_BReader reader, oct_Charstr
 		return readF32(ctx, reader, source, out_result);
 	}
 	// OK
-	out_result->variant = OCT_READRESULT_OBJECT;
-	if(!oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_I32), &box)) {
-		goto error;
-	}
-	bt.ptr = ctx->rt->builtInTypes.I32;
-	if(!oct_Any_setAll(ctx, &out_result->result, OCT_POINTER_OWNED, bt, box)) {
-		goto error;
-	}
-	*((oct_I32*)box) = l;
+	out_result->variant = OCT_READRESULT_OK;
+	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_I32), (void**)&instance.ptr));
+	
+	out_result->result.variant = OCT_OBJECTOPTION_OBJECT;
+	CHECK(oct_I32_asObject(ctx, instance, &out_result->result.object));
 
-	printf("Read an I32: %d\n", *((oct_I32*)box));
+	printf("Read an I32: %d\n", *instance.ptr);
 
 	goto end;
 error:
 	result = oct_False;
+	if(instance.ptr) {
+		oct_Object_destroyOwned(ctx, out_result->result.object);
+	}
 end:
 	reader_clearChars(reader);
 	return result;
@@ -246,8 +249,9 @@ static oct_Bool readF32(struct oct_Context* ctx, oct_BReader reader, oct_Charstr
 	oct_Uword i;
 	char convertBuf[15];
 	oct_Bool result = oct_True;
-	void* box;
-	oct_BType bt;
+	oct_OF32 instance;
+
+	instance.ptr = NULL;
 
 	if(reader_nChars(reader) > 14) {
 		oct_Context_setErrorWithCMessage(ctx, "F32 parse error - too many characters");
@@ -275,21 +279,20 @@ static oct_Bool readF32(struct oct_Context* ctx, oct_BReader reader, oct_Charstr
 		return readSymbol(ctx, reader, source, out_result);
 	}
 	// OK
-	out_result->variant = OCT_READRESULT_OBJECT;
-	if(!oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_F32), &box)) {
-		goto error;
-	}
-	bt.ptr = ctx->rt->builtInTypes.F32;
-	if(!oct_Any_setAll(ctx, &out_result->result, OCT_POINTER_OWNED, bt, box)) {
-		goto error;
-	}
-	*((oct_F32*)box) = (oct_F32)d;
+	out_result->variant = OCT_READRESULT_OK;
+	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_F32), (void**)&instance.ptr));
 
-	printf("Read an F32: %f\n", *((oct_F32*)box));
+	out_result->result.variant = OCT_OBJECTOPTION_OBJECT;
+	CHECK(oct_F32_asObject(ctx, instance, &out_result->result.object));
+
+	printf("Read an F32: %f\n", *instance.ptr);
 
 	goto end;
 error:
 	result = oct_False;
+	if(instance.ptr) {
+		oct_Object_destroyOwned(ctx, out_result->result.object);
+	}
 end:
 	reader_clearChars(reader);
 	return result;
@@ -298,8 +301,9 @@ end:
 static oct_Bool readString(struct oct_Context* ctx, oct_BReader reader, oct_Charstream source, oct_ReadResult* out_result) {
 	oct_Bool result = oct_True;
 	oct_Char next;
-	oct_BType bt;
-	void* box;
+	oct_OString instance;
+
+	instance.ptr = NULL;
 
 	// discard leading "
 	reader_clearChars(reader);
@@ -316,26 +320,20 @@ static oct_Bool readString(struct oct_Context* ctx, oct_BReader reader, oct_Char
 	// discard ending "
 	DISCARD_CHAR;
 
-	out_result->variant = OCT_READRESULT_OBJECT;
-	if(!oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_String), &box)) {
-		goto error;
-	}
-	if(!oct_String_ctorCharArray(ctx, (oct_String*)box, reader.ptr->readBuffer, 0, reader.ptr->nchars)) {
-		oct_ExchangeHeap_free(ctx, box);
-		goto error;
-	}
-	bt.ptr = ctx->rt->builtInTypes.String;
-	if(!oct_Any_setAll(ctx, &out_result->result, OCT_POINTER_OWNED, bt, box)) {
-		oct_String_dtor(ctx, (oct_String*)box);
-		oct_ExchangeHeap_free(ctx, box);
-		goto error;
-	}
+	out_result->variant = OCT_READRESULT_OK;
+	CHECK(oct_String_createOwnedFromCharArray(ctx, reader.ptr->readBuffer, 0, reader.ptr->nchars, &instance));
 
-	printf("Read a String: \"%s\"\n", &((oct_String*)box)->utf8Data.ptr->data[0]);
+	out_result->result.variant = OCT_OBJECTOPTION_OBJECT;
+	CHECK(oct_String_asObject(ctx, instance, &out_result->result.object));
+
+	printf("Read a String: \"%s\"\n", &instance.ptr->utf8Data.ptr->data[0]);
 
 	goto end;
 error:
 	result = oct_False;
+	if(instance.ptr) {
+		oct_Object_destroyOwned(ctx, out_result->result.object);
+	}
 end:
 	reader_clearChars(reader);
 	return result;
@@ -343,35 +341,31 @@ end:
 
 static oct_Bool readSymbol(struct oct_Context* ctx, oct_BReader reader, oct_Charstream source, oct_ReadResult* out_result) {
 	oct_Bool result = oct_True;
-	void* box;
-	oct_BType bt;
 	oct_OString name;
+	oct_OSymbol instance;
 
-	out_result->variant = OCT_READRESULT_OBJECT;
-	if(!oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_Symbol), &box)) {
-		goto error;
-	}
-	if(!oct_OString_createFromCharArray(ctx, reader.ptr->readBuffer, 0, reader.ptr->nchars, &name)) {
-		oct_ExchangeHeap_free(ctx, box);
-		goto error;
-	}
-	if(!oct_Symbol_ctor(ctx, (oct_Symbol*)box, name)) {
-		oct_String_destroyOwned(ctx, name);
-		oct_ExchangeHeap_free(ctx, box);
-		goto error;
-	}
-	bt.ptr = ctx->rt->builtInTypes.Symbol;
-	if(!oct_Any_setAll(ctx, &out_result->result, OCT_POINTER_OWNED, bt, box)) {
-		oct_String_destroyOwned(ctx, name);
-		oct_ExchangeHeap_free(ctx, box);
-		goto error;
-	}
+	name.ptr = NULL;
+	instance.ptr = NULL;
 
-	printf("Read a Symbol: %s\n", &((oct_Symbol*)box)->name.ptr->utf8Data.ptr->data[0]);
+	CHECK(oct_String_createOwnedFromCharArray(ctx, reader.ptr->readBuffer, 0, reader.ptr->nchars, &name));
+	CHECK(oct_Symbol_createOwned(ctx, name, &instance));
+
+	out_result->variant = OCT_READRESULT_OK;
+	out_result->result.variant = OCT_OBJECTOPTION_OBJECT;
+
+	CHECK(oct_Symbol_asObject(ctx, instance, &out_result->result.object));
+
+	printf("Read a Symbol: %s\n", &instance.ptr->name.ptr->utf8Data.ptr->data[0]);
 
 	goto end;
 error:
 	result = oct_False;
+	if(instance.ptr) {
+		oct_Object_destroyOwned(ctx, out_result->result.object);
+	}
+	else if(name.ptr) {
+		oct_String_destroyOwned(ctx, name);
+	}
 end:
 	reader_clearChars(reader);
 	return result;
@@ -382,18 +376,12 @@ static oct_Bool readList(struct oct_Context* ctx, oct_BReader reader, oct_Charst
 	oct_Char next;
 	oct_ReadResult content;
 	oct_OList olist;
-	oct_BList list;
-	oct_BType bt;
+	oct_BList blist;
 
 	oct_Uword DEBUG_I;
 
-	list.ptr = NULL;
-
-	out_result->variant = OCT_READRESULT_OBJECT;
 	CHECK(oct_List_createOwned(ctx, &olist));
-	list.ptr = olist.ptr;
-	bt.ptr = ctx->rt->builtInTypes.List;
-	CHECK(oct_Any_setAll(ctx, &out_result->result, OCT_POINTER_OWNED, bt, list.ptr));
+	blist.ptr = olist.ptr;
 
 	// Drop leading (
 	reader_clearChars(reader);
@@ -417,18 +405,22 @@ static oct_Bool readList(struct oct_Context* ctx, oct_BReader reader, oct_Charst
 			out_result->errorCode = content.errorCode;
 			goto end;
 		}
-		CHECK(oct_List_append(ctx, list, content.result.object));
+		CHECK(oct_List_append(ctx, blist, content.result.object));
 	}
 	// TODO: error if EOF before )
 	// discard ending )
 	DISCARD_CHAR;
 
-	oct_List_count(ctx, list, &DEBUG_I);
+	out_result->variant = OCT_READRESULT_OK;
+	out_result->result.variant = OCT_OBJECTOPTION_OBJECT;
+	CHECK(oct_List_asObject(ctx, olist, &out_result->result.object));
+
+	oct_List_count(ctx, blist, &DEBUG_I);
 	printf("LIST END: %d ELEMENTS )\n", DEBUG_I);
 
 	goto end;
 error:
-	if(list.ptr) {
+	if(olist.ptr) {
 		oct_List_destroyOwned(ctx, olist);
 	}
 	result = oct_False;
@@ -439,13 +431,13 @@ end:
 
 static oct_Bool readVector(struct oct_Context* ctx, oct_BReader reader, oct_Charstream source, oct_ReadResult* out_result) {
 	reader_clearChars(reader);
-	out_result->variant = OCT_READRESULT_OBJECT;
+	out_result->variant = OCT_READRESULT_OK;
 	return oct_True;
 }
 
 static oct_Bool readMap(struct oct_Context* ctx, oct_BReader reader, oct_Charstream source, oct_ReadResult* out_result) {
 	reader_clearChars(reader);
-	out_result->variant = OCT_READRESULT_OBJECT;
+	out_result->variant = OCT_READRESULT_OK;
 	return oct_True;
 }
 
@@ -471,11 +463,11 @@ oct_Bool oct_Reader_readFromCString(struct oct_Context* ctx, oct_BReader reader,
 error:
     result = oct_False;
 end:
-    if(str.ptr) {
-        oct_String_destroyOwned(ctx, str);
-    }
     if(ss.ptr) {
         oct_OStringStream_destroy(ctx, ss);
+    }
+    else if(str.ptr) {
+        oct_String_destroyOwned(ctx, str);
     }
     return result;
 }

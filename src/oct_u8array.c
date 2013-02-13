@@ -24,7 +24,7 @@ oct_Bool _oct_OAU8_initType(struct oct_Context* ctx) {
 // Public
 
 oct_Bool oct_OAU8_alloc(struct oct_Context* ctx, oct_Uword size, oct_OAU8* out_result) {
-    if(!oct_ExchangeHeap_alloc(ctx, sizeof(oct_AU8) + (sizeof(oct_U8) * size), (void**)&out_result->ptr)) {
+    if(!oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_AU8) + (sizeof(oct_U8) * size), (void**)&out_result->ptr)) {
         return oct_False;
     }
 	out_result->ptr->size = size;

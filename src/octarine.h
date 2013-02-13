@@ -12,5 +12,7 @@
 #include "oct_reader.h"
 #include "oct_stringstream.h"
 #include "oct_compiler.h"
+#include "oct_object.h"
+#include "oct_object_vtable.h"
 
 #endif
