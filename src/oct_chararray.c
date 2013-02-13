@@ -23,10 +23,12 @@ oct_Bool _oct_OAChar_initType(struct oct_Context* ctx) {
 
 // Public
 
-oct_Bool oct_OAChar_alloc(struct oct_Context* ctx, oct_Uword size, oct_OAChar* out_result) {
-    if(!oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_Char) * size + sizeof(oct_AChar), (void**)&out_result->ptr)) {
-        return oct_False;
-    }
+oct_Bool oct_AChar_createOwned(struct oct_Context* ctx, oct_Uword size, oct_OAChar* out_result) {
+	oct_BType bt;
+	bt.ptr = ctx->rt->builtInTypes.AChar;
+	if(!oct_ExchangeHeap_allocArray(ctx, bt, size, (void**)&out_result->ptr)) {
+		return oct_False;
+	}
 	out_result->ptr->size = size;
 	// "construct"
 	memset(&out_result->ptr->data[0], 0, (sizeof(oct_Char) * size));

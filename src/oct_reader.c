@@ -23,7 +23,7 @@
 
 oct_Bool oct_Reader_ctor(struct oct_Context* ctx, oct_Reader* reader) {
 	reader->nchars = 0;
-	if(!oct_OAChar_alloc(ctx, 200, &reader->readBuffer)) {
+	if(!oct_AChar_createOwned(ctx, 200, &reader->readBuffer)) {
 		return oct_False;
 	}
 	return oct_True;
@@ -36,7 +36,7 @@ oct_Bool oct_ReadResult_dtor(struct oct_Context* ctx, oct_ReadResult* rr) {
 static oct_Bool reader_pushChar(oct_Context* ctx, oct_BReader reader, oct_Char c) {
 	oct_OAChar tmp;
 	if(reader.ptr->nchars == reader.ptr->readBuffer.ptr->size) {
-		if(!oct_OAChar_alloc(ctx, reader.ptr->readBuffer.ptr->size * 2, &tmp)) {
+		if(!oct_AChar_createOwned(ctx, reader.ptr->readBuffer.ptr->size * 2, &tmp)) {
 			return oct_False;
 		}
 		memcpy(tmp.ptr->data, reader.ptr->readBuffer.ptr->data, reader.ptr->nchars * sizeof(oct_Char));

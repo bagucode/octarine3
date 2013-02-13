@@ -21,6 +21,6 @@ oct_Bool _oct_OAChar_initType(struct oct_Context* ctx);
 
 // Public
 
-oct_Bool oct_OAChar_alloc(struct oct_Context* ctx, oct_Uword size, oct_OAChar* out_result);
+oct_Bool oct_AChar_createOwned(struct oct_Context* ctx, oct_Uword size, oct_OAChar* out_result);
 
 #endif
