@@ -4,6 +4,7 @@
 #include "oct_context.h"
 #include "oct_u8array.h"
 #include "oct_exchangeheap.h"
+#include "oct_object_vtable.h"
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -145,3 +146,32 @@ oct_Bool oct_BStringCString_equals(struct oct_Context* ctx, oct_BString str, con
 	*out_result = (memcmp(&str.ptr->utf8Data.ptr->data[0], cstr, str.ptr->size) == 0);
 	return oct_True;
 }
+
+	//oct_BType instanceType;
+	//oct_Bool(*ctor)       (struct oct_Context* ctx, void* object, oct_OList args);
+	//oct_Bool(*dtor)       (struct oct_Context* ctx, void* object);
+	////oct_Bool(*print)      (struct oct_Context* ctx, void* object, /*Text output stream*/);
+	//oct_Bool(*invoke)     (struct oct_Context* ctx, void* object, oct_OList args);
+	////oct_Bool(*eval)       (struct oct_Context* ctx, void* object);
+	//oct_Bool(*copyOwned)  (struct oct_Context* ctx, void* object, void** out_copy);
+	//oct_Bool(*copyManaged)(struct oct_Context* ctx, void* object, void** out_copy);
+	//oct_Bool(*hash)       (struct oct_Context* ctx, void* object, oct_Uword* out_hash);
+	//oct_Bool(*equals)     (struct oct_Context* ctx, void* object, oct_BObject other, oct_Bool* out_result);
+
+//static oct_ObjectVTable StringAsObject = {
+//	
+//};
+
+oct_Bool oct_String_asObject(struct oct_Context* ctx, oct_OString str, oct_OObject* out_object) {
+
+}
+
+
+
+
+
+
+
+
+
+

@@ -38,4 +38,6 @@ oct_Bool oct_Object_symbolp(struct oct_Context* ctx, oct_BObject obj, oct_Bool* 
 oct_Bool oct_Object_stringp(struct oct_Context* ctx, oct_BObject obj, oct_Bool* out_bool);
 oct_Bool oct_Object_listp(struct oct_Context* ctx, oct_BObject obj, oct_Bool* out_bool);
 
+oct_Bool oct_Object_sizeOf(struct oct_Context* ctx, oct_BObject obj, oct_Uword* out_size);
+
 #endif

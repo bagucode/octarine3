@@ -3,6 +3,7 @@
 #include "oct_runtime.h"
 #include "oct_object_vtable.h"
 #include "oct_exchangeheap.h"
+#include "oct_type.h"
 
 oct_Bool _oct_Object_initType(struct oct_Context* ctx) {
 }
@@ -58,3 +59,17 @@ oct_Bool oct_Object_destroyOwned(struct oct_Context* ctx, oct_OObject obj) {
 	oct_Bool result = oct_Object_dtor(ctx, obj.object);
 	return oct_ExchangeHeap_free(ctx, obj.object.object) && result;
 }
+
+typedef struct Array {
+	oct_Uword size;
+	oct_U8 data[];
+} Array;
+
+oct_Bool oct_Object_sizeOf(struct oct_Context* ctx, oct_BObject obj, oct_Uword* out_size) {
+	*out_size = oct_Type_sizeOf(ctx, obj.object.vtable->instanceType, out_size);
+	if(obj.object.vtable->instanceType.ptr->variant == OCT_TYPE_ARRAY) {
+		*out_size = sizeof(oct_Uword) + ( ((Array*)obj.object.object)->size * (*out_size));
+	}
+	return oct_True;
+}
+
