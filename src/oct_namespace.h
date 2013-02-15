@@ -2,49 +2,17 @@
 #define oct_namespace
 
 #include "oct_primitives.h"
-#include "oct_symbol.h"
 #include "oct_object.h"
-
-typedef struct oct_NamespaceBinding {
-	oct_OSymbolOption sym;
-	oct_OObjectOption obj;
-} oct_NamespaceBinding;
-
-typedef struct oct_ANamespaceBinding {
-	oct_Uword size;
-	oct_NamespaceBinding bindings[];
-} oct_ANamespaceBinding;
-
-typedef struct oct_OANamespaceBinding {
-	oct_ANamespaceBinding* ptr;
-} oct_OANamespaceBinding;
-
-typedef struct oct_Namespace {
-	// Just use an array of bindings for now.
-	// No need for efficiency in a proof of concept, right? :P
-	// Ok, I'm too lazy to make a hash table right now.
-	oct_OANamespaceBinding bindings;
-	// TODO: lock
-} oct_Namespace;
-
-typedef struct oct_BNamespace {
-	oct_Namespace* ptr;
-} oct_BNamespace;
-
-// Private
+#include "oct_hashtable.h"
 
 struct oct_Context;
 
-oct_Bool _oct_NamespaceBinding_initType(struct oct_Context* ctx);
-oct_Bool _oct_ANamespaceBinding_initType(struct oct_Context* ctx);
-oct_Bool _oct_OANamespaceBinding_initType(struct oct_Context* ctx);
-oct_Bool _oct_Namespace_initType(struct oct_Context* ctx);
-oct_Bool _oct_BNamespace_initType(struct oct_Context* ctx);
+typedef struct oct_BindingInfo {
+	oct_OHashtableKey key;
+	oct_OObject object;
+} oct_BindingInfo;
 
-// Public
-
-oct_Bool oct_Namespace_create(struct oct_Context* ctx, oct_OSymbol name, oct_BNamespace* out_ns);
-oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_OSymbol sym, oct_OObjectOption val);
-oct_Bool oct_Namespace_lookup(struct oct_Context* ctx, oct_BNamespace ns, oct_BSymbol sym, oct_OObjectOption* out_val);
+oct_Bool oct_Namespace_bind(struct oct_Context* ctx, const char* ns, oct_BindingInfo* bindings);
+oct_Bool oct_Namespace_find(struct oct_Context* ctx, const char* ns, oct_BHashtableKey key, oct_OObject* out_obj);
 
 #endif

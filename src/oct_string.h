@@ -21,9 +21,7 @@ typedef struct oct_BString {
 
 // Private
 
-oct_Bool _oct_String_initType(struct oct_Context* ctx);
-oct_Bool _oct_OString_initType(struct oct_Context* ctx);
-oct_Bool _oct_BString_initType(struct oct_Context* ctx);
+oct_Bool _oct_String_init(struct oct_Context* ctx);
 
 // Public
 

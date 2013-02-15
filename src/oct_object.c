@@ -23,9 +23,9 @@ oct_Bool oct_Object_listp(struct oct_Context* ctx, oct_BObject obj, oct_Bool* ou
 	return oct_True;
 }
 
-oct_Bool oct_Object_ctor(struct oct_Context* ctx, oct_Object obj, oct_OList args) {
-	return obj.vtable->ctor(ctx, obj.object, args);
-}
+//oct_Bool oct_Object_ctor(struct oct_Context* ctx, oct_Object obj, oct_OList args) {
+//	return obj.vtable->ctor(ctx, obj.object, args);
+//}
 
 oct_Bool oct_Object_dtor(struct oct_Context* ctx, oct_Object obj) {
 	return obj.vtable->dtor(ctx, obj.object);
