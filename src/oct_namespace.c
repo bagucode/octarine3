@@ -1,4 +1,14 @@
 #include "oct_namespace.h"
+
+
+
+oct_Bool oct_Namespace_bind(struct oct_Context* ctx, const char* ns, oct_BindingInfo* bindings) {
+}
+
+oct_Bool oct_Namespace_find(struct oct_Context* ctx, const char* ns, oct_BHashtableKey key, oct_OObject* out_obj) {
+}
+
+
 //#include "oct_runtime.h"
 //#include "oct_type.h"
 //#include "oct_context.h"
