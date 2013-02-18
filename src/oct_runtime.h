@@ -3,7 +3,7 @@
 
 #include "oct_primitives.h"
 #include "oct_symbol.h"
-#include "oct_namespace.h"
+#include "oct_hashtable.h"
 #include "oct_tls.h"
 
 struct oct_Context;
@@ -85,20 +85,13 @@ typedef struct oct_BuiltInTypes {
 	/* TODO: TYPE HASH! Structurally equal types should be same! */
 } oct_BuiltInTypes;
 
-// TODO: Use a hash table instead
-typedef struct oct_NamespaceList {
-	oct_OSymbol name;
-	oct_Namespace ns;
-	struct oct_NamespaceList* next;
-} oct_NamespaceList;
-
 typedef struct oct_Runtime {
 	oct_TLS currentContext;
 	// TODO: lock for context collection
 	oct_ContextList contextList;
 	oct_BuiltInTypes builtInTypes;
 	// TODO: lock for namespace collection
-	oct_NamespaceList* namespaces;
+	oct_Hashtable namespaces;
 } oct_Runtime;
 
 struct oct_Context;

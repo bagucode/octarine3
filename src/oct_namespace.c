@@ -1,11 +1,41 @@
 #include "oct_namespace.h"
+#include "oct_runtime.h"
+#include "oct_context.h"
+#include "oct_runtime.h"
+
+typedef struct oct_Namespace {
+	oct_String name;
+	oct_Hashtable bindings;
+	/* Mutex lock */
+} oct_Namespace;
+
+#define CHECK(X) if(!X) return oct_False;
+
+oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BString nsName, oct_BindingInfo binding) {
+	oct_BHashtableKey nsNameKey;
+	oct_BObject nsObject;
+	oct_BHashtable nsTable;
+	oct_Namespace* ns;
+	
+	CHECK(oct_String_asHashtableKeyBorrowed(ctx, nsName, &nsNameKey));
+	nsTable.ptr = &ctx->rt->namespaces;
+	CHECK(oct_Hashtable_borrow(ctx, nsTable, nsNameKey, &nsObject));
+	ns = (oct_Namespace*)nsObject.self.self;
 
 
-
-oct_Bool oct_Namespace_bind(struct oct_Context* ctx, const char* ns, oct_BindingInfo* bindings) {
 }
 
-oct_Bool oct_Namespace_find(struct oct_Context* ctx, const char* ns, oct_BHashtableKey key, oct_OObject* out_obj) {
+oct_Bool oct_Namespace_bindMultiple(struct oct_Context* ctx, oct_BString ns, oct_OABindingInfo bindings) {
+	oct_Uword i;
+	oct_Bool result = oct_True;
+	for(i = 0; i < bindings.ptr->size; ++i) {
+		// TODO: make this transactional (bind all or none if one fails)?
+		result = oct_Namespace_bind(ctx, ns, bindings.ptr->data[i]) && result;
+	}
+	return result;
+}
+
+oct_Bool oct_Namespace_find(struct oct_Context* ctx, oct_BString ns, oct_BHashtableKey key, oct_OObject* out_obj) {
 }
 
 

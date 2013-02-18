@@ -4,6 +4,7 @@
 #include "oct_u8array.h"
 #include "oct_chararray.h"
 #include "oct_object.h"
+#include "oct_hashable.h"
 
 typedef struct oct_String {
 	oct_Uword size;
@@ -39,6 +40,10 @@ oct_Bool oct_BString_equals(struct oct_Context* ctx, oct_BString x, oct_BString 
 oct_Bool oct_BStringCString_equals(struct oct_Context* ctx, oct_BString str, const char* cstr, oct_Bool* out_result);
 
 // Protocol casts
-oct_Bool oct_String_asObject(struct oct_Context* ctx, oct_OString str, oct_OObject* out_object);
+oct_Bool oct_String_asObjectOwned(struct oct_Context* ctx, oct_OString str, oct_OObject* out_object);
+oct_Bool oct_String_asHashableOwned(struct oct_Context* ctx, oct_OString str, oct_OHashable* out_hashable);
+oct_Bool oct_String_asEqComparableOwned(struct oct_Context* ctx, oct_OString str, oct_OEqComparable* out_eq);
+oct_Bool oct_String_asHashtableKeyOwned(struct oct_Context* ctx, oct_OString str, oct_OHashtableKey* out_key);
+oct_Bool oct_String_asHashtableKeyBorrowed(struct oct_Context* ctx, oct_BString str, oct_BHashtableKey* out_key);
 
 #endif
