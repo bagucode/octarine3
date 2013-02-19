@@ -5,14 +5,11 @@
 
 struct oct_Type;
 
-typedef struct oct_OType {
-    struct oct_Type* ptr;
-} oct_OType;
-
-// Borrowed oct_Type
 typedef struct oct_BType {
 	struct oct_Type* ptr;
 } oct_BType;
+
+oct_BType _oct_BTypeType;
 
 // Array of Borrowed oct_Type
 typedef struct oct_ABType {

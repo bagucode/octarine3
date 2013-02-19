@@ -5,7 +5,7 @@
 
 typedef struct oct_Function {
 	oct_BType returnType;
-	oct_OABType argTypes;
+	oct_OABType paramTypes;
 } oct_Function;
 
 typedef struct oct_BFunction {
@@ -23,9 +23,9 @@ typedef struct oct_OABFunction {
 
 struct oct_Context;
 
-oct_Bool _oct_Function_initType(struct oct_Context* ctx);
-oct_Bool _oct_BFunction_initType(struct oct_Context* ctx);
-oct_Bool _oct_ABFunction_initType(struct oct_Context* ctx);
-oct_Bool _oct_OABFunction_initType(struct oct_Context* ctx);
+oct_Bool _oct_Function_init(struct oct_Context* ctx);
+
+// ... expects a null-terminated array of oct_BType
+oct_Bool _oct_Function_construct(struct oct_Context* ctx, oct_BType fn, const char* name, oct_BType retType, ...);
 
 #endif

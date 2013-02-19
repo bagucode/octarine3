@@ -2,6 +2,7 @@
 #define oct_protocoltype
 
 #include "oct_function.h"
+#include "oct_hashtable.h"
 
 // The definition of a protocol is just a set of function signatures
 // for functions that operate primarily on an object of the same type,
@@ -20,5 +21,8 @@ typedef struct oct_ProtocolType {
 struct oct_Context;
 
 oct_Bool _oct_Protocol_initType(struct oct_Context* ctx);
+
+// ... expects a null-terminated array of oct_BFunction
+oct_Bool _oct_Protocol_construct(struct oct_Context* ctx, oct_BType pt, ...);
 
 #endif

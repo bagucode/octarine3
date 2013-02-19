@@ -5,6 +5,7 @@
 #include "oct_symbol.h"
 #include "oct_hashtable.h"
 #include "oct_tls.h"
+#include "oct_type_pointers.h"
 
 struct oct_Context;
 
@@ -17,81 +18,39 @@ struct oct_Type;
 
 typedef struct oct_BuiltInTypes {
 	// Primitives
-	struct oct_Type* U8;
-	struct oct_Type* I8;
-	struct oct_Type* U16;
-	struct oct_Type* I16;
-	struct oct_Type* U32;
-	struct oct_Type* I32;
-	struct oct_Type* U64;
-	struct oct_Type* I64;
-	struct oct_Type* F32;
-	struct oct_Type* F64;
-	struct oct_Type* Uword;
-	struct oct_Type* Word;
-	struct oct_Type* Char;
-	struct oct_Type* Bool;
-	// Aggregate types
-	struct oct_Type* List;
-	struct oct_Type* Symbol;
-	struct oct_Type* OSymbol;
-	struct oct_Type* OSymbolOption;
-	struct oct_Type* String;
-	struct oct_Type* OString;
-	struct oct_Type* Type;
-	struct oct_Type* StructType;
-	struct oct_Type* ProtoType;
-	struct oct_Type* VariadicType;
-	struct oct_Type* PointerType;
-	struct oct_Type* ArrayType;
-	struct oct_Type* FixedSizeArrayType;
-	struct oct_Type* Field;
-	struct oct_Type* AField;
-	struct oct_Type* OAField;
-	struct oct_Type* BType;
-	struct oct_Type* ABType;
-	struct oct_Type* OABType;
-	struct oct_Type* AU8;
-	struct oct_Type* OAU8;
-	struct oct_Type* OList;
-	struct oct_Type* MList;
-	struct oct_Type* BList;
-	struct oct_Type* OListOption;
-	struct oct_Type* Reader;
-	struct oct_Type* ReadResult;
-	struct oct_Type* Nothing;
-	struct oct_Type* NamespaceBinding;
-	struct oct_Type* ANamespaceBinding;
-	struct oct_Type* OANamespaceBinding;
-	struct oct_Type* Namespace;
-	struct oct_Type* BNamespace;
-	struct oct_Type* ProtocolType;
-	struct oct_Type* Function;
-	struct oct_Type* BFunction;
-	struct oct_Type* ABFunction;
-	struct oct_Type* OABFunction;
-	struct oct_Type* AChar;
-	struct oct_Type* OAChar;
-	struct oct_Type* BStringStream;
-	struct oct_Type* Error;
-	struct oct_Type* OError;
-	struct oct_Type* ErrorOption;
-    struct oct_Type* Object;
-    struct oct_Type* OObject;
-    struct oct_Type* MObject;
-    struct oct_Type* BObject;
-    struct oct_Type* OObjectOption;
-    struct oct_Type* BObjectOption;
-	/* TODO: TYPE HASH! Structurally equal types should be same! */
+	oct_BType U8;
+	oct_BType I8;
+	oct_BType U16;
+	oct_BType I16;
+	oct_BType U32;
+	oct_BType I32;
+	oct_BType U64;
+	oct_BType I64;
+	oct_BType F32;
+	oct_BType F64;
+	oct_BType Uword;
+	oct_BType Word;
+	oct_BType Char;
+	oct_BType Bool;
+	// Hashtable
+	oct_BType HashtableKey;
+	oct_BType OHashtableKey;
+	oct_BType BHashtableKey;
+	oct_BType HashtableEntry;
+	oct_BType AHashtableEntry;
+	oct_BType OAHashtableEntry;
+	oct_BType Hashtable;
+	oct_BType OHashtable;
+	oct_BType BHashtable;
 } oct_BuiltInTypes;
 
 typedef struct oct_Runtime {
 	oct_TLS currentContext;
 	// TODO: lock for context collection
 	oct_ContextList contextList;
-	oct_BuiltInTypes builtInTypes;
 	// TODO: lock for namespace collection
 	oct_Hashtable namespaces;
+	oct_BuiltInTypes builtInTypes;
 } oct_Runtime;
 
 struct oct_Context;

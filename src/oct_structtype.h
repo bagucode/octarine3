@@ -13,4 +13,11 @@ struct oct_Context;
 
 oct_Bool _oct_StructType_initType(struct oct_Context* ctx);
 
+typedef struct _oct_StructInitInfo {
+	const char* fieldName;
+	oct_BType type;
+} _oct_StructInitInfo;
+
+oct_Bool _oct_StructType_construct(struct oct_Context* ctx, _oct_StructInitInfo* infos);
+
 #endif

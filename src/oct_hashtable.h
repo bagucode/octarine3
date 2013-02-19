@@ -60,6 +60,7 @@ struct oct_Context;
 
 oct_Bool _oct_Hashtable_init(struct oct_Context* ctx);
 
+oct_Bool oct_Hashtable_ctor   (struct oct_Context* ctx, oct_BHashtable self, oct_Uword initialCap);
 oct_Bool oct_Hashtable_put    (struct oct_Context* ctx, oct_BHashtable self, oct_OHashtableKey key, oct_OObject value);
 oct_Bool oct_Hashtable_take   (struct oct_Context* ctx, oct_BHashtable self, oct_BHashtableKey key, oct_OObject* out_value);
 oct_Bool oct_Hashtable_borrow (struct oct_Context* ctx, oct_BHashtable self, oct_BHashtableKey key, oct_BObject* out_value);

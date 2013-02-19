@@ -31,6 +31,12 @@ end:
 	return oct_True;
 }
 
+oct_Bool oct_Namespace_bindInCurrent(struct oct_Context* ctx, oct_BindingInfo binding) {
+	oct_BNamespace bns;
+	bns.ptr = ctx->ns;
+	return oct_Namespace_bind(ctx, bns, binding);
+}
+
 oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_BindingInfo binding) {
 	oct_BHashtable bindingsTable;
 	oct_Bool result = oct_True;
@@ -86,7 +92,24 @@ end:
 	return result;
 }
 
+oct_Bool oct_Namespace_cBind(struct oct_Context* ctx, const char* keySym, oct_OObject obj) {
+	oct_OSymbol sym;
+	oct_OString str;
+	oct_BindingInfo bi;
+	oct_Bool result = oct_True;
 
+	CHECK(oct_String_createOwnedFromCString(ctx, keySym, &str));
+	CHECK(oct_Symbol_createOwned(ctx, str, &sym));
+	CHECK(oct_Symbol_asHashtableKey(ctx, sym, &bi.key));
+	bi.object = obj;
+	CHECK(oct_Namespace_bindInCurrent(ctx, bi));
+
+	goto end;
+error:
+	result = oct_False;
+end:
+	return result;
+}
 
 //#include "oct_runtime.h"
 //#include "oct_type.h"
