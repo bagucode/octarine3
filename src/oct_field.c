@@ -65,6 +65,6 @@ oct_Bool oct_OAField_alloc(struct oct_Context* ctx, oct_Uword size, oct_OAField*
 
 oct_Bool oct_OAField_free(struct oct_Context* ctx, oct_OAField oafield) {
 	// No need to call destructor since it does nothing
-    oct_ExchangeHeap_free(ctx, oafield.ptr);
+    oct_ExchangeHeap_freeRaw(ctx, oafield.ptr);
 	return oct_True;
 }

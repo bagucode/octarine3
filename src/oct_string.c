@@ -68,7 +68,7 @@ oct_Bool oct_OString_createFromCharArray(struct oct_Context* ctx, oct_OAChar cha
         return oct_False;
     }
 	if(!oct_String_ctorCharArray(ctx, out_str->ptr, chars, idx, len)) {
-        oct_ExchangeHeap_free(ctx, out_str->ptr);
+        oct_ExchangeHeap_freeRaw(ctx, out_str->ptr);
 		out_str->ptr = NULL;
 		return oct_False;
 	}
@@ -87,7 +87,7 @@ oct_Bool oct_String_createOwnedFromCStringLen(struct oct_Context* ctx, const cha
 	out_str->ptr->size = strLen; // TODO: proper size in unicode code points
 	result = oct_OAU8_alloc(ctx, strLen + 1, &out_str->ptr->utf8Data);
 	if(!result) {
-        oct_ExchangeHeap_free(ctx, out_str->ptr);
+        oct_ExchangeHeap_freeRaw(ctx, out_str->ptr);
 		return oct_False;
 	}
 	memcpy(&out_str->ptr->utf8Data.ptr->data[0], cstr, strLen + 1);
@@ -96,7 +96,7 @@ oct_Bool oct_String_createOwnedFromCStringLen(struct oct_Context* ctx, const cha
 
 oct_Bool oct_String_destroyOwned(struct oct_Context* ctx, oct_OString str) {
 	oct_Bool result = oct_String_dtor(ctx, str.ptr);
-    return oct_ExchangeHeap_free(ctx, str.ptr) && result;
+    return oct_ExchangeHeap_freeRaw(ctx, str.ptr) && result;
 }
 
 oct_Bool oct_String_ctorCStringLen(struct oct_Context* ctx, oct_String* str, const char* cstr, oct_Uword strlen) {

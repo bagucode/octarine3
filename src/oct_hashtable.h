@@ -4,22 +4,28 @@
 #include "oct_object.h"
 #include "oct_hashable.h"
 #include "oct_eqcomparable.h"
+#include "oct_type_pointers.h"
 
 // Protocol that the keys must satisfy
 
+typedef struct oct_HashtableKeyFunctions {
+	oct_HashableFunctions hashable;
+	oct_EqComparableFunctions eq;
+} oct_HashtableKeyFunctions;
+
 typedef struct oct_HashtableKeyVTable {
-	oct_HashableVTable hashable;
-	oct_EqComparableVTable eq;
+	oct_BType type;
+	oct_HashtableKeyFunctions functions;
 } oct_HashtableKeyVTable;
 
 typedef struct oct_OHashtableKey {
 	oct_OSelf self;
-	oct_HashtableKeyVTable vtable;
+	oct_HashtableKeyVTable* vtable;
 } oct_OHashtableKey;
 
 typedef struct oct_BHashtableKey {
 	oct_BSelf self;
-	oct_HashtableKeyVTable vtable;
+	oct_HashtableKeyVTable* vtable;
 } oct_BHashtableKey;
 
 // Hash table

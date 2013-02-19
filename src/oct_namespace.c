@@ -2,6 +2,8 @@
 #include "oct_runtime.h"
 #include "oct_context.h"
 #include "oct_runtime.h"
+#include "oct_exchangeheap.h"
+#include "oct_copyable.h"
 
 typedef struct oct_Namespace {
 	oct_String name;
@@ -9,34 +11,81 @@ typedef struct oct_Namespace {
 	/* Mutex lock */
 } oct_Namespace;
 
-#define CHECK(X) if(!X) return oct_False;
+#define CHECK(X) if(!X) goto error;
 
-oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BString nsName, oct_BindingInfo binding) {
+oct_Bool oct_Namespace_findNs(struct oct_Context* ctx, oct_BString nsName, oct_BNamespace* out_ns) {
 	oct_BHashtableKey nsNameKey;
 	oct_BObject nsObject;
 	oct_BHashtable nsTable;
-	oct_Namespace* ns;
+	oct_Bool result = oct_True;
 	
 	CHECK(oct_String_asHashtableKeyBorrowed(ctx, nsName, &nsNameKey));
 	nsTable.ptr = &ctx->rt->namespaces;
 	CHECK(oct_Hashtable_borrow(ctx, nsTable, nsNameKey, &nsObject));
-	ns = (oct_Namespace*)nsObject.self.self;
+	out_ns->ptr = (oct_Namespace*)nsObject.self.self;
 
-
+	goto end;
+error:
+	result = oct_False;
+end:
+	return oct_True;
 }
 
-oct_Bool oct_Namespace_bindMultiple(struct oct_Context* ctx, oct_BString ns, oct_OABindingInfo bindings) {
-	oct_Uword i;
+oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_BindingInfo binding) {
+	oct_BHashtable bindingsTable;
 	oct_Bool result = oct_True;
-	for(i = 0; i < bindings.ptr->size; ++i) {
-		// TODO: make this transactional (bind all or none if one fails)?
-		result = oct_Namespace_bind(ctx, ns, bindings.ptr->data[i]) && result;
-	}
+
+	bindingsTable.ptr = &ns.ptr->bindings;
+	CHECK(oct_Hashtable_put(ctx, bindingsTable, binding.key, binding.object));
+
+	goto end;
+error:
+	result = oct_False;
+end:
 	return result;
 }
 
-oct_Bool oct_Namespace_find(struct oct_Context* ctx, oct_BString ns, oct_BHashtableKey key, oct_OObject* out_obj) {
+oct_Bool oct_Namespace_copyValueOwned(struct oct_Context* ctx, oct_BNamespace ns, oct_BHashtableKey key, oct_OObject* out_obj) {
+	oct_BHashtable bindingsTable;
+	oct_BObject borrowed;
+	oct_Bool isCopyable;
+	oct_BCopyable cp;
+	oct_Bool result = oct_True;
+
+	bindingsTable.ptr = &ns.ptr->bindings;
+	CHECK(oct_Hashtable_borrow(ctx, bindingsTable, key, &borrowed));
+	CHECK(oct_Object_checkCast(ctx, borrowed, _oct_BCopyableType, &isCopyable));
+	if(!isCopyable) {
+		oct_Context_setErrorWithCMessage(ctx, "copyValueOwned: illegal cast to Copyable, is binding not a value type?");
+		goto error;
+	}
+	// cast
+	cp.self.self = borrowed.self.self;
+	cp.vtable = (oct_CopyableVTable*)borrowed.vtable;
+	// copy
+	CHECK(oct_Copyable_copyOwned(ctx, cp, out_obj));
+	goto end;
+error:
+	result = oct_False;
+end:
+	return result;
 }
+
+oct_Bool oct_Namespace_borrowGlobal(struct oct_Context* ctx, oct_BNamespace ns, oct_BHashtableKey key, oct_BObject* out_obj) {
+	oct_BHashtable bindingsTable;
+	oct_Bool result = oct_True;
+
+	bindingsTable.ptr = &ns.ptr->bindings;
+	// TODO: check that the binding is not a value!
+	// only functions, types and protocols are allowed to be globally borrowed, values must be copied
+	CHECK(oct_Hashtable_borrow(ctx, bindingsTable, key, out_obj));
+	goto end;
+error:
+	result = oct_False;
+end:
+	return result;
+}
+
 
 
 //#include "oct_runtime.h"

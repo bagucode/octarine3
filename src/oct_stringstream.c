@@ -55,7 +55,7 @@ oct_Bool oct_OStringStream_create(struct oct_Context* ctx, oct_BString str, oct_
 }
 
 oct_Bool oct_OStringStream_destroy(struct oct_Context* ctx, oct_OStringStream stream) {
-    return oct_ExchangeHeap_free(ctx, stream.ptr);
+    return oct_ExchangeHeap_freeRaw(ctx, stream.ptr);
 }
 
 oct_Bool oct_BStringStream_asCharStream(struct oct_Context* ctx, oct_BStringStream stream, oct_Charstream* out_cs) {

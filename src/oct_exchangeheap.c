@@ -34,7 +34,7 @@ oct_Bool oct_ExchangeHeap_allocArray(struct oct_Context* ctx, oct_BType type, oc
 	return oct_ExchangeHeap_allocRaw(ctx, size * elementSize + sizeof(oct_Uword), out_box);
 }
 
-oct_Bool oct_ExchangeHeap_free(struct oct_Context* ctx, void* box) {
+oct_Bool oct_ExchangeHeap_freeRaw(struct oct_Context* ctx, void* box) {
 	free(box);
 	return oct_True;
 }

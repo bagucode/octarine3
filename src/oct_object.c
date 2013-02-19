@@ -57,7 +57,7 @@ oct_Bool oct_Object_equals(struct oct_Context* ctx, oct_Object obj, oct_BObject 
 
 oct_Bool oct_Object_destroyOwned(struct oct_Context* ctx, oct_OObject obj) {
 	oct_Bool result = oct_Object_dtor(ctx, obj.object);
-	return oct_ExchangeHeap_free(ctx, obj.object.object) && result;
+	return oct_ExchangeHeap_freeRaw(ctx, obj.object.object) && result;
 }
 
 typedef struct Array {

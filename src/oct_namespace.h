@@ -7,6 +7,11 @@
 #include "oct_string.h"
 
 struct oct_Context;
+struct oct_Namespace;
+
+typedef struct oct_BNamespace {
+	struct oct_Namespace* ptr;
+} oct_BNamespace;
 
 typedef struct oct_BindingInfo {
 	oct_OHashtableKey key;
@@ -23,8 +28,9 @@ typedef struct oct_OABindingInfo {
 } oct_OABindingInfo;
 
 oct_Bool oct_Namespace_findNs(struct oct_Context* ctx, oct_BString nsName, oct_BNamespace* out_ns);
-oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BString ns, oct_BindingInfo binding);
-oct_Bool oct_Namespace_bindMultiple(struct oct_Context* ctx, oct_BString ns, oct_OABindingInfo bindings);
-oct_Bool oct_Namespace_find(struct oct_Context* ctx, oct_BString ns, oct_BHashtableKey key, oct_OObject* out_obj);
+oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_BindingInfo binding);
+oct_Bool oct_Namespace_copyValueOwned(struct oct_Context* ctx, oct_BNamespace ns, oct_BHashtableKey key, oct_OObject* out_obj);
+//oct_Bool oct_Namespace_copyValueManaged(struct oct_Context* ctx, oct_BNamespace ns, oct_BHashtableKey key, oct_MObject* out_obj);
+oct_Bool oct_Namespace_borrowGlobal(struct oct_Context* ctx, oct_BNamespace ns, oct_BHashtableKey key, oct_BObject* out_obj);
 
 #endif

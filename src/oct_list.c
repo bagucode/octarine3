@@ -95,7 +95,7 @@ oct_Bool oct_List_dtor(struct oct_Context* ctx, oct_List* self) {
 			}
 			prev = self;
 			self = self->next.list.ptr;
-			oct_ExchangeHeap_free(ctx, prev);
+			oct_ExchangeHeap_freeRaw(ctx, prev);
 		}
 	}
     return result;
@@ -119,7 +119,7 @@ oct_Bool oct_List_createManaged(struct oct_Context* ctx, oct_MList* out_result) 
 
 oct_Bool oct_List_destroyOwned(struct oct_Context* ctx, oct_OList lst) {
 	oct_Bool result = oct_List_dtor(ctx, lst.ptr);
-	return oct_ExchangeHeap_free(ctx, lst.ptr) && result;
+	return oct_ExchangeHeap_freeRaw(ctx, lst.ptr) && result;
 }
 
 // Operations

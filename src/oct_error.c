@@ -52,6 +52,6 @@ oct_Bool oct_Error_createOwned(struct oct_Context* ctx, oct_OString message, oct
 
 oct_Bool oct_Error_destroyOwned(struct oct_Context* ctx, oct_OError err) {
 	oct_String_destroyOwned(ctx, err.ptr->message);
-	return oct_ExchangeHeap_free(ctx, err.ptr);
+	return oct_ExchangeHeap_freeRaw(ctx, err.ptr);
 }
 

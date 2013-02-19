@@ -6,7 +6,7 @@
 #include "oct_type_pointers.h"
 
 typedef struct oct_ObjectVTable {
-	oct_Bool (*typeOf) (struct oct_Context* ctx, oct_BSelf self, oct_BType* out_type);
+	oct_BType type;
 } oct_ObjectVTable;
 
 typedef struct oct_BObject {
@@ -22,5 +22,7 @@ typedef struct oct_OObject {
 struct oct_Context;
 
 oct_Bool _oct_Object_init(struct oct_Context* ctx);
+
+oct_Bool oct_Object_checkCast(struct oct_Context* ctx, oct_BObject self, oct_BType protocol, oct_Bool* out_result);
 
 #endif

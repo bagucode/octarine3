@@ -66,5 +66,5 @@ oct_Bool oct_Symbol_createOwned(struct oct_Context* ctx, oct_OString name, oct_O
 
 oct_Bool oct_Symbol_destroyOwned(struct oct_Context* ctx, oct_OSymbol sym) {
 	oct_Bool result = oct_Symbol_dtor(ctx, sym.ptr);
-	return oct_ExchangeHeap_free(ctx, sym.ptr) && result;
+	return oct_ExchangeHeap_freeRaw(ctx, sym.ptr) && result;
 }
