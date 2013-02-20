@@ -54,18 +54,13 @@ end:
 oct_Bool oct_Namespace_copyValueOwned(struct oct_Context* ctx, oct_BNamespace ns, oct_BHashtableKey key, oct_OObject* out_obj) {
 	oct_BHashtable bindingsTable;
 	oct_BObject borrowed;
-	oct_Bool isCopyable;
 	oct_BCopyable cp;
 	oct_Bool result = oct_True;
 
 	bindingsTable.ptr = &ns.ptr->bindings;
 	CHECK(oct_Hashtable_borrow(ctx, bindingsTable, key, &borrowed));
-	CHECK(oct_Object_checkCast(ctx, borrowed, _oct_BCopyableType, &isCopyable));
-	if(!isCopyable) {
-		oct_Context_setErrorWithCMessage(ctx, "copyValueOwned: illegal cast to Copyable, is binding not a value type?");
-		goto error;
-	}
 	// cast
+	CHECK(oct_Object_cast(ctx, borrowed, _oct_BCopyableType, &borrowed));
 	cp.self.self = borrowed.self.self;
 	cp.vtable = (oct_CopyableVTable*)borrowed.vtable;
 	// copy

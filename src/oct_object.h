@@ -23,6 +23,8 @@ struct oct_Context;
 
 oct_Bool _oct_Object_init(struct oct_Context* ctx);
 
-oct_Bool oct_Object_checkCast(struct oct_Context* ctx, oct_BObject self, oct_BType protocol, oct_Bool* out_result);
+// The output is untyped because C does not have templates but the output should be safe to manually
+// cast to the given protocol
+oct_Bool oct_Object_cast(struct oct_Context* ctx, oct_BObject self, oct_BType protocol, oct_BObject* out_casted);
 
 #endif
