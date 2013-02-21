@@ -6,6 +6,7 @@
 #include "oct_hashtable.h"
 #include "oct_tls.h"
 #include "oct_type_pointers.h"
+#include "oct_protocoltype.h"
 
 struct oct_Context;
 
@@ -60,6 +61,10 @@ typedef struct oct_BuiltInTypes {
 	oct_BType Object; // TODO
 } oct_BuiltInTypes;
 
+typedef struct oct_BuiltInProtocols {
+	oct_BProtocolBinding Object;
+} oct_BuiltInProtocols;
+
 typedef struct oct_Runtime {
 	oct_TLS currentContext;
 	// TODO: lock for context collection
@@ -67,6 +72,7 @@ typedef struct oct_Runtime {
 	// TODO: lock for namespace collection
 	oct_Hashtable namespaces;
 	oct_BuiltInTypes builtInTypes;
+	oct_BuiltInProtocols builtInProtocols;
 } oct_Runtime;
 
 struct oct_Context;

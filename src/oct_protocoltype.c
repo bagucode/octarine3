@@ -5,6 +5,9 @@
 
 #include <stddef.h>
 
+static oct_VTable ProtocolBindingObjectVTable;
+static oct_BVTable BProtocolBindingObjectVTable;
+
 oct_Bool _oct_Protocol_init(struct oct_Context* ctx) {
 	oct_BType t;
 	oct_Bool result;
@@ -54,6 +57,17 @@ oct_Bool _oct_Protocol_init(struct oct_Context* ctx) {
 	t.ptr->structType.fields.ptr->data[0].type = ctx->rt->builtInTypes.BType;
 	t.ptr->structType.fields.ptr->data[1].offset = offsetof(oct_ProtocolBinding, implementations);
 	t.ptr->structType.fields.ptr->data[1].type = ctx->rt->builtInTypes.Hashtable;
+
+	// ProtocolBinding must participate in Object protocol
+	// Bit of a chicken and egg problem here.
+	// The init for the runtime must contain a hardcoded init for some of
+	// the protocol bindings to make calls like this valid in the init phase
+	ProtocolBindingObjectVTable.objectType = t;
+	BProtocolBindingObjectVTable.ptr = &ProtocolBindingObjectVTable;
+	result = oct_Protocol_addImplementation(ctx, ctx->rt->builtInProtocols.Object, t, BProtocolBindingObjectVTable);
+	if(!result) {
+		return result;
+	}
 
 	// BProtocolBinding
 	t = ctx->rt->builtInTypes.BProtocolBinding;
