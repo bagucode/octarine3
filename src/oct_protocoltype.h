@@ -16,13 +16,31 @@ typedef struct oct_ProtocolType {
 	oct_OABFunction functions;
 } oct_ProtocolType;
 
-// Private
+typedef struct oct_VTable {
+	oct_BType objectType;
+	void* functions[]; /* zero or more function pointers */
+} oct_VTable;
+
+typedef struct oct_BVTable {
+	oct_VTable* ptr;
+} oct_BVTable;
+
+// This type is what is put in a namespace when creating or linking a new protocol.
+// It contains the protocol definition and a table of implementations for all implementing types.
+typedef struct oct_ProtocolBinding {
+	oct_BType protocolType;
+	oct_Hashtable implementations;
+} oct_ProtocolBinding;
+
+// Only borrowed pointer with global scope. These are never deleted.
+typedef struct oct_BProtocolBinding {
+	oct_ProtocolBinding* ptr;
+} oct_BProtocolBinding;
 
 struct oct_Context;
 
-oct_Bool _oct_Protocol_initType(struct oct_Context* ctx);
+oct_Bool _oct_Protocol_init(struct oct_Context* ctx);
 
-// ... expects a null-terminated array of oct_BFunction
-oct_Bool _oct_Protocol_construct(struct oct_Context* ctx, oct_BType pt, ...);
+oct_Bool oct_Protocol_addImplementation(struct oct_Context* ctx, oct_BProtocolBinding protocol, oct_BType type, oct_BVTable vtable);
 
 #endif

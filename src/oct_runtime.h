@@ -33,15 +33,31 @@ typedef struct oct_BuiltInTypes {
 	oct_BType Char;
 	oct_BType Bool;
 	// Hashtable
-	oct_BType HashtableKey;
-	oct_BType OHashtableKey;
-	oct_BType BHashtableKey;
-	oct_BType HashtableEntry;
-	oct_BType AHashtableEntry;
-	oct_BType OAHashtableEntry;
-	oct_BType Hashtable;
-	oct_BType OHashtable;
-	oct_BType BHashtable;
+	oct_BType HashtableKey; // TODO
+	oct_BType OHashtableKey; // TODO
+	oct_BType BHashtableKey; // TODO
+	oct_BType HashtableEntry; // TODO
+	oct_BType AHashtableEntry; // TODO
+	oct_BType OAHashtableEntry; // TODO
+	oct_BType Hashtable; // TODO
+	oct_BType OHashtable; // TODO
+	oct_BType BHashtable; // TODO
+	// Type
+	oct_BType Type; // TODO
+	oct_BType BType; // TODO
+	// Protocol
+	oct_BType Protocol;
+	oct_BType VTable;
+	oct_BType BVTable;
+	oct_BType ProtocolBinding;
+	oct_BType BProtocolBinding;
+	// Function
+	oct_BType Function; // TODO
+	oct_BType BFunction; // TODO
+	oct_BType ABFunction; // TODO
+	oct_BType OABFunction; // TODO
+	// Object
+	oct_BType Object; // TODO
 } oct_BuiltInTypes;
 
 typedef struct oct_Runtime {
