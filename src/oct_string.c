@@ -9,22 +9,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Object
-static oct_VTable StringObjectVTable;
-static oct_BVTable BStringObjectVTable;
-
-// EqComparable
-static oct_EqComparableVTable StringEqComparableVTable;
-static oct_BVTable BStringEqComparableVTable;
-
-// Hashable
-static oct_HashableVTable StringHashableVTable;
-static oct_BVTable BStringHashableVTable;
-
-// HashtableKey
-static oct_HashtableKeyVTable StringHashtableKeyVTable;
-static oct_BVTable BStringHashtableKeyVTable;
-
 #define CHECK(X) if(!X) return oct_False;
 
 oct_Bool _oct_String_init(struct oct_Context* ctx) {
@@ -41,29 +25,17 @@ oct_Bool _oct_String_init(struct oct_Context* ctx) {
 	t.ptr->structType.fields.ptr->data[1].offset = offsetof(oct_String, utf8Data);
 	t.ptr->structType.fields.ptr->data[1].type = ctx->rt->builtInTypes.OAU8;
 
-	// String VTable for Object
-	StringObjectVTable.objectType = t;
-	BStringObjectVTable.ptr = &StringObjectVTable;
-	CHECK(oct_Protocol_addImplementation(ctx, ctx->rt->builtInProtocols.Object, t, BStringObjectVTable));
+	// String VTable for Object {}
+	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Object, 0, &ctx->rt->vtables.StringAsObject, t));
 
-	// String VTable for EqComparable
-	StringEqComparableVTable.type = t;
-	StringEqComparableVTable.functions.equals = (oct_Bool(*)(oct_Context*,oct_BSelf,oct_BSelf,oct_Bool*))oct_BString_equals;
-	BStringEqComparableVTable.ptr = (oct_VTable*)&StringEqComparableVTable;
-	CHECK(oct_Protocol_addImplementation(ctx, ctx->rt->builtInProtocols.EqComparable, t, BStringEqComparableVTable));
+	// String VTable for EqComparable {eq}
+	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.EqComparable, 1, &ctx->rt->vtables.StringAsEqComparable, t, oct_BString_equals));
 
-	// String VTable for Hashable
-	StringHashableVTable.type = t;
-	StringHashableVTable.functions.hash = (oct_Bool(*)(oct_Context*,oct_BSelf,oct_Uword*))oct_String_hash;
-	BStringHashableVTable.ptr = (oct_VTable*)&StringHashableVTable;
-	CHECK(oct_Protocol_addImplementation(ctx, ctx->rt->builtInProtocols.Hashable, t, BStringHashableVTable));
+	// String VTable for Hashable {hash}
+	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Hashable, 1, &ctx->rt->vtables.StringAsHashable, t, oct_String_hash));
 
-	// String VTable for HashtableKey
-	StringHashtableKeyVTable.type = t;
-	StringHashtableKeyVTable.functions.eq = StringEqComparableVTable.functions;
-	StringHashtableKeyVTable.functions.hashable = StringHashableVTable.functions;
-	BStringHashtableKeyVTable.ptr = (oct_VTable*)&StringHashtableKeyVTable;
-	CHECK(oct_Protocol_addImplementation(ctx, ctx->rt->builtInProtocols.HashtableKey, t, BStringHashtableKeyVTable));
+	// String VTable for HashtableKey {hash, eq}
+	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.HashtableKey, 2, &ctx->rt->vtables.StringAsHashtableKey, t, oct_String_hash, oct_BString_equals));
 
 	// OString
 	t = ctx->rt->builtInTypes.OString;
@@ -188,24 +160,9 @@ oct_Bool oct_BStringCString_equals(struct oct_Context* ctx, oct_BString str, con
 	return oct_True;
 }
 
-	//oct_BType instanceType;
-	//oct_Bool(*ctor)       (struct oct_Context* ctx, void* object, oct_OList args);
-	//oct_Bool(*dtor)       (struct oct_Context* ctx, void* object);
-	////oct_Bool(*print)      (struct oct_Context* ctx, void* object, /*Text output stream*/);
-	//oct_Bool(*invoke)     (struct oct_Context* ctx, void* object, oct_OList args);
-	////oct_Bool(*eval)       (struct oct_Context* ctx, void* object);
-	//oct_Bool(*copyOwned)  (struct oct_Context* ctx, void* object, void** out_copy);
-	//oct_Bool(*copyManaged)(struct oct_Context* ctx, void* object, void** out_copy);
-	//oct_Bool(*hash)       (struct oct_Context* ctx, void* object, oct_Uword* out_hash);
-	//oct_Bool(*equals)     (struct oct_Context* ctx, void* object, oct_BObject other, oct_Bool* out_result);
-
-//static oct_ObjectVTable StringAsObject = {
-//	
-//};
-
 oct_Bool oct_String_asObject(struct oct_Context* ctx, oct_OString str, oct_OObject* out_object) {
 	out_object->self.self = str.ptr;
-	out_object->vtable = (oct_ObjectVTable*)&StringObjectVTable;
+	out_object->vtable = (oct_ObjectVTable*)ctx->rt->vtables.StringAsObject.ptr;
 	return oct_True;
 }
 

@@ -67,6 +67,16 @@ typedef struct oct_BuiltInTypes {
 	oct_BType BString; // TODO
 } oct_BuiltInTypes;
 
+typedef struct oct_BuiltInVTables {
+	// Protocol
+	oct_BVTable ProtocolBindingAsObject;
+	// String
+	oct_BVTable StringAsObject; // TODO
+	oct_BVTable StringAsEqComparable; // TODO
+	oct_BVTable StringAsHashable; // TODO
+	oct_BVTable StringAsHashtableKey; // TODO
+} oct_BuiltInVTables;
+
 typedef struct oct_BuiltInProtocols {
 	oct_BProtocolBinding Object; // TODO
 	oct_BProtocolBinding EqComparable; // TODO
@@ -82,6 +92,7 @@ typedef struct oct_Runtime {
 	oct_Hashtable namespaces;
 	oct_BuiltInTypes builtInTypes;
 	oct_BuiltInProtocols builtInProtocols;
+	oct_BuiltInVTables vtables;
 } oct_Runtime;
 
 struct oct_Context;
