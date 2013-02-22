@@ -20,6 +20,8 @@ struct oct_Type;
 typedef struct oct_BuiltInTypes {
 	// Primitives
 	oct_BType U8;
+	oct_BType AU8; // TODO
+	oct_BType OAU8; // TODO
 	oct_BType I8;
 	oct_BType U16;
 	oct_BType I16;
@@ -59,10 +61,17 @@ typedef struct oct_BuiltInTypes {
 	oct_BType OABFunction; // TODO
 	// Object
 	oct_BType Object; // TODO
+	// String
+	oct_BType String;
+	oct_BType OString; // TODO
+	oct_BType BString; // TODO
 } oct_BuiltInTypes;
 
 typedef struct oct_BuiltInProtocols {
-	oct_BProtocolBinding Object;
+	oct_BProtocolBinding Object; // TODO
+	oct_BProtocolBinding EqComparable; // TODO
+	oct_BProtocolBinding Hashable; // TODO
+	oct_BProtocolBinding HashtableKey; // TODO
 } oct_BuiltInProtocols;
 
 typedef struct oct_Runtime {

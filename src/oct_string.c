@@ -4,47 +4,88 @@
 #include "oct_context.h"
 #include "oct_u8array.h"
 #include "oct_exchangeheap.h"
-#include "oct_object_vtable.h"
 
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 
-// Private
+// Object
+static oct_VTable StringObjectVTable;
+static oct_BVTable BStringObjectVTable;
 
-oct_Bool _oct_String_initType(struct oct_Context* ctx) {
-	oct_Type* t = ctx->rt->builtInTypes.String;
-	oct_Bool result;
+// EqComparable
+static oct_EqComparableVTable StringEqComparableVTable;
+static oct_BVTable BStringEqComparableVTable;
 
-	t->variant = OCT_TYPE_STRUCT;
-	t->structType.alignment = 0;
-	t->structType.size = sizeof(oct_String);
-	result = oct_OAField_alloc(ctx, 2, &t->structType.fields);
-	if(!result) {
-		return result;
-	}
-	t->structType.fields.ptr->data[0].offset = offsetof(oct_String, size);
-	t->structType.fields.ptr->data[0].type.ptr = ctx->rt->builtInTypes.Uword;
-	t->structType.fields.ptr->data[1].offset = offsetof(oct_String, utf8Data);
-	t->structType.fields.ptr->data[1].type.ptr = ctx->rt->builtInTypes.OAU8;
+// Hashable
+static oct_HashableVTable StringHashableVTable;
+static oct_BVTable BStringHashableVTable;
+
+// HashtableKey
+static oct_HashtableKeyVTable StringHashtableKeyVTable;
+static oct_BVTable BStringHashtableKeyVTable;
+
+#define CHECK(X) if(!X) return oct_False;
+
+oct_Bool _oct_String_init(struct oct_Context* ctx) {
+	oct_BType t;
+
+	// String
+	t = ctx->rt->builtInTypes.String;
+	t.ptr->variant = OCT_TYPE_STRUCT;
+	t.ptr->structType.alignment = 0;
+	t.ptr->structType.size = sizeof(oct_String);
+	CHECK(oct_OAField_alloc(ctx, 2, &t.ptr->structType.fields));
+	t.ptr->structType.fields.ptr->data[0].offset = offsetof(oct_String, size);
+	t.ptr->structType.fields.ptr->data[0].type = ctx->rt->builtInTypes.Uword;
+	t.ptr->structType.fields.ptr->data[1].offset = offsetof(oct_String, utf8Data);
+	t.ptr->structType.fields.ptr->data[1].type = ctx->rt->builtInTypes.OAU8;
+
+	// String VTable for Object
+	StringObjectVTable.objectType = t;
+	BStringObjectVTable.ptr = &StringObjectVTable;
+	CHECK(oct_Protocol_addImplementation(ctx, ctx->rt->builtInProtocols.Object, t, BStringObjectVTable));
+
+	// String VTable for EqComparable
+	StringEqComparableVTable.type = t;
+	StringEqComparableVTable.functions.equals = (oct_Bool(*)(oct_Context*,oct_BSelf,oct_BSelf,oct_Bool*))oct_BString_equals;
+	BStringEqComparableVTable.ptr = (oct_VTable*)&StringEqComparableVTable;
+	CHECK(oct_Protocol_addImplementation(ctx, ctx->rt->builtInProtocols.EqComparable, t, BStringEqComparableVTable));
+
+	// String VTable for Hashable
+	StringHashableVTable.type = t;
+	StringHashableVTable.functions.hash = (oct_Bool(*)(oct_Context*,oct_BSelf,oct_Uword*))oct_String_hash;
+	BStringHashableVTable.ptr = (oct_VTable*)&StringHashableVTable;
+	CHECK(oct_Protocol_addImplementation(ctx, ctx->rt->builtInProtocols.Hashable, t, BStringHashableVTable));
+
+	// String VTable for HashtableKey
+	StringHashtableKeyVTable.type = t;
+	StringHashtableKeyVTable.functions.eq = StringEqComparableVTable.functions;
+	StringHashtableKeyVTable.functions.hashable = StringHashableVTable.functions;
+	BStringHashtableKeyVTable.ptr = (oct_VTable*)&StringHashtableKeyVTable;
+	CHECK(oct_Protocol_addImplementation(ctx, ctx->rt->builtInProtocols.HashtableKey, t, BStringHashtableKeyVTable));
+
+	// OString
+	t = ctx->rt->builtInTypes.OString;
+	t.ptr->variant = OCT_TYPE_POINTER;
+	t.ptr->pointerType.kind = OCT_POINTER_OWNED;
+	t.ptr->pointerType.type = ctx->rt->builtInTypes.String;
+
+	// BString
+	t = ctx->rt->builtInTypes.BString;
+	t.ptr->variant = OCT_TYPE_POINTER;
+	t.ptr->pointerType.kind = OCT_POINTER_BORROWED;
+	t.ptr->pointerType.type = ctx->rt->builtInTypes.String;
+
 	return oct_True;
 }
-
-oct_Bool _oct_OString_initType(struct oct_Context* ctx) {
-	ctx->rt->builtInTypes.OString->variant = OCT_TYPE_POINTER;
-	ctx->rt->builtInTypes.OString->pointerType.kind = OCT_POINTER_OWNED;
-	ctx->rt->builtInTypes.OString->pointerType.type.ptr = ctx->rt->builtInTypes.String;
-	return oct_True;
-}
-
-// Public
 
 oct_Bool oct_String_ctorCharArray(struct oct_Context* ctx, oct_String* str, oct_OAChar chars, oct_Uword idx, oct_Uword len) {
 	oct_Uword si;
 	oct_Uword ci;
 	
 	if(idx >= chars.ptr->size || (idx + len) >= chars.ptr->size) {
-		// TODO: out of bounds error
+		oct_Context_setErrorWithCMessage(ctx, "Index out of bounds");
 		return oct_False;
 	}
 	
@@ -163,7 +204,9 @@ oct_Bool oct_BStringCString_equals(struct oct_Context* ctx, oct_BString str, con
 //};
 
 oct_Bool oct_String_asObject(struct oct_Context* ctx, oct_OString str, oct_OObject* out_object) {
-
+	out_object->self.self = str.ptr;
+	out_object->vtable = (oct_ObjectVTable*)&StringObjectVTable;
+	return oct_True;
 }
 
 
