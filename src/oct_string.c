@@ -160,18 +160,32 @@ oct_Bool oct_BStringCString_equals(struct oct_Context* ctx, oct_BString str, con
 	return oct_True;
 }
 
-oct_Bool oct_String_asObject(struct oct_Context* ctx, oct_OString str, oct_OObject* out_object) {
+oct_Bool oct_String_asObjectOwned(struct oct_Context* ctx, oct_OString str, oct_OObject* out_object) {
 	out_object->self.self = str.ptr;
 	out_object->vtable = (oct_ObjectVTable*)ctx->rt->vtables.StringAsObject.ptr;
 	return oct_True;
 }
 
+oct_Bool oct_String_asHashableOwned(struct oct_Context* ctx, oct_OString str, oct_OHashable* out_hashable) {
+	out_hashable->self.self = str.ptr;
+	out_hashable->vtable = (oct_HashableVTable*)ctx->rt->vtables.StringAsHashable.ptr;
+	return oct_True;
+}
 
+oct_Bool oct_String_asEqComparableOwned(struct oct_Context* ctx, oct_OString str, oct_OEqComparable* out_eq) {
+	out_eq->self.self = str.ptr;
+	out_eq->vtable = (oct_EqComparableVTable*)ctx->rt->vtables.StringAsEqComparable.ptr;
+	return oct_True;
+}
 
+oct_Bool oct_String_asHashtableKeyOwned(struct oct_Context* ctx, oct_OString str, oct_OHashtableKey* out_key) {
+	out_key->self.self = str.ptr;
+	out_key->vtable = (oct_HashtableKeyVTable*)ctx->rt->vtables.StringAsHashtableKey.ptr;
+	return oct_True;
+}
 
-
-
-
-
-
-
+oct_Bool oct_String_asHashtableKeyBorrowed(struct oct_Context* ctx, oct_BString str, oct_BHashtableKey* out_key) {
+	out_key->self.self = str.ptr;
+	out_key->vtable = (oct_HashtableKeyVTable*)ctx->rt->vtables.StringAsHashtableKey.ptr;
+	return oct_True;
+}
