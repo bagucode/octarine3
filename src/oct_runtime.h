@@ -65,6 +65,9 @@ typedef struct oct_BuiltInTypes {
 	oct_BType String;
 	oct_BType OString; // TODO
 	oct_BType BString; // TODO
+	// Array
+	oct_BType Array;
+	oct_BType FixedSizeArray; // TODO
 } oct_BuiltInTypes;
 
 typedef struct oct_BuiltInVTables {

@@ -17,7 +17,6 @@ typedef struct oct_FixedSizeArrayType {
 
 struct oct_Context;
 
-oct_Bool _oct_ArrayType_initType(struct oct_Context* ctx);
-oct_Bool _oct_FixedSizeArrayType_initType(struct oct_Context* ctx);
+oct_Bool _oct_Array_init(struct oct_Context* ctx);
 
 #endif

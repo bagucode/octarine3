@@ -6,34 +6,29 @@
 
 #include <stddef.h>
 
-oct_Bool _oct_ArrayType_initType(struct oct_Context* ctx) {
-	oct_Type* at = ctx->rt->builtInTypes.ArrayType;
-	oct_Bool result;
-	at->variant = OCT_TYPE_STRUCT;
-	at->structType.alignment = 0;
-	at->structType.size = sizeof(oct_ArrayType);
-	result = oct_OAField_alloc(ctx, 1, &at->structType.fields);
-	if(!result) {
-		return result;
-	}
-	at->structType.fields.ptr->data[0].offset = offsetof(oct_ArrayType, elementType);
-	at->structType.fields.ptr->data[0].type.ptr = ctx->rt->builtInTypes.BType;
-	return oct_True;
-}
+#define CHECK(X) if(!X) return oct_False;
 
-oct_Bool _oct_FixedSizeArrayType_initType(struct oct_Context* ctx) {
-	oct_Type* fat = ctx->rt->builtInTypes.FixedSizeArrayType;
-	oct_Bool result;
-	fat->variant = OCT_TYPE_STRUCT;
-	fat->structType.alignment = 0;
-	fat->structType.size = sizeof(oct_FixedSizeArrayType);
-	result = oct_OAField_alloc(ctx, 2, &fat->structType.fields);
-	if(!result) {
-		return result;
-	}
-	fat->structType.fields.ptr->data[0].offset = offsetof(oct_FixedSizeArrayType, size);
-	fat->structType.fields.ptr->data[0].type.ptr = ctx->rt->builtInTypes.Uword;
-	fat->structType.fields.ptr->data[1].offset = offsetof(oct_FixedSizeArrayType, elementType);
-	fat->structType.fields.ptr->data[1].type.ptr = ctx->rt->builtInTypes.BType;
+oct_Bool _oct_Arra_init(struct oct_Context* ctx) {
+	oct_BType t = ctx->rt->builtInTypes.Array;
+
+	// Array
+	t.ptr->variant = OCT_TYPE_STRUCT;
+	t.ptr->structType.alignment = 0;
+	t.ptr->structType.size = sizeof(oct_ArrayType);
+	CHECK(oct_OAField_alloc(ctx, 1, &t.ptr->structType.fields));
+	t.ptr->structType.fields.ptr->data[0].offset = offsetof(oct_ArrayType, elementType);
+	t.ptr->structType.fields.ptr->data[0].type = ctx->rt->builtInTypes.BType;
+
+	// Fixed
+	t = ctx->rt->builtInTypes.FixedSizeArray;
+	t.ptr->variant = OCT_TYPE_STRUCT;
+	t.ptr->structType.alignment = 0;
+	t.ptr->structType.size = sizeof(oct_FixedSizeArrayType);
+	CHECK(oct_OAField_alloc(ctx, 2, &t.ptr->structType.fields));
+	t.ptr->structType.fields.ptr->data[0].offset = offsetof(oct_FixedSizeArrayType, size);
+	t.ptr->structType.fields.ptr->data[0].type = ctx->rt->builtInTypes.Uword;
+	t.ptr->structType.fields.ptr->data[1].offset = offsetof(oct_FixedSizeArrayType, elementType);
+	t.ptr->structType.fields.ptr->data[1].type = ctx->rt->builtInTypes.BType;
+
 	return oct_True;
 }
