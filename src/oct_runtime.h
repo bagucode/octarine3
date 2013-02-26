@@ -20,8 +20,6 @@ struct oct_Type;
 typedef struct oct_BuiltInTypes {
 	// Primitives
 	oct_BType U8;
-	oct_BType AU8; // TODO
-	oct_BType OAU8; // TODO
 	oct_BType I8;
 	oct_BType U16;
 	oct_BType I16;
@@ -63,11 +61,17 @@ typedef struct oct_BuiltInTypes {
 	oct_BType Object; // TODO
 	// String
 	oct_BType String;
-	oct_BType OString; // TODO
-	oct_BType BString; // TODO
+	oct_BType OString;
+	oct_BType BString;
 	// Array
 	oct_BType Array;
 	oct_BType FixedSizeArray; // TODO
+	// AChar
+	oct_BType AChar;
+	oct_BType OAChar;
+	// AU8
+	oct_BType AU8; // TODO
+	oct_BType OAU8; // TODO
 } oct_BuiltInTypes;
 
 typedef struct oct_BuiltInVTables {
