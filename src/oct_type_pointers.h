@@ -24,6 +24,8 @@ typedef struct oct_OABType {
 
 struct oct_Context;
 
+oct_Bool oct_ABType_createOwned(struct oct_Context* ctx, oct_Uword size, oct_OABType* out_result);
+
 //oct_Bool oct_OABType_alloc(struct oct_Context* ctx, oct_Uword size, oct_OABType* out_result);
 //
 //oct_Bool oct_Type_asObject(struct oct_Context* ctx, oct_OType type, oct_OObject* out_obj);

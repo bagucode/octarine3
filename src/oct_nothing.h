@@ -7,8 +7,6 @@ typedef struct oct_Nothing {
 	oct_Uword dummy;
 } oct_Nothing;
 
-// Private
-
 struct oct_Context;
 
 oct_Bool _oct_Nothing_initType(struct oct_Context* ctx);

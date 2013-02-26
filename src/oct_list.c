@@ -3,74 +3,65 @@
 #include "oct_type.h"
 #include "oct_context.h"
 #include "oct_exchangeheap.h"
-#include "oct_managedheap.h"
 #include "oct_object.h"
 #include "oct_object_vtable.h"
 
 #include <stddef.h>
 #include <stdlib.h>
 
-oct_Bool _oct_List_initType(struct oct_Context* ctx) {
-	oct_Type* t = ctx->rt->builtInTypes.List;
-	oct_Bool result;
-	t->variant = OCT_TYPE_STRUCT;
-	t->structType.alignment = 0;
-	t->structType.size = sizeof(oct_List);
-	result = oct_OAField_alloc(ctx, 2, &t->structType.fields);
-	if(!result) {
-		return result;
-	}
-	t->structType.fields.ptr->data[0].offset = offsetof(oct_List, data);
-	t->structType.fields.ptr->data[0].type.ptr = ctx->rt->builtInTypes.OObjectOption;
-	t->structType.fields.ptr->data[1].offset = offsetof(oct_List, next);
-	t->structType.fields.ptr->data[1].type.ptr = ctx->rt->builtInTypes.OListOption;
+#define CHECK(X) if(!X) return oct_False;
+
+oct_Bool _oct_List_init(struct oct_Context* ctx) {
+	// List
+	oct_BType t = ctx->rt->builtInTypes.List;
+	t.ptr->variant = OCT_TYPE_STRUCT;
+	t.ptr->structType.alignment = 0;
+	t.ptr->structType.size = sizeof(oct_List);
+	CHECK(oct_OAField_alloc(ctx, 2, &t.ptr->structType.fields));
+	t.ptr->structType.fields.ptr->data[0].offset = offsetof(oct_List, data);
+	t.ptr->structType.fields.ptr->data[0].type = ctx->rt->builtInTypes.OObjectOption;
+	t.ptr->structType.fields.ptr->data[1].offset = offsetof(oct_List, next);
+	t.ptr->structType.fields.ptr->data[1].type = ctx->rt->builtInTypes.OListOption;
+
+	// OList
+	t = ctx->rt->builtInTypes.OList;
+	t.ptr->variant = OCT_TYPE_POINTER;
+	t.ptr->pointerType.kind = OCT_POINTER_OWNED;
+	t.ptr->pointerType.type = ctx->rt->builtInTypes.List;
+
+	// BList
+	t = ctx->rt->builtInTypes.BList;
+	t.ptr->variant = OCT_TYPE_POINTER;
+	t.ptr->pointerType.kind = OCT_POINTER_BORROWED;
+	t.ptr->pointerType.type = ctx->rt->builtInTypes.List;
+
+	// OListOption
+	t = ctx->rt->builtInTypes.OListOption;
+    t.ptr->variant = OCT_TYPE_VARIADIC;
+    t.ptr->variadicType.alignment = 0;
+    t.ptr->variadicType.size = sizeof(oct_OListOption);
+    CHECK(oct_ABType_createOwned(ctx, 2, &t.ptr->variadicType.types));
+    t.ptr->variadicType.types.ptr->data[0] = ctx->rt->builtInTypes.Nothing;
+    t.ptr->variadicType.types.ptr->data[1] = ctx->rt->builtInTypes.OList;
+
+	// BListOption
+	t = ctx->rt->builtInTypes.BListOption;
+    t.ptr->variant = OCT_TYPE_VARIADIC;
+    t.ptr->variadicType.alignment = 0;
+    t.ptr->variadicType.size = sizeof(oct_BListOption);
+    CHECK(oct_ABType_createOwned(ctx, 2, &t.ptr->variadicType.types));
+    t.ptr->variadicType.types.ptr->data[0] = ctx->rt->builtInTypes.Nothing;
+    t.ptr->variadicType.types.ptr->data[1] = ctx->rt->builtInTypes.BList;
+
 	return oct_True;
 }
 
-oct_Bool _oct_OList_initType(struct oct_Context* ctx) {
-	oct_Type* t = ctx->rt->builtInTypes.OList;
-	t->variant = OCT_TYPE_POINTER;
-	t->pointerType.kind = OCT_POINTER_OWNED;
-	t->pointerType.type.ptr = ctx->rt->builtInTypes.List;
-	return oct_True;
-}
-
-oct_Bool _oct_MList_initType(struct oct_Context* ctx) {
-	oct_Type* t = ctx->rt->builtInTypes.MList;
-	t->variant = OCT_TYPE_POINTER;
-	t->pointerType.kind = OCT_POINTER_MANAGED;
-	t->pointerType.type.ptr = ctx->rt->builtInTypes.List;
-	return oct_True;
-}
-
-oct_Bool _oct_BList_initType(struct oct_Context* ctx) {
-	oct_Type* t = ctx->rt->builtInTypes.BList;
-	t->variant = OCT_TYPE_POINTER;
-	t->pointerType.kind = OCT_POINTER_BORROWED;
-	t->pointerType.type.ptr = ctx->rt->builtInTypes.List;
-	return oct_True;
-}
-
-oct_Bool _oct_OListOption_initType(struct oct_Context* ctx) {
-    oct_Type* t = ctx->rt->builtInTypes.OListOption;
-    oct_Bool result;
-    t->variant = OCT_TYPE_VARIADIC;
-    t->variadicType.alignment = 0;
-    t->variadicType.size = sizeof(oct_OListOption);
-    result = oct_OABType_alloc(ctx, 2, &t->variadicType.types);
-    if(!result) {
-        return oct_False;
-    }
-    t->variadicType.types.ptr->data[0].ptr = ctx->rt->builtInTypes.Nothing;
-    t->variadicType.types.ptr->data[1].ptr = ctx->rt->builtInTypes.OList;
-    return oct_True;
-}
 
 // Public
 
 // Create & Destroy
 oct_Bool oct_List_ctor(struct oct_Context* ctx, oct_List* self) {
-    self->data.variant = OCT_OBJECTOPTION_NOTHING;
+	self->data.variant = OCT_OBJECTOPTION_NOTHING;
     self->next.variant = OCT_LISTOPTION_NOTHING;
     return oct_True;
 }
@@ -106,15 +97,6 @@ oct_Bool oct_List_createOwned(struct oct_Context* ctx, oct_OList* out_result) {
         return oct_False;
     }
     return oct_List_ctor(ctx, out_result->ptr);
-}
-
-oct_Bool oct_List_createManaged(struct oct_Context* ctx, oct_MList* out_result) {
-	oct_BType bt;
-	bt.ptr = ctx->rt->builtInTypes.List;
-	if(!oct_ManagedHeap_alloc(ctx, bt, (void**)&out_result->ptr)) {
-		return oct_False;
-	}
-	return oct_List_ctor(ctx, out_result->ptr);
 }
 
 oct_Bool oct_List_destroyOwned(struct oct_Context* ctx, oct_OList lst) {

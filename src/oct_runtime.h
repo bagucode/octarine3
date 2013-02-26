@@ -59,6 +59,8 @@ typedef struct oct_BuiltInTypes {
 	oct_BType OABFunction; // TODO
 	// Object
 	oct_BType Object; // TODO
+	oct_BType OObject; // TODO
+	oct_BType OObjectOption; // TODO
 	// String
 	oct_BType String;
 	oct_BType OString;
@@ -72,6 +74,14 @@ typedef struct oct_BuiltInTypes {
 	// AU8
 	oct_BType AU8; // TODO
 	oct_BType OAU8; // TODO
+	// List
+	oct_BType List;
+	oct_BType OList;
+	oct_BType BList;
+	oct_BType OListOption;
+	oct_BType BListOption;
+	// Nothing
+	oct_BType Nothing; // TODO
 } oct_BuiltInTypes;
 
 typedef struct oct_BuiltInVTables {
