@@ -58,9 +58,10 @@ typedef struct oct_BuiltInTypes {
 	oct_BType ABFunction; // TODO
 	oct_BType OABFunction; // TODO
 	// Object
-	oct_BType Object; // TODO
-	oct_BType OObject; // TODO
-	oct_BType OObjectOption; // TODO
+	oct_BType Object;
+	oct_BType OObject;
+	oct_BType BObject;
+	oct_BType OObjectOption;
 	// String
 	oct_BType String;
 	oct_BType OString;

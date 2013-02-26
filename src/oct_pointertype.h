@@ -4,10 +4,13 @@
 #include "oct_primitives.h"
 #include "oct_type_pointers.h"
 
-// These have to be 1-bit flags or oct_Any will break
 #define OCT_POINTER_BORROWED 0
 #define OCT_POINTER_OWNED 1
 #define OCT_POINTER_MANAGED 2
+
+#define OCT_POINTER_BORROWED_PROTOCOL 3
+#define OCT_POINTER_OWNED_PROTOCOL 4
+#define OCT_POINTER_MANAGED_PROTOCOL 5
 
 typedef struct oct_PointerType {
 	oct_Uword kind; // OCT_POINTER_*

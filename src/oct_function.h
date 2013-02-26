@@ -25,7 +25,6 @@ struct oct_Context;
 
 oct_Bool _oct_Function_init(struct oct_Context* ctx);
 
-// ... expects a null-terminated array of oct_BType
-oct_Bool _oct_Function_construct(struct oct_Context* ctx, oct_BType fn, const char* name, oct_BType retType, ...);
+oct_Bool oct_ABFunction_createOwned(struct oct_Context* ctx, oct_Uword size, oct_OABFunction* out_result);
 
 #endif
