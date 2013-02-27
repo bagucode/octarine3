@@ -43,8 +43,10 @@ typedef struct oct_BuiltInTypes {
 	oct_BType OHashtable; // TYPE, INIT
 	oct_BType BHashtable; // TYPE, INIT
 	// Type
-	oct_BType Type; // TYPE, INIT
-	oct_BType BType; // TYPE, INIT
+	oct_BType Type; // INIT
+	oct_BType BType; // INIT
+	oct_BType ABType; // INIT
+	oct_BType OABType; // INIT
 	// Protocol
 	oct_BType Protocol; // INIT
 	oct_BType VTable; // INIT
@@ -95,6 +97,10 @@ typedef struct oct_BuiltInTypes {
 	oct_BType OSymbol; // INIT
 	oct_BType BSymbol; // INIT
 	oct_BType OSymbolOption; // INIT
+	// Prototype
+	oct_BType Prototype; // TYPE, INIT
+	// Variadic
+	oct_BType Variadic; // TYPE, INIT
 } oct_BuiltInTypes;
 
 typedef struct oct_BuiltInVTables {
