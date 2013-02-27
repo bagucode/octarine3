@@ -26,6 +26,10 @@ struct oct_Context;
 
 oct_Bool oct_ABType_createOwned(struct oct_Context* ctx, oct_Uword size, oct_OABType* out_result);
 
+struct oct_BHashtableKey;
+
+oct_Bool oct_BType_asHashtableKey(struct oct_Context* ctx, oct_BType self, struct oct_BHashtableKey* key);
+
 //oct_Bool oct_OABType_alloc(struct oct_Context* ctx, oct_Uword size, oct_OABType* out_result);
 //
 //oct_Bool oct_Type_asObject(struct oct_Context* ctx, oct_OType type, oct_OObject* out_obj);

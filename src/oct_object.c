@@ -41,14 +41,26 @@ oct_Bool _oct_Object_init(struct oct_Context* ctx) {
 	return oct_True;
 }
 
-// The output is untyped because C does not have templates but the output should be safe to manually cast to the given protocol
-oct_Bool oct_Object_as(struct oct_Context* ctx, oct_BSelf object, oct_BType selfType, oct_BProtocolBinding protocol, oct_BObject* out_casted);
+// The output is BObject because C does not have templates but the output should be safe to manually cast to the given protocol
+oct_Bool oct_Object_as(oct_Context* ctx, oct_BSelf object, oct_BType selfType, oct_BProtocolBinding protocol, oct_BObject* out_casted) {
+	oct_BHashtable table;
+	oct_BHashtableKey key;
+	oct_BObject vtableObject;
+
+	table.ptr = &protocol.ptr->implementations;
+	CHECK(oct_BType_asHashtableKey(ctx, selfType, &key));
+	// TODO: change hashtable to return OObjectOption/BObjectOption instead of just OObject/BObject
+	CHECK(oct_Hashtable_borrow(ctx, table, key, &vtableObject));
+	out_casted->self = object;
+	out_casted->vtable = (oct_ObjectVTable*)vtableObject.self.self;
+	return oct_True;
+}
 
 // The output is untyped because C does not have templates but the output should be safe to manually
 // cast to the given protocol
-oct_Bool oct_Object_as(struct oct_Context* ctx, oct_BSelf object, oct_BType type, oct_BType protocol, oct_BObject* out_casted);
+oct_Bool oct_Object_as(oct_Context* ctx, oct_BSelf object, oct_BType type, oct_BType protocol, oct_BObject* out_casted);
 
-oct_Bool oct_Object_destroyOwned(struct oct_Context* ctx, oct_OObject obj);
+oct_Bool oct_Object_destroyOwned(oct_Context* ctx, oct_OObject obj);
 
 
 //oct_Bool _oct_Object_initType(struct oct_Context* ctx) {

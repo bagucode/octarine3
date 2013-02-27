@@ -3,6 +3,7 @@
 
 #include "oct_function.h"
 #include "oct_hashtable.h"
+#include "oct_protocolbindingpointers.h"
 
 // The definition of a protocol is just a set of function signatures
 // for functions that operate primarily on an object of the same type,
@@ -31,11 +32,6 @@ typedef struct oct_ProtocolBinding {
 	oct_BType protocolType;
 	oct_Hashtable implementations;
 } oct_ProtocolBinding;
-
-// Only borrowed pointer with global scope. These are never deleted.
-typedef struct oct_BProtocolBinding {
-	oct_ProtocolBinding* ptr;
-} oct_BProtocolBinding;
 
 struct oct_Context;
 

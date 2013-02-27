@@ -5,7 +5,7 @@
 #include "oct_primitives.h"
 #include "oct_type_pointers.h"
 #include "oct_nothing.h"
-#include "oct_protocoltype.h"
+#include "oct_protocolbindingpointers.h"
 
 typedef struct oct_ObjectVTable {
 	oct_BType type;
@@ -36,7 +36,7 @@ struct oct_Context;
 
 oct_Bool _oct_Object_init(struct oct_Context* ctx);
 
-// The output is untyped because C does not have templates but the output should be safe to manually cast to the given protocol
+// The output is BObject because C does not have templates but the output should be safe to manually cast to the given protocol
 oct_Bool oct_Object_as(struct oct_Context* ctx, oct_BSelf object, oct_BType selfType, oct_BProtocolBinding protocol, oct_BObject* out_casted);
 
 oct_Bool oct_Object_destroyOwned(struct oct_Context* ctx, oct_OObject obj);
