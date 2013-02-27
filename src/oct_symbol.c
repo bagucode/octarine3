@@ -17,7 +17,7 @@ oct_Bool _oct_Symbol_init(oct_Context* ctx) {
 	t.ptr->variant = OCT_TYPE_STRUCT;
 	t.ptr->structType.alignment = 0;
 	t.ptr->structType.size = sizeof(oct_Symbol);
-	CHECK(oct_OAField_alloc(ctx, 1, &t.ptr->structType.fields));
+	CHECK(oct_AField_createOwned(ctx, 1, &t.ptr->structType.fields));
 	t.ptr->structType.fields.ptr->data[0].offset = offsetof(oct_Symbol, name);
 	t.ptr->structType.fields.ptr->data[0].type = ctx->rt->builtInTypes.OString;
 

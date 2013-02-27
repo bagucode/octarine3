@@ -8,7 +8,7 @@ static oct_Bool createPrimitiveType(oct_Context* ctx, oct_BType* t, oct_Uword si
 	t->ptr->variant = OCT_TYPE_STRUCT;
 	t->ptr->structType.size = size;
 	t->ptr->structType.alignment = alignment;
-	return oct_OAField_alloc(ctx, 0, &t->ptr->structType.fields);
+	return oct_AField_createOwned(ctx, 0, &t->ptr->structType.fields);
 }
 
 oct_Bool _oct_Primitives_initType(struct oct_Context* ctx) {

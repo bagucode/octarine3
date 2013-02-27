@@ -11,5 +11,5 @@ oct_Bool _oct_Nothing_initType(struct oct_Context* ctx) {
 	t->variant = OCT_TYPE_STRUCT;
 	t->structType.alignment = 0;
 	t->structType.size = sizeof(oct_Nothing);
-	return oct_OAField_alloc(ctx, 0, &t->structType.fields);
+	return oct_AField_createOwned(ctx, 0, &t->structType.fields);
 }

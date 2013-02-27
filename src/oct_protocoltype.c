@@ -16,7 +16,7 @@ oct_Bool _oct_Protocol_init(struct oct_Context* ctx) {
 	t.ptr->variant = OCT_TYPE_STRUCT;
 	t.ptr->structType.size = sizeof(oct_ProtocolType);
 	t.ptr->structType.alignment = 0;
-	CHECK(oct_OAField_alloc(ctx, 1, &t.ptr->structType.fields));
+	CHECK(oct_AField_createOwned(ctx, 1, &t.ptr->structType.fields));
 	t.ptr->structType.fields.ptr->data[0].offset = offsetof(oct_ProtocolType, functions);
 	t.ptr->structType.fields.ptr->data[0].type = ctx->rt->builtInTypes.OABFunction;
 
@@ -27,7 +27,7 @@ oct_Bool _oct_Protocol_init(struct oct_Context* ctx) {
 	t.ptr->variant = OCT_TYPE_STRUCT;
 	t.ptr->structType.size = sizeof(oct_VTable);
 	t.ptr->structType.alignment = 0;
-	CHECK(oct_OAField_alloc(ctx, 1, &t.ptr->structType.fields));
+	CHECK(oct_AField_createOwned(ctx, 1, &t.ptr->structType.fields));
 	t.ptr->structType.fields.ptr->data[0].offset = offsetof(oct_VTable, objectType);
 	t.ptr->structType.fields.ptr->data[0].type = ctx->rt->builtInTypes.BType;
 
@@ -42,7 +42,7 @@ oct_Bool _oct_Protocol_init(struct oct_Context* ctx) {
 	t.ptr->variant = OCT_TYPE_STRUCT;
 	t.ptr->structType.size = sizeof(oct_ProtocolBinding);
 	t.ptr->structType.alignment = 0;
-	CHECK(oct_OAField_alloc(ctx, 2, &t.ptr->structType.fields));
+	CHECK(oct_AField_createOwned(ctx, 2, &t.ptr->structType.fields));
 	t.ptr->structType.fields.ptr->data[0].offset = offsetof(oct_ProtocolBinding, protocolType);
 	t.ptr->structType.fields.ptr->data[0].type = ctx->rt->builtInTypes.BType;
 	t.ptr->structType.fields.ptr->data[1].offset = offsetof(oct_ProtocolBinding, implementations);
@@ -84,11 +84,11 @@ oct_Bool oct_Protocol_addImplementation(struct oct_Context* ctx, oct_BProtocolBi
 	oct_BSelf self;
 
 	self.self = type.ptr;
-	if(!oct_Object_as(ctx, self, ctx->rt->builtInTypes.Type, ctx->rt->builtInTypes.HashtableKey, (oct_BObject*)&key)) {
+	if(!oct_Object_as(ctx, self, ctx->rt->builtInTypes.Type, ctx->rt->builtInProtocols.HashtableKey, (oct_BObject*)&key)) {
 		return oct_False;
 	}
 	self.self = vtable.ptr;
-	if(!oct_Object_as(ctx, self, ctx->rt->builtInTypes.VTable, ctx->rt->builtInTypes.Object, (oct_BObject*)&val)) {
+	if(!oct_Object_as(ctx, self, ctx->rt->builtInTypes.VTable, ctx->rt->builtInProtocols.Object, (oct_BObject*)&val)) {
 		return oct_False;
 	}
 

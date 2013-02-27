@@ -123,7 +123,7 @@ end:
 //	t->variant = OCT_TYPE_STRUCT;
 //	t->structType.alignment = 0;
 //	t->structType.size = sizeof(oct_NamespaceBinding);
-//	CHECK(oct_OAField_alloc(ctx, 2, &t->structType.fields));
+//	CHECK(oct_AField_createOwned(ctx, 2, &t->structType.fields));
 //	t->structType.fields.ptr->data[0].offset = offsetof(oct_NamespaceBinding, sym);
 //	t->structType.fields.ptr->data[0].type.ptr = ctx->rt->builtInTypes.Symbol;
 //	t->structType.fields.ptr->data[1].offset = offsetof(oct_NamespaceBinding, obj);
@@ -150,7 +150,7 @@ end:
 //	t->variant = OCT_TYPE_STRUCT;
 //	t->structType.alignment = 0;
 //	t->structType.size = sizeof(oct_Namespace);
-//	CHECK(oct_OAField_alloc(ctx, 1, &t->structType.fields));
+//	CHECK(oct_AField_createOwned(ctx, 1, &t->structType.fields));
 //	t->structType.fields.ptr->data[0].offset = offsetof(oct_Namespace, bindings);
 //	t->structType.fields.ptr->data[0].type.ptr = ctx->rt->builtInTypes.OANamespaceBinding;
 //	return oct_True;

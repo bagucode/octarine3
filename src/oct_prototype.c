@@ -11,7 +11,7 @@ oct_Bool _oct_ProtoType_initType(struct oct_Context* ctx) {
 	t->variant = OCT_TYPE_STRUCT;
 	t->structType.alignment = 0;
 	t->structType.size = sizeof(oct_ProtoType);
-	result = oct_OAField_alloc(ctx, 1, &t->structType.fields);
+	result = oct_AField_createOwned(ctx, 1, &t->structType.fields);
 	if(!result) {
 		return result;
 	}

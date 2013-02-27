@@ -12,7 +12,7 @@ oct_Bool _oct_VariadicType_init(struct oct_Context* ctx) {
 	t.ptr->variant = OCT_TYPE_STRUCT;
 	t.ptr->structType.alignment = 0;
 	t.ptr->structType.size = sizeof(oct_VariadicType);
-    CHECK(oct_OAField_alloc(ctx, 3, &t.ptr->structType.fields));
+    CHECK(oct_AField_createOwned(ctx, 3, &t.ptr->structType.fields));
 	t.ptr->structType.fields.ptr->data[0].offset = offsetof(oct_VariadicType, alignment);
 	t.ptr->structType.fields.ptr->data[0].type = ctx->rt->builtInTypes.Uword;
 	t.ptr->structType.fields.ptr->data[1].offset = offsetof(oct_VariadicType, size);

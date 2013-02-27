@@ -23,18 +23,16 @@ typedef struct oct_OAField {
 
 struct oct_Context;
 
-oct_Bool _oct_Field_initType(struct oct_Context* ctx);
-oct_Bool _oct_AField_initType(struct oct_Context* ctx);
-oct_Bool _oct_OAField_initType(struct oct_Context* ctx);
+oct_Bool _oct_Field_init(struct oct_Context* ctx);
 
 // Public
 
-oct_Bool oct_Field_ctor(struct oct_Context* ctx, oct_Field* field);
+//oct_Bool oct_Field_ctor(struct oct_Context* ctx, oct_Field* field);
 
-oct_Bool oct_Field_dtor(struct oct_Context* ctx, oct_Field* field);
+//oct_Bool oct_Field_dtor(struct oct_Context* ctx, oct_Field* field);
 
-oct_Bool oct_OAField_alloc(struct oct_Context* ctx, oct_Uword size, oct_OAField* out_result);
+oct_Bool oct_AField_createOwned(struct oct_Context* ctx, oct_Uword size, oct_OAField* out_result);
 
-oct_Bool oct_OAField_free(struct oct_Context* ctx, oct_OAField oafield);
+oct_Bool oct_AField_destroyOwned(struct oct_Context* ctx, oct_OAField oafield);
 
 #endif
