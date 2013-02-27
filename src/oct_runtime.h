@@ -74,8 +74,8 @@ typedef struct oct_BuiltInTypes {
 	oct_BType AChar; // INIT
 	oct_BType OAChar; // INIT
 	// AU8
-	oct_BType AU8; // TYPE, INIT
-	oct_BType OAU8; // TYPE, INIT
+	oct_BType AU8; // INIT
+	oct_BType OAU8; // INIT
 	// List
 	oct_BType List; // INIT
 	oct_BType OList; // INIT
@@ -101,6 +101,10 @@ typedef struct oct_BuiltInTypes {
 	oct_BType Prototype; // TYPE, INIT
 	// Variadic
 	oct_BType Variadic; // TYPE, INIT
+	// Error
+	oct_BType Error; // INIT
+	oct_BType OError; // INIT
+	oct_BType OErrorOption; // INIT
 } oct_BuiltInTypes;
 
 typedef struct oct_BuiltInVTables {

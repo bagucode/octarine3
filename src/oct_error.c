@@ -9,38 +9,30 @@
 #define CHECK(X) if(!X) return oct_False;
 
 oct_Bool _oct_Error_initType(struct oct_Context* ctx) {
-	oct_Type* t = ctx->rt->builtInTypes.Error;
+	oct_BType t = ctx->rt->builtInTypes.Error;
 
-	t->variant = OCT_TYPE_STRUCT;
-	t->structType.alignment = 0;
-	t->structType.size = sizeof(oct_Error);
-	CHECK(oct_OAField_alloc(ctx, 1, &t->structType.fields));
-	t->structType.fields.ptr->data[0].offset = offsetof(oct_Error, message);
-	t->structType.fields.ptr->data[0].type.ptr = ctx->rt->builtInTypes.OString;
-	return oct_True;
-}
+	// Error
+	t.ptr->variant = OCT_TYPE_STRUCT;
+	t.ptr->structType.alignment = 0;
+	t.ptr->structType.size = sizeof(oct_Error);
+	CHECK(oct_OAField_alloc(ctx, 1, &t.ptr->structType.fields));
+	t.ptr->structType.fields.ptr->data[0].offset = offsetof(oct_Error, message);
+	t.ptr->structType.fields.ptr->data[0].type = ctx->rt->builtInTypes.OString;
 
-oct_Bool _oct_OError_initType(struct oct_Context* ctx) {
-	ctx->rt->builtInTypes.OError->variant = OCT_TYPE_POINTER;
-	ctx->rt->builtInTypes.OError->pointerType.kind = OCT_POINTER_OWNED;
-	ctx->rt->builtInTypes.OError->pointerType.type.ptr = ctx->rt->builtInTypes.Error;
-	return oct_True;
-}
+	// OError
+	ctx->rt->builtInTypes.OError.ptr->variant = OCT_TYPE_POINTER;
+	ctx->rt->builtInTypes.OError.ptr->pointerType.kind = OCT_POINTER_OWNED;
+	ctx->rt->builtInTypes.OError.ptr->pointerType.type = ctx->rt->builtInTypes.Error;
 
-oct_Bool _oct_ErrorOption_initType(struct oct_Context* ctx) {
-	oct_Type* t = ctx->rt->builtInTypes.ErrorOption;
+	// OErrorOption
+	t = ctx->rt->builtInTypes.OErrorOption;
+	t.ptr->variant = OCT_TYPE_VARIADIC;
+	t.ptr->variadicType.alignment = 0;
+	t.ptr->variadicType.size = sizeof(oct_OErrorOption);
+	CHECK(oct_ABType_createOwned(ctx, 2, &t.ptr->variadicType.types));
+	t.ptr->variadicType.types.ptr->data[0] = ctx->rt->builtInTypes.Nothing;
+	t.ptr->variadicType.types.ptr->data[1] = ctx->rt->builtInTypes.OError;
 
-	t->variant = OCT_TYPE_VARIADIC;
-	t->variadicType.alignment = 0;
-	t->variadicType.size = sizeof(oct_ErrorOption);
-	CHECK(oct_OABType_alloc(ctx, 2, &t->variadicType.types));
-	t->variadicType.types.ptr->data[0].ptr = ctx->rt->builtInTypes.Nothing;
-	t->variadicType.types.ptr->data[1].ptr = ctx->rt->builtInTypes.OError;
-	return oct_True;
-}
-
-oct_Bool oct_Error_ctor(struct oct_Context* ctx, oct_OString message, oct_Error* err) {
-	err->message.ptr = message.ptr;
 	return oct_True;
 }
 
