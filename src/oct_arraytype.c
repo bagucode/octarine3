@@ -8,7 +8,7 @@
 
 #define CHECK(X) if(!X) return oct_False;
 
-oct_Bool _oct_Arra_init(struct oct_Context* ctx) {
+oct_Bool _oct_Array_init(struct oct_Context* ctx) {
 	oct_BType t = ctx->rt->builtInTypes.Array;
 
 	// Array
