@@ -13,6 +13,6 @@ typedef struct oct_VariadicType {
 
 struct oct_Context;
 
-oct_Bool _oct_VariadicType_initType(struct oct_Context* ctx);
+oct_Bool _oct_VariadicType_init(struct oct_Context* ctx);
 
 #endif
