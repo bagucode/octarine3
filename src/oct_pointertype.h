@@ -19,6 +19,6 @@ typedef struct oct_PointerType {
 
 struct oct_Context;
 
-oct_Bool _oct_PointerType_initType(struct oct_Context* ctx);
+oct_Bool _oct_PointerType_init(struct oct_Context* ctx);
 
 #endif
