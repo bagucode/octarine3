@@ -16,11 +16,10 @@ struct oct_Context;
 
 // Private
 
-oct_Bool _oct_AU8_initType(struct oct_Context* ctx);
-oct_Bool _oct_OAU8_initType(struct oct_Context* ctx);
+oct_Bool _oct_AU8_init(struct oct_Context* ctx);
 
 // Public
 
-oct_Bool oct_OAU8_alloc(struct oct_Context* ctx, oct_Uword size, oct_OAU8* out_result);
+oct_Bool oct_AU8_createOwned(struct oct_Context* ctx, oct_Uword size, oct_OAU8* out_result);
 
 #endif
