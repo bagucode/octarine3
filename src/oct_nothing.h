@@ -9,6 +9,6 @@ typedef struct oct_Nothing {
 
 struct oct_Context;
 
-oct_Bool _oct_Nothing_initType(struct oct_Context* ctx);
+oct_Bool _oct_Nothing_init(struct oct_Context* ctx);
 
 #endif
