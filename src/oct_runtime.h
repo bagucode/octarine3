@@ -101,15 +101,15 @@ typedef struct oct_BuiltInVTables {
 	// Protocol
 	oct_BVTable ProtocolBindingAsObject;
 	// String
-	oct_BVTable StringAsObject; // TODO
-	oct_BVTable StringAsEqComparable; // TODO
-	oct_BVTable StringAsHashable; // TODO
-	oct_BVTable StringAsHashtableKey; // TODO
+	oct_BVTable StringAsObject;
+	oct_BVTable StringAsEqComparable;
+	oct_BVTable StringAsHashable;
+	oct_BVTable StringAsHashtableKey;
 	// Symbol
-	oct_BVTable SymbolAsObject; // TODO
-	oct_BVTable SymbolAsEqComparable; // TODO
-	oct_BVTable SymbolAsHashable; // TODO
-	oct_BVTable SymbolAsHashtableKey; // TODO
+	oct_BVTable SymbolAsObject;
+	oct_BVTable SymbolAsEqComparable;
+	oct_BVTable SymbolAsHashable;
+	oct_BVTable SymbolAsHashtableKey;
 } oct_BuiltInVTables;
 
 typedef struct oct_BuiltInProtocols {
