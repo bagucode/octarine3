@@ -11,6 +11,6 @@ typedef struct oct_ProtoType {
 
 struct oct_Context;
 
-oct_Bool _oct_ProtoType_initType(struct oct_Context* ctx);
+oct_Bool _oct_ProtoType_init(struct oct_Context* ctx);
 
 #endif
