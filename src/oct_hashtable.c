@@ -18,7 +18,10 @@
 */
 
 oct_Bool _oct_Hashtable_init(struct oct_Context* ctx) {
-	oct_BuiltInTypes* bit = &ctx->rt->builtInTypes;
+
+	// Hashtable
+	oct_BType t = ctx->rt->builtInTypes.Hashtable;
+
 
 	//_oct_Function_construct(ctx, 
 	//_oct_Protocol_construct(ctx, bit->HashtableKey, 

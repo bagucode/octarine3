@@ -61,6 +61,34 @@ oct_Bool oct_ABType_createOwned(struct oct_Context* ctx, oct_Uword size, oct_OAB
 	return oct_True;
 }
 
+oct_Bool oct_Type_sizeOf(struct oct_Context* ctx, oct_BType type, oct_Uword* out_size) {
+	oct_Uword elementSize;
+	switch(type.ptr->variant) {
+	case OCT_TYPE_PROTO:
+		*out_size = sizeof(void*);
+		break;
+	case OCT_TYPE_PROTOCOL:
+		*out_size = sizeof(void*) * 2;
+		break;
+	case OCT_TYPE_POINTER:
+		*out_size = sizeof(void*);
+		break;
+	case OCT_TYPE_VARIADIC:
+		*out_size = type.ptr->variadicType.size;
+		break;
+	case OCT_TYPE_STRUCT:
+		*out_size = type.ptr->structType.size;
+		break;
+	case OCT_TYPE_FIXED_SIZE_ARRAY:
+		oct_Type_sizeOf(ctx, type.ptr->fixedSizeArray.elementType, &elementSize);
+		*out_size = type.ptr->fixedSizeArray.size * elementSize;
+		break;
+	case OCT_TYPE_ARRAY:
+		*out_size = 0; // incorrect, but the actual size is unknown without looking at the instance
+		break;
+	}
+	return oct_True;
+}
 
 
 

@@ -48,9 +48,9 @@ typedef struct oct_Hashtable {
 	oct_OAHashtableEntry table;
 } oct_Hashtable;
 
-typedef struct oct_OHashtable {
-	oct_Hashtable* ptr;
-} oct_OHashtable;
+//typedef struct oct_OHashtable {
+//	oct_Hashtable* ptr;
+//} oct_OHashtable;
 
 typedef struct oct_BHashtable {
 	oct_Hashtable* ptr;

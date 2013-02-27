@@ -17,7 +17,7 @@ typedef struct oct_Context {
 
 // Private
 
-oct_Bool _oct_Context_initType(oct_Context* ctx);
+oct_Bool _oct_Context_init(oct_Context* ctx);
 
 // Public
 

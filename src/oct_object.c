@@ -288,35 +288,6 @@ typedef struct Array {
 	oct_U8 data[];
 } Array;
 
-static oct_Bool oct_sizeOf(oct_Context* ctx, oct_BType type, oct_Uword* out_size) {
-	oct_Uword elementSize;
-	switch(type.ptr->variant) {
-	case OCT_TYPE_PROTO:
-		*out_size = sizeof(void*);
-		break;
-	case OCT_TYPE_PROTOCOL:
-		*out_size = sizeof(void*) * 2;
-		break;
-	case OCT_TYPE_POINTER:
-		*out_size = sizeof(void*);
-		break;
-	case OCT_TYPE_VARIADIC:
-		*out_size = type.ptr->variadicType.size;
-		break;
-	case OCT_TYPE_STRUCT:
-		*out_size = type.ptr->structType.size;
-		break;
-	case OCT_TYPE_FIXED_SIZE_ARRAY:
-		oct_sizeOf(ctx, type.ptr->fixedSizeArray.elementType, &elementSize);
-		*out_size = type.ptr->fixedSizeArray.size * elementSize;
-		break;
-	case OCT_TYPE_ARRAY:
-		*out_size = 0; // incorrect, but the actual size is unknown without looking at the instance
-		break;
-	}
-	return oct_True;
-}
-
 static oct_Bool findEmbeddedPointers(oct_Context* ctx, oct_Type* type, void* object, FieldPointerArray* pointerArray, oct_Uword offset) {
 	Pointer* ptr;
 	Variadic* var;
@@ -352,7 +323,7 @@ static oct_Bool findEmbeddedPointers(oct_Context* ctx, oct_Type* type, void* obj
         }
         return oct_True;
 	case OCT_TYPE_FIXED_SIZE_ARRAY:
-		oct_sizeOf(ctx, type->fixedSizeArray.elementType, &elemSize);
+		oct_Type_sizeOf(ctx, type->fixedSizeArray.elementType, &elemSize);
 		for(i = 0; i < type->fixedSizeArray.size; ++i) {
 			offset += elemSize * i;
 			if(!findEmbeddedPointers(ctx, type->fixedSizeArray.elementType.ptr, object, pointerArray, offset)) {
@@ -362,7 +333,7 @@ static oct_Bool findEmbeddedPointers(oct_Context* ctx, oct_Type* type, void* obj
 		return oct_True;
 	case OCT_TYPE_ARRAY:
 		arr = (Array*)object;
-		oct_sizeOf(ctx, type->arrayType.elementType, &elemSize);
+		oct_Type_sizeOf(ctx, type->arrayType.elementType, &elemSize);
 		for(i = 0; i < arr->size; ++i) {
 			offset += elemSize * i;
 			if(!findEmbeddedPointers(ctx, type->arrayType.elementType.ptr, &arr->data[0], pointerArray, offset)) {
