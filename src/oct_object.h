@@ -39,6 +39,10 @@ oct_Bool _oct_Object_init(struct oct_Context* ctx);
 // The output is BObject because C does not have templates but the output should be safe to manually cast to the given protocol
 oct_Bool oct_Object_as(struct oct_Context* ctx, oct_BSelf object, oct_BType selfType, oct_BProtocolBinding protocol, oct_BObject* out_casted);
 
+typedef oct_Bool(*oct_PostwalkFn)(struct oct_Context* ctx, oct_OSelf obj, oct_BType objType, oct_OSelf* out_result);
+
+oct_Bool oct_Object_postWalk(struct oct_Context* ctx, oct_OSelf root, oct_BType rootType, oct_PostwalkFn fn);
+
 oct_Bool oct_Object_destroyOwned(struct oct_Context* ctx, oct_OObject obj);
 
 #endif
