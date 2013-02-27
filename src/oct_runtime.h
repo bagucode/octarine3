@@ -84,7 +84,7 @@ typedef struct oct_BuiltInTypes {
 	// Nothing
 	oct_BType Nothing; // TODO
 	// Pointer
-	oct_BType Pointer; // TODO
+	oct_BType Pointer;
 } oct_BuiltInTypes;
 
 typedef struct oct_BuiltInVTables {
