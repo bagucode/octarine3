@@ -7,7 +7,6 @@
 #include "oct_function.h"
 
 #include <stddef.h>
-#include <stdlib.h>
 #include <memory.h>
 
 #define CHECK(X) if(!X) return oct_False;
@@ -246,11 +245,12 @@ static oct_Bool FieldPointerArray_Create(oct_Context* ctx, FieldPointerArray* fp
 	return oct_True;
 }
 
-static void FieldPointerArray_Destroy(FieldPointerArray* fpa) {
-	free(fpa->data);
+static oct_Bool FieldPointerArray_Destroy(oct_Context* ctx, FieldPointerArray* fpa) {
+	CHECK(oct_ExchangeHeap_freeRaw(ctx, fpa->data));
 	fpa->capacity = 0;
 	fpa->data = NULL;
 	fpa->size = 0;
+	return oct_True;
 }
 
 static oct_Bool FieldPointerArray_Add(oct_Context* ctx, FieldPointerArray* fpa, FieldPointer fp) {
@@ -265,7 +265,7 @@ static oct_Bool FieldPointerArray_Add(oct_Context* ctx, FieldPointerArray* fpa, 
 			return oct_False;
 		}
 		memcpy(newArray, fpa->data, fpa->capacity);
-		free(fpa->data);
+		CHECK(oct_ExchangeHeap_freeRaw(ctx, fpa->data));
 		fpa->capacity = newCap;
 		fpa->data = newArray;
 	}
@@ -404,15 +404,16 @@ static oct_Bool FrameStack_Create(oct_Context* ctx, FrameStack* stack, oct_Uword
 
 static oct_Bool FrameStack_Destroy(oct_Context* ctx, FrameStack* stack) {
 	oct_Uword i;
+	oct_Bool result = oct_True;
 
 	for(i = 0; i < stack->top; ++i) {
-        FieldPointerArray_Destroy(&stack->stack[i].fieldPointers);
+        result = FieldPointerArray_Destroy(ctx, &stack->stack[i].fieldPointers) && result;
 	}
-    CHECK(oct_ExchangeHeap_freeRaw(ctx, stack->stack));
+    result = oct_ExchangeHeap_freeRaw(ctx, stack->stack) && result;
 	stack->capacity = 0;
 	stack->top = 0;
 	stack->stack = NULL;
-	return oct_True;
+	return result;
 }
 
 static oct_Bool FrameStack_Push(oct_Context* ctx, FrameStack* stack, FrameStackEntry* entry) {
@@ -539,7 +540,7 @@ oct_Bool oct_Object_preWalk(oct_Context* ctx, oct_OSelf root, oct_BType rootType
 				embeddedPtr = (void**)(((char*)currentFrame.updated.self) + currentFrame.fieldPointers.data[i].offset);
                 *embeddedPtr = PointerTranslationTable_Get(&ptt, *embeddedPtr);
             }
-            FieldPointerArray_Destroy(&currentFrame.fieldPointers);
+            CHECK(FieldPointerArray_Destroy(ctx, &currentFrame.fieldPointers));
             // Pop previous frame off stack
             if(FrameStack_Pop(&stack, &currentFrame) == oct_False) {
                 // All done!
