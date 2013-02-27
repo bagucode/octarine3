@@ -18,79 +18,83 @@ typedef struct oct_ContextList {
 struct oct_Type;
 
 typedef struct oct_BuiltInTypes {
-	// Primitives
-	oct_BType U8;
-	oct_BType I8;
-	oct_BType U16;
-	oct_BType I16;
-	oct_BType U32;
-	oct_BType I32;
-	oct_BType U64;
-	oct_BType I64;
-	oct_BType F32;
-	oct_BType F64;
-	oct_BType Uword;
-	oct_BType Word;
-	oct_BType Char;
-	oct_BType Bool;
+	oct_BType U8; // INIT
+	oct_BType I8; // INIT
+	oct_BType U16; // INIT
+	oct_BType I16; // INIT
+	oct_BType U32; // INIT
+	oct_BType I32; // INIT
+	oct_BType U64; // INIT
+	oct_BType I64; // INIT
+	oct_BType F32; // INIT
+	oct_BType F64; // INIT
+	oct_BType Uword; // INIT
+	oct_BType Word; // INIT
+	oct_BType Char; // INIT
+	oct_BType Bool; // INIT
 	// Hashtable
-	oct_BType HashtableKey; // TODO
-	oct_BType OHashtableKey; // TODO
-	oct_BType BHashtableKey; // TODO
-	oct_BType HashtableEntry; // TODO
-	oct_BType AHashtableEntry; // TODO
-	oct_BType OAHashtableEntry; // TODO
-	oct_BType Hashtable; // TODO
-	oct_BType OHashtable; // TODO
-	oct_BType BHashtable; // TODO
+	oct_BType HashtableKey; // TYPE, INIT
+	oct_BType OHashtableKey; // TYPE, INIT
+	oct_BType BHashtableKey; // TYPE, INIT
+	oct_BType HashtableEntry; // TYPE, INIT
+	oct_BType AHashtableEntry; // TYPE, INIT
+	oct_BType OAHashtableEntry; // TYPE, INIT
+	oct_BType Hashtable; // TYPE, INIT
+	oct_BType OHashtable; // TYPE, INIT
+	oct_BType BHashtable; // TYPE, INIT
 	// Type
-	oct_BType Type; // TODO
-	oct_BType BType; // TODO
+	oct_BType Type; // TYPE, INIT
+	oct_BType BType; // TYPE, INIT
 	// Protocol
-	oct_BType Protocol;
-	oct_BType VTable;
-	oct_BType BVTable;
-	oct_BType ProtocolBinding;
-	oct_BType BProtocolBinding;
+	oct_BType Protocol; // INIT
+	oct_BType VTable; // INIT
+	oct_BType BVTable; // INIT
+	oct_BType ProtocolBinding; // INIT
+	oct_BType BProtocolBinding; // INIT
 	// Function
-	oct_BType Function; // TODO
-	oct_BType BFunction; // TODO
-	oct_BType ABFunction; // TODO
-	oct_BType OABFunction; // TODO
+	oct_BType Function; // TYPE, INIT
+	oct_BType BFunction; // TYPE, INIT
+	oct_BType ABFunction; // TYPE, INIT
+	oct_BType OABFunction; // TYPE, INIT
 	// Object
-	oct_BType Object;
-	oct_BType OObject;
-	oct_BType BObject;
-	oct_BType OObjectOption;
+	oct_BType Object; // INIT
+	oct_BType OObject; // INIT
+	oct_BType BObject; // INIT
+	oct_BType OObjectOption; // INIT
 	// String
-	oct_BType String;
-	oct_BType OString;
-	oct_BType BString;
+	oct_BType String; // INIT
+	oct_BType OString; // INIT
+	oct_BType BString; // INIT
 	// Array
-	oct_BType Array;
-	oct_BType FixedSizeArray; // TODO
+	oct_BType Array; // INIT
+	oct_BType FixedSizeArray; // TYPE, INIT
 	// AChar
-	oct_BType AChar;
-	oct_BType OAChar;
+	oct_BType AChar; // INIT
+	oct_BType OAChar; // INIT
 	// AU8
-	oct_BType AU8; // TODO
-	oct_BType OAU8; // TODO
+	oct_BType AU8; // TYPE, INIT
+	oct_BType OAU8; // TYPE, INIT
 	// List
-	oct_BType List;
-	oct_BType OList;
-	oct_BType BList;
-	oct_BType OListOption;
-	oct_BType BListOption;
+	oct_BType List; // INIT
+	oct_BType OList; // INIT
+	oct_BType BList; // INIT
+	oct_BType OListOption; // INIT
+	oct_BType BListOption; // INIT
 	// Nothing
-	oct_BType Nothing; // TODO
+	oct_BType Nothing; // TYPE, INIT
 	// Pointer
-	oct_BType Pointer;
+	oct_BType Pointer; // INIT
 	// Struct
-	oct_BType Struct;
+	oct_BType Struct; // INIT
 	// Field
-	oct_BType Field; // TODO
-	oct_BType AField; // TODO
-	oct_BType OAField; // TODO
+	oct_BType Field; // TYPE, INIT
+	oct_BType AField; // TYPE, INIT
+	oct_BType OAField; // TYPE, INIT
+	// Symbol
+	oct_BType Symbol; // INIT
+	oct_BType OSymbol; // INIT
+	oct_BType BSymbol; // INIT
+	oct_BType OSymbolOption; // INIT
 } oct_BuiltInTypes;
 
 typedef struct oct_BuiltInVTables {
@@ -101,6 +105,11 @@ typedef struct oct_BuiltInVTables {
 	oct_BVTable StringAsEqComparable; // TODO
 	oct_BVTable StringAsHashable; // TODO
 	oct_BVTable StringAsHashtableKey; // TODO
+	// Symbol
+	oct_BVTable SymbolAsObject; // TODO
+	oct_BVTable SymbolAsEqComparable; // TODO
+	oct_BVTable SymbolAsHashable; // TODO
+	oct_BVTable SymbolAsHashtableKey; // TODO
 } oct_BuiltInVTables;
 
 typedef struct oct_BuiltInProtocols {

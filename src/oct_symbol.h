@@ -34,18 +34,17 @@ typedef struct oct_OSymbolOption {
 
 struct oct_Context;
 
-oct_Bool _oct_Symbol_initType(struct oct_Context* ctx);
-oct_Bool _oct_OSymbol_initType(struct oct_Context* ctx);
-oct_Bool _oct_OSymbolOption_initType(struct oct_Context* ctx);
+oct_Bool _oct_Symbol_init(struct oct_Context* ctx);
 
 // Public
 
-oct_Bool oct_Symbol_ctor(struct oct_Context* ctx, oct_Symbol* sym, oct_OString name);
-oct_Bool oct_Symbol_dtor(struct oct_Context* ctx, oct_Symbol* sym);
 oct_Bool oct_Symbol_createOwned(struct oct_Context* ctx, oct_OString name, oct_OSymbol* out_result);
 oct_Bool oct_Symbol_destroyOwned(struct oct_Context* ctx, oct_OSymbol sym);
 
-oct_Bool oct_Symbol_asObject(struct oct_Context* ctx, oct_OSymbol sym, oct_OObject* out_obj);
-oct_Bool oct_Symbol_asHashtableKey(struct oct_Context* ctx, oct_OSymbol sym, oct_OHashtableKey* out_key);
+oct_Bool oct_Symbol_equals(struct oct_Context* ctx, oct_BSymbol self, oct_BSymbol other, oct_Bool* out_eq);
+oct_Bool oct_Symbol_hash(struct oct_Context* ctx, oct_BSymbol self, oct_Uword* out_hash);
+
+oct_Bool oct_Symbol_asObject(struct oct_Context* ctx, oct_BSymbol sym, oct_BObject* out_obj);
+oct_Bool oct_Symbol_asHashtableKey(struct oct_Context* ctx, oct_BSymbol sym, oct_BHashtableKey* out_key);
 
 #endif
