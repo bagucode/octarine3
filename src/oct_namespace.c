@@ -89,14 +89,19 @@ end:
 
 oct_Bool oct_Namespace_cBind(struct oct_Context* ctx, const char* keySym, oct_OObject obj) {
 	oct_OSymbol sym;
+	oct_BSymbol bs;
 	oct_OString str;
+	oct_BHashtableKey bhk;
 	oct_BindingInfo bi;
 	oct_Bool result = oct_True;
 
 	CHECK(oct_String_createOwnedFromCString(ctx, keySym, &str));
 	CHECK(oct_Symbol_createOwned(ctx, str, &sym));
-	CHECK(oct_Symbol_asHashtableKey(ctx, sym, &bi.key));
+	bs.ptr = sym.ptr;
+	CHECK(oct_Symbol_asHashtableKey(ctx, bs, &bhk));
 	bi.object = obj;
+	bi.key.self.self = bhk.self.self;
+	bi.key.vtable = bhk.vtable;
 	CHECK(oct_Namespace_bindInCurrent(ctx, bi));
 
 	goto end;

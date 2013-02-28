@@ -33,15 +33,15 @@
 #define CHECK(X) if(!X) goto error;
 
 static oct_Bool is_symbol(oct_Context* ctx, oct_BType t) {
-	return ctx->rt->builtInTypes.Symbol == t.ptr;
+	return ctx->rt->builtInTypes.Symbol.ptr == t.ptr;
 }
 
 static oct_Bool is_string(oct_Context* ctx, oct_BType t) {
-	return ctx->rt->builtInTypes.String == t.ptr;
+	return ctx->rt->builtInTypes.String.ptr == t.ptr;
 }
 
 static oct_Bool is_list(oct_Context* ctx, oct_BType t) {
-	return ctx->rt->builtInTypes.List == t.ptr;
+	return ctx->rt->builtInTypes.List.ptr == t.ptr;
 }
 
 static oct_Bool eval_sym(struct oct_Context* ctx, oct_OSymbol sym, oct_OObjectOption* out_result) {
