@@ -53,6 +53,10 @@ static oct_Bool eval_sym(struct oct_Context* ctx, oct_OSymbol sym, oct_OObjectOp
 
 	ns.ptr = ctx->ns;
 	bsym.ptr = sym.ptr;
+	// What to do here? Need to do the lookup without knowing if the value should be copied or not
+	// Should probably just borrow always and if it is not a global, do the copy right here.
+	// But what do we return? OObjectOption can only contain an owned object and type or function pointers are never owned...
+	// Is the Any type needed after all?
 	CHECK(oct_Namespace_lookup(ctx, ns, bsym, out_result));
 	goto end;
 error:
