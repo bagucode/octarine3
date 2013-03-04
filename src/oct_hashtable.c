@@ -70,7 +70,100 @@ oct_Bool _oct_Hashtable_init(struct oct_Context* ctx) {
 	return oct_True;
 }
 
+static oct_Uword nextp2(oct_Uword n) {
+	oct_Uword p2 = 2;
+	while(p2 < n) {
+		p2 <<= 1;
+	}
+	return p2;
+}
+
+static oct_Uword hash1(oct_Uword h) {
+	return h;
+}
+
+static oct_Uword hash2(oct_Uword h) {
+	return h * 17;
+}
+
+static oct_Uword hash3(oct_Uword h) {
+	return h * 751;
+}
+
 oct_Bool oct_Hashtable_ctor(struct oct_Context* ctx, oct_BHashtable self, oct_Uword initialCap) {
+	return oct_AHashtableEntry_createOwned(ctx, nextp2(initialCap), &self.ptr->table);
+}
+
+oct_Bool oct_Hashtable_dtor(struct oct_Context* ctx, oct_BHashtable self) {
+	return oct_AHashtableEntry_destroyOwned(ctx, self.ptr->table);
+}
+
+static oct_Bool keyHash(oct_Context* ctx, oct_HashtableEntry* entry, oct_Uword* result) {
+	oct_BSelf bself;
+	bself.self = entry->key.self.self;
+	return entry->key.vtable->functions.hashable.hash(ctx, bself, result);
+}
+
+static oct_Bool keyIsNothing(oct_Context* ctx, oct_OHashtableKey key) {
+	return key.vtable->type.ptr == ctx->rt->builtInTypes.Nothing.ptr;
+}
+
+static oct_Bool keyEq(oct_Context* ctx, oct_OHashtableKey key1, oct_OHashtableKey key2, oct_Bool* out_eq) {
+	oct_BSelf key1Self;
+	oct_BSelf key2Self;
+
+	key1Self.self = key1.self.self;
+	key2Self.self = key2.self.self;
+
+	return key1.vtable->functions.eq.equals(ctx, key1Self, key2Self, out_eq);
+}
+
+static oct_Bool oct_Hashtable_tryPut(oct_Context* ctx, oct_BHashtable self, oct_HashtableEntry* entry) {
+	oct_Uword i, mask, key;
+	oct_HashtableEntry tmp;
+	oct_Bool eq;
+    
+	mask = self.ptr->table.ptr->size - 1;
+    
+	CHECK(keyHash(ctx, entry, &key));
+	i = hash1(key) & mask;
+	tmp = self.ptr->table.ptr->table[i];
+	self.ptr->table.ptr->table[i] = *entry;
+	eq = keyIsNothing(ctx, tmp.key);
+	if(!eq) {
+		CHECK(keyEq(ctx, tmp.key, entry->key, &eq));
+	}
+	if(eq) {
+#error MAC WAS HERE
+		// Destroy old hash table entry here!
+		CHECK(oct_HashtableE
+		return oct_True;
+	}
+	if(keyIsNothing(ctx, entry->key) || tmp.key == entry->key) {
+		++table->size;
+		return oct_True;
+	}
+	*entry = tmp;
+
+	i = hash2(hashPointer(entry->key)) & mask;
+	tmp = table->table[i];
+	table->table[i] = *entry;
+	if(tmp.key == NULL || tmp.key == entry->key) {
+		++table->size;
+		return oct_True;
+	}
+	*entry = tmp;
+
+	i = hash3(hashPointer(entry->key)) & mask;
+	tmp = table->table[i];
+	table->table[i] = *entry;
+	if(tmp.key == NULL || tmp.key == entry->key) {
+		++table->size;
+		return oct_True;
+	}
+	*entry = tmp;
+
+	return oct_False;
 
 }
 
@@ -100,38 +193,7 @@ typedef struct PointerTranslationTable {
 	PointerTranslationTableEntry* table;
 } PointerTranslationTable;
 
-static oct_Uword nextp2(oct_Uword n) {
-	oct_Uword p2 = 2;
-	while(p2 < n) {
-		p2 <<= 1;
-	}
-	return p2;
-}
 
-static oct_Uword hashPointer(void* ptr) {
-	// Actually do something here?
-	return (oct_Uword)ptr;
-}
-
-oct_Bool oct_Hashtable_ctor(struct oct_Context* ctx, oct_BHashtable self, oct_Uword initialCap) {
-	
-}
-
-static oct_Bool PointerTranslationTable_Create(oct_Context* ctx, oct_Uword initialCap, PointerTranslationTable* table) {
-	oct_Uword byteSize;
-    
-	table->capacity = nextp2(initialCap);
-	table->size = 0;
-	byteSize = table->capacity * sizeof(PointerTranslationTableEntry);
-	table->table = (PointerTranslationTableEntry*)calloc(1, byteSize);
-	if(table->table == NULL) {
-		oct_Context_setErrorOOM(ctx);
-		return oct_False;
-	}
-	memset(table->table, 0, byteSize);
-    
-	return oct_True;
-}
 
 static void PointerTranslationTable_Destroy(PointerTranslationTable* table) {
 	free(table->table);
@@ -140,17 +202,6 @@ static void PointerTranslationTable_Destroy(PointerTranslationTable* table) {
 	table->table = NULL;
 }
 
-static oct_Uword hash1(oct_Uword h) {
-	return h;
-}
-
-static oct_Uword hash2(oct_Uword h) {
-	return h >> 4;
-}
-
-static oct_Uword hash3(oct_Uword h) {
-	return h * 31;
-}
 
 static oct_Bool PointerTranslationTable_TryPut(PointerTranslationTable* table, PointerTranslationTableEntry* entry) {
 	oct_Uword i, mask;

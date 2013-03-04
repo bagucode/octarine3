@@ -60,7 +60,11 @@ struct oct_Context;
 
 oct_Bool _oct_Hashtable_init(struct oct_Context* ctx);
 
+oct_Bool oct_AHashtableEntry_createOwned(struct oct_Context* ctx, oct_Uword initialCap, oct_OAHashtableEntry* out_result);
+oct_Bool oct_AHashtableEntry_destroyOwned(struct oct_Context* ctx, oct_OAHashtableEntry self);
+
 oct_Bool oct_Hashtable_ctor(struct oct_Context* ctx, oct_BHashtable self, oct_Uword initialCap);
+oct_Bool oct_Hashtable_dtor(struct oct_Context* ctx, oct_BHashtable self);
 oct_Bool oct_Hashtable_put(struct oct_Context* ctx, oct_BHashtable self, oct_OHashtableKey key, oct_Any value);
 // Get a value from the table. If the value is owned, it will be removed from the hash table and returned. If the value
 // is borrowed, a reference to it will be returned and it will remain in the hash table.
