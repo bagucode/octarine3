@@ -62,7 +62,7 @@ typedef struct oct_BuiltInTypes {
 	oct_BType Object; // INIT
 	oct_BType OObject; // INIT
 	oct_BType BObject; // INIT
-	oct_BType ObjectOption; // INIT
+	oct_BType OObjectOption; // INIT
 	// String
 	oct_BType String; // INIT
 	oct_BType OString; // INIT

@@ -152,7 +152,7 @@ oct_Bool oct_List_emptyp(struct oct_Context* ctx, oct_BList lst, oct_Bool* out_r
 	return oct_True;
 }
 
-oct_Bool oct_List_first(struct oct_Context* ctx, oct_OList lst, oct_ObjectOption* out_value, oct_OList* out_lst) {
+oct_Bool oct_List_first(struct oct_Context* ctx, oct_OList lst, oct_OObjectOption* out_value, oct_OList* out_lst) {
 	oct_Bool result = oct_True;
 	if(lst.ptr->data.variant == OCT_OBJECTOPTION_NOTHING) {
 		out_value->variant = OCT_OBJECTOPTION_NOTHING;
@@ -202,7 +202,7 @@ oct_Bool oct_List_count(struct oct_Context* ctx, oct_BList lst, oct_Uword* out_c
 	return oct_True;
 }
 
-oct_Bool oct_List_nth(struct oct_Context* ctx, oct_OList lst, oct_Uword idx, oct_ObjectOption* out_value, oct_OList* out_lst) {
+oct_Bool oct_List_nth(struct oct_Context* ctx, oct_OList lst, oct_Uword idx, oct_OObjectOption* out_value, oct_OList* out_lst) {
 	oct_Uword current;
 	oct_List* prev;
 	oct_Bool result = oct_True;

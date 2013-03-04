@@ -44,7 +44,7 @@ static oct_Bool is_list(oct_Context* ctx, oct_BType t) {
 	return ctx->rt->builtInTypes.List.ptr == t.ptr;
 }
 
-static oct_Bool eval_sym(struct oct_Context* ctx, oct_OSymbol sym, oct_ObjectOption* out_result) {
+static oct_Bool eval_sym(struct oct_Context* ctx, oct_OSymbol sym, oct_OObjectOption* out_result) {
 	oct_BNamespace ns;
 	oct_BSymbol bsym;
 	oct_Bool result = oct_True;
@@ -65,7 +65,7 @@ end:
 	return oct_Symbol_destroyOwned(ctx, sym) && result;
 }
 
-static oct_Bool eval_def(struct oct_Context* ctx, oct_OList olist, oct_ObjectOption* out_result) {
+static oct_Bool eval_def(struct oct_Context* ctx, oct_OList olist, oct_OObjectOption* out_result) {
 	// (def <symbol>)
 	// (def <symbol> <value>)
 	oct_BNamespace ns;
@@ -73,7 +73,7 @@ static oct_Bool eval_def(struct oct_Context* ctx, oct_OList olist, oct_ObjectOpt
 	oct_OSymbol sym;
     oct_BList blist;
     oct_OListOption listOpt;
-    oct_ObjectOption tmp;
+    oct_OObjectOption tmp;
 	oct_BObject bob;
 	oct_Bool b;
 	oct_Bool result = oct_True;
@@ -120,7 +120,7 @@ end:
 	return result;
 }
 
-static oct_Bool eval_list(oct_Context* ctx, oct_OList olist, oct_ObjectOption* out_result) {
+static oct_Bool eval_list(oct_Context* ctx, oct_OList olist, oct_OObjectOption* out_result) {
 	oct_Bool eq;
 	oct_BObjectOption bopt;
 	oct_BObject bob;
@@ -158,7 +158,7 @@ end:
 	return oct_List_destroyOwned(ctx, olist) && result; // TODO: Finish implementing this function :)
 }
 
-static oct_Bool eval_string(oct_Context* ctx, oct_OString ostr, oct_ObjectOption* out_result) {
+static oct_Bool eval_string(oct_Context* ctx, oct_OString ostr, oct_OObjectOption* out_result) {
 	out_result->variant = OCT_OBJECTOPTION_OBJECT;
 	return oct_String_asObject(ctx, ostr, &out_result->object);
 }
@@ -168,7 +168,7 @@ typedef struct VTable {
 	oct_U8 data[];
 } VTable;
 
-oct_Bool oct_Compiler_eval(struct oct_Context* ctx, oct_OObject form, oct_ObjectOption* out_result) {
+oct_Bool oct_Compiler_eval(struct oct_Context* ctx, oct_OObject form, oct_OObjectOption* out_result) {
 	oct_BType t;
 	oct_BObject bob;
 	oct_OSymbol sym;

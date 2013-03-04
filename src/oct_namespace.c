@@ -217,7 +217,7 @@ end:
 //	return oct_True;
 //}
 //
-//oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_OSymbol sym, oct_ObjectOption val) {
+//oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_OSymbol sym, oct_OObjectOption val) {
 //	oct_Uword i, j;
 //	oct_Uword newSize;
 //    oct_Uword ptrKind;
@@ -262,7 +262,7 @@ end:
 //	return oct_True;
 //}
 //
-//oct_Bool oct_Namespace_lookup(struct oct_Context* ctx, oct_BNamespace ns, oct_BSymbol sym, oct_ObjectOption* out_val) {
+//oct_Bool oct_Namespace_lookup(struct oct_Context* ctx, oct_BNamespace ns, oct_BSymbol sym, oct_OObjectOption* out_val) {
 //	oct_Uword i;
 //	oct_BString n1;
 //	oct_BString n2;

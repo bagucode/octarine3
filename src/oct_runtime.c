@@ -34,7 +34,7 @@ static void alloc_builtIn(oct_Runtime* rt) {
 static oct_Bool bind_type(oct_Context* ctx, oct_BNamespace ns, const char* name, oct_Type* type) {
 	oct_OString str;
 	oct_OSymbol sym;
-	oct_ObjectOption val;
+	oct_OObjectOption val;
     oct_OType otype;
 	
 	if(!oct_String_createOwnedFromCString(ctx, name, &str)) return oct_False;
@@ -124,7 +124,7 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	_oct_OABFunction_initType(mainCtx);
 	_oct_AChar_initType(mainCtx);
 	_oct_OAChar_initType(mainCtx);
-    _oct_ObjectOption_initType(mainCtx);
+    _oct_OObjectOption_initType(mainCtx);
     _oct_OString_initType(mainCtx);
 
 	//_oct_ReadResult_initType(mainCtx);

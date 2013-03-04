@@ -30,15 +30,14 @@ oct_Bool _oct_Object_init(struct oct_Context* ctx) {
 	t.ptr->pointerType.kind = OCT_POINTER_BORROWED_PROTOCOL;
 	t.ptr->pointerType.type = ctx->rt->builtInTypes.Object;
 
-	// ObjectOption
-	t = ctx->rt->builtInTypes.ObjectOption;
+	// OObjectOption
+	t = ctx->rt->builtInTypes.OObjectOption;
 	t.ptr->variant = OCT_TYPE_VARIADIC;
 	t.ptr->variadicType.alignment = 0;
-	t.ptr->variadicType.size = sizeof(oct_ObjectOption);
-	CHECK(oct_ABType_createOwned(ctx, 3, &t.ptr->variadicType.types));
+	t.ptr->variadicType.size = sizeof(oct_OObjectOption);
+	CHECK(oct_ABType_createOwned(ctx, 2, &t.ptr->variadicType.types));
 	t.ptr->variadicType.types.ptr->data[0] = ctx->rt->builtInTypes.Nothing;
 	t.ptr->variadicType.types.ptr->data[1] = ctx->rt->builtInTypes.OObject;
-	t.ptr->variadicType.types.ptr->data[2] = ctx->rt->builtInTypes.BObject;
 
 	return oct_True;
 }
