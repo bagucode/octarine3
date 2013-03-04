@@ -13,6 +13,10 @@ typedef struct oct_Namespace {
 
 #define CHECK(X) if(!X) goto error;
 
+oct_Bool oct_Namespace_create(struct oct_Context* ctx, oct_BString nsName, oct_BNamespace* out_ns) {
+
+}
+
 oct_Bool oct_Namespace_findNs(struct oct_Context* ctx, oct_BString nsName, oct_BNamespace* out_ns) {
 	oct_BHashtableKey nsNameKey;
 	oct_BObject nsObject;
