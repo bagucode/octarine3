@@ -298,7 +298,7 @@ static oct_Bool findEmbeddedPointers(oct_Context* ctx, oct_Type* type, void* obj
 	oct_Uword elemSize;
 
 	switch(type->variant) {
-	case OCT_TYPE_PROTO:
+	case OCT_TYPE_PROTOTYPE:
 	case OCT_TYPE_PROTOCOL:
 		oct_Context_setErrorWithCMessage(ctx, "Runtime internal error: attempt to find pointers in Prototype or Protocol instance");
 		return oct_False;
@@ -421,7 +421,7 @@ static oct_Bool FrameStack_Pop(FrameStack* stack, FrameStackEntry* out) {
 //	bt.ptr = type;
 //    
 //	switch(type->variant) {
-//	case OCT_TYPE_PROTO:
+//	case OCT_TYPE_PROTOTYPE:
 //		{
 //			oct_Context_setErrorWithCMessage(ctx, "Runtime internal error: Trying to copy object of type Prototype");
 //			return oct_False;

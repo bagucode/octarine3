@@ -40,7 +40,6 @@ typedef struct oct_BuiltInTypes {
 	oct_BType AHashtableEntry; // TYPE, INIT
 	oct_BType OAHashtableEntry; // TYPE, INIT
 	oct_BType Hashtable; // TYPE, INIT
-	oct_BType OHashtable; // TYPE, INIT
 	oct_BType BHashtable; // TYPE, INIT
 	// Type
 	oct_BType Type; // INIT
@@ -131,6 +130,11 @@ typedef struct oct_BuiltInProtocols {
 	oct_BProtocolBinding HashtableKey; // TODO
 } oct_BuiltInProtocols;
 
+typedef struct oct_BuiltInFunctions {
+	oct_BFunction hash; // TODO
+	oct_BFunction eq; // TODO
+} oct_BuiltInFunctions;
+
 typedef struct oct_Runtime {
 	oct_TLS currentContext;
 	// TODO: lock for context collection
@@ -140,6 +144,7 @@ typedef struct oct_Runtime {
 	oct_BuiltInTypes builtInTypes;
 	oct_BuiltInProtocols builtInProtocols;
 	oct_BuiltInVTables vtables;
+	oct_BuiltInFunctions functions;
 } oct_Runtime;
 
 struct oct_Context;

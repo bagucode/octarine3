@@ -64,7 +64,7 @@ oct_Bool oct_ABType_createOwned(struct oct_Context* ctx, oct_Uword size, oct_OAB
 oct_Bool oct_Type_sizeOf(struct oct_Context* ctx, oct_BType type, oct_Uword* out_size) {
 	oct_Uword elementSize;
 	switch(type.ptr->variant) {
-	case OCT_TYPE_PROTO:
+	case OCT_TYPE_PROTOTYPE:
 		*out_size = sizeof(void*);
 		break;
 	case OCT_TYPE_PROTOCOL:

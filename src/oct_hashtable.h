@@ -1,7 +1,7 @@
 #ifndef oct_hashtable
 #define oct_hashtable
 
-#include "oct_object.h"
+#include "oct_any.h"
 #include "oct_hashable.h"
 #include "oct_eqcomparable.h"
 #include "oct_type_pointers.h"
@@ -32,7 +32,7 @@ typedef struct oct_BHashtableKey {
 
 typedef struct oct_HashtableEntry {
 	oct_OHashtableKey key;
-	oct_OObject val;
+	oct_Any val;
 } oct_HashtableEntry;
 
 typedef struct oct_AHashtableEntry {
@@ -60,9 +60,13 @@ struct oct_Context;
 
 oct_Bool _oct_Hashtable_init(struct oct_Context* ctx);
 
-oct_Bool oct_Hashtable_ctor   (struct oct_Context* ctx, oct_BHashtable self, oct_Uword initialCap);
-oct_Bool oct_Hashtable_put    (struct oct_Context* ctx, oct_BHashtable self, oct_OHashtableKey key, oct_OObject value);
-oct_Bool oct_Hashtable_take   (struct oct_Context* ctx, oct_BHashtable self, oct_BHashtableKey key, oct_OObject* out_value);
-oct_Bool oct_Hashtable_borrow (struct oct_Context* ctx, oct_BHashtable self, oct_BHashtableKey key, oct_BObject* out_value);
+oct_Bool oct_Hashtable_ctor(struct oct_Context* ctx, oct_BHashtable self, oct_Uword initialCap);
+oct_Bool oct_Hashtable_put(struct oct_Context* ctx, oct_BHashtable self, oct_OHashtableKey key, oct_Any value);
+// Get a value from the table. If the value is owned, it will be removed from the hash table and returned. If the value
+// is borrowed, a reference to it will be returned and it will remain in the hash table.
+oct_Bool oct_Hashtable_take(struct oct_Context* ctx, oct_BHashtable self, oct_BHashtableKey key, oct_Any* out_value);
+// Get a value from the table. If the value is borrowed, return a reference to it. If the value is owned, return
+// a borrowed reference to it. In both cases the value remains in the table.
+oct_Bool oct_Hashtable_borrow(struct oct_Context* ctx, oct_BHashtable self, oct_BHashtableKey key, oct_Any* out_value);
 
 #endif

@@ -9,7 +9,7 @@
 #include "oct_pointertype.h"
 #include "oct_protocoltype.h"
 
-#define OCT_TYPE_PROTO 0
+#define OCT_TYPE_PROTOTYPE 0
 #define OCT_TYPE_VARIADIC 1
 #define OCT_TYPE_STRUCT 2
 #define OCT_TYPE_ARRAY 3

@@ -5,29 +5,89 @@
 #include "oct_context.h"
 #include "oct_runtime.h"
 
-/*
-	oct_BType HashtableKey;
-	oct_BType OHashtableKey;
-	oct_BType BHashtableKey;
-	oct_BType HashtableEntry;
-	oct_BType AHashtableEntry;
-	oct_BType OAHashtableEntry;
-	oct_BType Hashtable;
-	oct_BType OHashtable;
-	oct_BType BHashtable;
-*/
+#include <stddef.h>
+
+#define CHECK(X) if(!X) return oct_False;
 
 oct_Bool _oct_Hashtable_init(struct oct_Context* ctx) {
 
+	// HashtableKey
+	oct_BType t = ctx->rt->builtInTypes.HashtableKey;
+	t.ptr->variant = OCT_TYPE_PROTOCOL;
+	CHECK(oct_ABFunction_createOwned(ctx, 2, &t.ptr->protocolType.functions));
+	t.ptr->protocolType.functions.ptr->data[0] = ctx->rt->functions.hash;
+	t.ptr->protocolType.functions.ptr->data[1] = ctx->rt->functions.eq;
+
+	// OHashtableKey
+	t = ctx->rt->builtInTypes.OHashtableKey;
+	t.ptr->variant = OCT_TYPE_POINTER;
+	t.ptr->pointerType.kind = OCT_POINTER_OWNED_PROTOCOL;
+	t.ptr->pointerType.type = ctx->rt->builtInTypes.HashtableKey;
+
+	// BHashtableKey
+	t = ctx->rt->builtInTypes.BHashtableKey;
+	t.ptr->variant = OCT_TYPE_POINTER;
+	t.ptr->pointerType.kind = OCT_POINTER_BORROWED_PROTOCOL;
+	t.ptr->pointerType.type = ctx->rt->builtInTypes.HashtableKey;
+
+	// HashtableEntry
+	t = ctx->rt->builtInTypes.HashtableEntry;
+	t.ptr->variant = OCT_TYPE_STRUCT;
+	t.ptr->structType.alignment = 0;
+	t.ptr->structType.size = sizeof(oct_HashtableEntry);
+	CHECK(oct_AField_createOwned(ctx, 2, &t.ptr->structType.fields));
+	t.ptr->structType.fields.ptr->data[0].offset = offsetof(oct_HashtableEntry, key);
+	t.ptr->structType.fields.ptr->data[0].type = ctx->rt->builtInTypes.OHashtableKey;
+	t.ptr->structType.fields.ptr->data[1].offset = offsetof(oct_HashtableEntry, val);
+	t.ptr->structType.fields.ptr->data[1].type = ctx->rt->builtInTypes.Any;
+
+	// AHashtableEntry
+	t = ctx->rt->builtInTypes.AHashtableEntry;
+	t.ptr->variant = OCT_TYPE_ARRAY;
+	t.ptr->arrayType.elementType = ctx->rt->builtInTypes.HashtableEntry;
+
+	// OAHashtableEntry
+	t = ctx->rt->builtInTypes.OAHashtableEntry;
+	t.ptr->variant = OCT_TYPE_POINTER;
+	t.ptr->pointerType.kind = OCT_POINTER_OWNED;
+	t.ptr->pointerType.type = ctx->rt->builtInTypes.AHashtableEntry;
+
 	// Hashtable
-	oct_BType t = ctx->rt->builtInTypes.Hashtable;
+	t = ctx->rt->builtInTypes.Hashtable;
+	t.ptr->variant = OCT_TYPE_STRUCT;
+	t.ptr->structType.alignment = 0;
+	t.ptr->structType.size = sizeof(oct_Hashtable);
+	CHECK(oct_AField_createOwned(ctx, 1, &t.ptr->structType.fields));
+	t.ptr->structType.fields.ptr->data[0].offset = offsetof(oct_Hashtable, table);
+	t.ptr->structType.fields.ptr->data[0].type = ctx->rt->builtInTypes.OAHashtableEntry;
 
+	// BHashtable
+	t = ctx->rt->builtInTypes.BHashtable;
+	t.ptr->variant = OCT_TYPE_POINTER;
+	t.ptr->pointerType.kind = OCT_POINTER_BORROWED;
+	t.ptr->pointerType.type = ctx->rt->builtInTypes.Hashtable;
 
-	//_oct_Function_construct(ctx, 
-	//_oct_Protocol_construct(ctx, bit->HashtableKey, 
+	return oct_True;
+}
 
+oct_Bool oct_Hashtable_ctor(struct oct_Context* ctx, oct_BHashtable self, oct_Uword initialCap) {
 
 }
+
+oct_Bool oct_Hashtable_put(struct oct_Context* ctx, oct_BHashtable self, oct_OHashtableKey key, oct_Any value) {
+}
+
+// Get a value from the table. If the value is owned, it will be removed from the hash table and returned. If the value
+// is borrowed, a reference to it will be returned and it will remain in the hash table.
+oct_Bool oct_Hashtable_take(struct oct_Context* ctx, oct_BHashtable self, oct_BHashtableKey key, oct_Any* out_value) {
+}
+
+// Get a value from the table. If the value is borrowed, return a reference to it. If the value is owned, return
+// a borrowed reference to it. In both cases the value remains in the table.
+oct_Bool oct_Hashtable_borrow(struct oct_Context* ctx, oct_BHashtable self, oct_BHashtableKey key, oct_Any* out_value) {
+}
+
+
 
 typedef struct PointerTranslationTableEntry {
     void* key;
