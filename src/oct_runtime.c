@@ -53,7 +53,6 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	oct_Runtime* rt;
 	oct_Context* mainCtx;
 	oct_OString str;
-	oct_OSymbol sym;
 	oct_BNamespace octarine;
 
 	oct_initJITTarget();
@@ -112,11 +111,11 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	// *** 3. Create octarine namespace.
 
 	oct_String_createOwnedFromCString(mainCtx, "octarine", &str);
-	oct_Symbol_createOwned(mainCtx, str, &sym);
-	oct_Namespace_create(mainCtx, sym, &octarine);
+	oct_Namespace_create(mainCtx, str, &octarine);
 	mainCtx->ns = octarine.ptr;
 
 	// *** 4. Register all built in types and functions in octarine namespace.
+	// Primitives
 	bind_type(mainCtx, octarine, "U8", rt->builtInTypes.U8);
 	bind_type(mainCtx, octarine, "I8", rt->builtInTypes.I8);
 	bind_type(mainCtx, octarine, "U16", rt->builtInTypes.U16);
@@ -131,40 +130,16 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	bind_type(mainCtx, octarine, "Word", rt->builtInTypes.Word);
 	bind_type(mainCtx, octarine, "Char", rt->builtInTypes.Char);
 	bind_type(mainCtx, octarine, "Bool", rt->builtInTypes.Bool);
-	bind_type(mainCtx, octarine, "List", rt->builtInTypes.List);
-	bind_type(mainCtx, octarine, "Symbol", rt->builtInTypes.Symbol);
-	bind_type(mainCtx, octarine, "~Symbol", rt->builtInTypes.OSymbol);
-	bind_type(mainCtx, octarine, "~SymbolOption", rt->builtInTypes.OSymbolOption);
-	bind_type(mainCtx, octarine, "String", rt->builtInTypes.String);
-	bind_type(mainCtx, octarine, "~String", rt->builtInTypes.OString);
-	bind_type(mainCtx, octarine, "Type", rt->builtInTypes.Type);
-	bind_type(mainCtx, octarine, "StructType", rt->builtInTypes.StructType);
-	bind_type(mainCtx, octarine, "ProtoType", rt->builtInTypes.ProtoType);
-	bind_type(mainCtx, octarine, "VariadicType", rt->builtInTypes.VariadicType);
-	bind_type(mainCtx, octarine, "PointerType", rt->builtInTypes.PointerType);
-	bind_type(mainCtx, octarine, "ArrayType", rt->builtInTypes.ArrayType);
-	bind_type(mainCtx, octarine, "FixedSizeArrayType", rt->builtInTypes.FixedSizeArrayType);
-	bind_type(mainCtx, octarine, "Field", rt->builtInTypes.Field);
-	bind_type(mainCtx, octarine, "+Field", rt->builtInTypes.AField);
-	bind_type(mainCtx, octarine, "~+Field", rt->builtInTypes.OAField);
-	bind_type(mainCtx, octarine, "&Type", rt->builtInTypes.BType);
-	bind_type(mainCtx, octarine, "+&Type", rt->builtInTypes.ABType);
-	bind_type(mainCtx, octarine, "~+&Type", rt->builtInTypes.OABType);
-	bind_type(mainCtx, octarine, "+U8", rt->builtInTypes.AU8);
-	bind_type(mainCtx, octarine, "~+U8", rt->builtInTypes.OAU8);
-	bind_type(mainCtx, octarine, "OListOption", rt->builtInTypes.OListOption);
-	bind_type(mainCtx, octarine, "Nothing", rt->builtInTypes.Nothing);
-	bind_type(mainCtx, octarine, "NamespaceBinding", rt->builtInTypes.NamespaceBinding);
-	bind_type(mainCtx, octarine, "+NamespaceBinding", rt->builtInTypes.ANamespaceBinding);
-	bind_type(mainCtx, octarine, "~+NamespaceBinding", rt->builtInTypes.OANamespaceBinding);
-	bind_type(mainCtx, octarine, "Namespace", rt->builtInTypes.Namespace);
-	bind_type(mainCtx, octarine, "&Namespace", rt->builtInTypes.BNamespace);
-	bind_type(mainCtx, octarine, "Reader", rt->builtInTypes.Reader);
-	bind_type(mainCtx, octarine, "ReadResult", rt->builtInTypes.ReadResult);
-	bind_type(mainCtx, octarine, "ProtocolType", rt->builtInTypes.ProtocolType);
-	bind_type(mainCtx, octarine, "Error", rt->builtInTypes.Error);
-	bind_type(mainCtx, octarine, "~Error", rt->builtInTypes.OError);
-	bind_type(mainCtx, octarine, "ErrorOption", rt->builtInTypes.ErrorOption);
+	// Hashtable
+	bind_type(mainCtx, octarine, "HashtableKey", rt->builtInTypes.HashtableKey);
+	bind_type(mainCtx, octarine, "~HashtableKey", rt->builtInTypes.OHashtableKey);
+	bind_type(mainCtx, octarine, "&HashtableKey", rt->builtInTypes.BHashtableKey);
+	bind_type(mainCtx, octarine, "HashtableEntry", rt->builtInTypes.HashtableEntry);
+	bind_type(mainCtx, octarine, "+HashtableEntry", rt->builtInTypes.AHashtableEntry);
+	bind_type(mainCtx, octarine, "~+HashtableEntry", rt->builtInTypes.OAHashtableEntry);
+	bind_type(mainCtx, octarine, "Hashtable", rt->builtInTypes.Hashtable);
+	bind_type(mainCtx, octarine, "&Hashtable", rt->builtInTypes.BHashtable);
+
 
 	return rt;
 }
