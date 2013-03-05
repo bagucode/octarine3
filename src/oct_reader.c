@@ -343,6 +343,7 @@ static oct_Bool readSymbol(struct oct_Context* ctx, oct_BReader reader, oct_Char
 	oct_Bool result = oct_True;
 	oct_OString name;
 	oct_OSymbol instance;
+	oct_BSymbol bsym;
 
 	name.ptr = NULL;
 	instance.ptr = NULL;
@@ -353,7 +354,8 @@ static oct_Bool readSymbol(struct oct_Context* ctx, oct_BReader reader, oct_Char
 	out_result->variant = OCT_READRESULT_OK;
 	out_result->result.variant = OCT_OBJECTOPTION_OBJECT;
 
-	CHECK(oct_Symbol_asObject(ctx, instance, &out_result->result.object));
+	bsym.ptr = instance.ptr;
+	CHECK(oct_Symbol_asObject(ctx, bsym, (oct_BObject*)&out_result->result.object));
 
 	printf("Read a Symbol: %s\n", &instance.ptr->name.ptr->utf8Data.ptr->data[0]);
 

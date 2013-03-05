@@ -3,6 +3,7 @@
 #include "oct_runtime.h"
 #include "oct_type.h"
 #include "oct_exchangeheap.h"
+#include "oct_any.h"
 
 #include <stddef.h>
 
@@ -80,7 +81,7 @@ oct_Bool oct_Protocol_addImplementation(struct oct_Context* ctx, oct_BProtocolBi
 	// TODO: What to do with the fact that types and vtables are borrowed, not owned??
 	// make a special hashtable that has borrowed keys and values to use for globals?
 	oct_OHashtableKey key;
-	oct_OObject val;
+	oct_Any val;
 	oct_BSelf self;
 
 	self.self = type.ptr;
@@ -88,9 +89,10 @@ oct_Bool oct_Protocol_addImplementation(struct oct_Context* ctx, oct_BProtocolBi
 		return oct_False;
 	}
 	self.self = vtable.ptr;
-	if(!oct_Object_as(ctx, self, ctx->rt->builtInTypes.VTable, ctx->rt->builtInProtocols.Object, (oct_BObject*)&val)) {
+	if(!oct_Object_as(ctx, self, ctx->rt->builtInTypes.VTable, ctx->rt->builtInProtocols.Object, &val.bobject)) {
 		return oct_False;
 	}
+	val.variant = OCT_ANY_BOBJECT;
 
 	impls.ptr = &protocol.ptr->implementations;
 	return oct_Hashtable_put(ctx, impls, key, val);
