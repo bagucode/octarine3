@@ -98,10 +98,10 @@ oct_Bool oct_Hashtable_dtor(struct oct_Context* ctx, oct_BHashtable self) {
 	return oct_AHashtableEntry_destroyOwned(ctx, self.ptr->table);
 }
 
-static oct_Bool keyHash(oct_Context* ctx, oct_HashtableEntry* entry, oct_Uword* result) {
+static oct_Bool keyHash(oct_Context* ctx, oct_OHashtableKey key, oct_Uword* result) {
 	oct_BSelf bself;
-	bself.self = entry->key.self.self;
-	return entry->key.vtable->functions.hashable.hash(ctx, bself, result);
+	bself.self = key.self.self;
+	return key.vtable->functions.hashable.hash(ctx, bself, result);
 }
 
 static oct_Bool keyIsNothing(oct_Context* ctx, oct_OHashtableKey key) {
@@ -155,21 +155,21 @@ static oct_Bool oct_Hashtable_tryPut(oct_Context* ctx, oct_BHashtable self, oct_
     
 	mask = self.ptr->table.ptr->size - 1;
     
-	CHECK(keyHash(ctx, entry, &key));
+	CHECK(keyHash(ctx, entry->key, &key));
 	i = hash1(key) & mask;
 	CHECK(oct_Hashtable_putOne(ctx, self, entry, i, out_result));
 	if(*out_result) {
 		return oct_True;
 	}
 
-	CHECK(keyHash(ctx, entry, &key));
+	CHECK(keyHash(ctx, entry->key, &key));
 	i = hash2(key) & mask;
 	CHECK(oct_Hashtable_putOne(ctx, self, entry, i, out_result));
 	if(*out_result) {
 		return oct_True;
 	}
 
-	CHECK(keyHash(ctx, entry, &key));
+	CHECK(keyHash(ctx, entry->key, &key));
 	i = hash3(key) & mask;
 	CHECK(oct_Hashtable_putOne(ctx, self, entry, i, out_result));
 
@@ -225,9 +225,62 @@ oct_Bool oct_Hashtable_put(struct oct_Context* ctx, oct_BHashtable self, oct_OHa
 	}
 }
 
+#undef CHECK
+#define CHECK(X) if(!X) goto error;
+
 // Get a value from the table. If the value is owned, it will be removed from the hash table and returned. If the value
 // is borrowed, a reference to it will be returned and it will remain in the hash table.
 oct_Bool oct_Hashtable_take(struct oct_Context* ctx, oct_BHashtable self, oct_BHashtableKey key, oct_Any* out_value) {
+	oct_Uword i, mask, hash;
+	oct_Bool eq;
+	oct_Bool result = oct_True;
+	oct_OHashtableKey tmpOwnedKey; // not really owned
+	oct_OObject oobject;
+
+	tmpOwnedKey.self.self = key.self.self;
+	tmpOwnedKey.vtable = key.vtable;
+
+	mask = self.ptr->table.ptr->size - 1;
+	CHECK(keyHash(ctx, tmpOwnedKey, &hash));
+
+	i = hash1(hash) & mask;
+	CHECK(keyEq(ctx, tmpOwnedKey, self.ptr->table.ptr->table[i].key, &eq));
+	if(eq) {
+		goto match;
+	}
+
+	i = hash2(hash) & mask;
+	CHECK(keyEq(ctx, tmpOwnedKey, self.ptr->table.ptr->table[i].key, &eq));
+	if(eq) {
+		goto match;
+	}
+
+	i = hash3(hash) & mask;
+	CHECK(keyEq(ctx, tmpOwnedKey, self.ptr->table.ptr->table[i].key, &eq));
+	if(eq) {
+		goto match;
+	}
+
+	// Key did not match anything. Return a Nothing-Any
+	(*out_value).variant = OCT_ANY_NOTHING;
+	(*out_value).nothing.dummy = 0;
+	goto end;
+match:
+	*out_value = self.ptr->table.ptr->table[i].val;
+	if((*out_value).variant == OCT_ANY_OOBJECT) {
+		// Remove entry from the table; just drop the key and replace with nil
+		// TODO: replace this nil stuff with an Option type for the key. nil feels wrong. It obscures information and when it is not a value type, can a global instance really be used safely?
+		oobject.self.self = self.ptr->table.ptr->table[i].key.self.self;
+		oobject.vtable = (oct_ObjectVTable*)self.ptr->table.ptr->table[i].key.vtable;
+		CHECK(oct_Object_destroyOwned(ctx, oobject));
+		self.ptr->table.ptr->table[i].key.self.self = &ctx->rt->nil;
+		self.ptr->table.ptr->table[i].key.vtable = (oct_HashtableKeyVTable*)ctx->rt->vtables.NothingAsHashtableKey.ptr;
+	}
+	goto end;
+error:
+	result = oct_False;
+end:
+	return result;
 }
 
 // Get a value from the table. If the value is borrowed, return a reference to it. If the value is owned, return

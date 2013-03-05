@@ -121,6 +121,9 @@ typedef struct oct_BuiltInVTables {
 	oct_BVTable SymbolAsEqComparable;
 	oct_BVTable SymbolAsHashable;
 	oct_BVTable SymbolAsHashtableKey;
+	// Nothing
+	oct_BVTable NothingAsObject; // TODO
+	oct_BVTable NothingAsHashtableKey; // TODO
 } oct_BuiltInVTables;
 
 typedef struct oct_BuiltInProtocols {
@@ -145,6 +148,7 @@ typedef struct oct_Runtime {
 	oct_BuiltInProtocols builtInProtocols;
 	oct_BuiltInVTables vtables;
 	oct_BuiltInFunctions functions;
+	oct_Nothing nil; // TODO
 } oct_Runtime;
 
 struct oct_Context;
