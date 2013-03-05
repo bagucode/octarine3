@@ -118,56 +118,111 @@ static oct_Bool keyEq(oct_Context* ctx, oct_OHashtableKey key1, oct_OHashtableKe
 	return key1.vtable->functions.eq.equals(ctx, key1Self, key2Self, out_eq);
 }
 
-static oct_Bool oct_Hashtable_tryPut(oct_Context* ctx, oct_BHashtable self, oct_HashtableEntry* entry) {
-	oct_Uword i, mask, key;
+static oct_Bool oct_Hashtable_putOne(oct_Context* ctx, oct_BHashtable self, oct_HashtableEntry* entry, oct_Uword i, oct_Bool* result) {
 	oct_HashtableEntry tmp;
+	oct_OObject oobj;
 	oct_Bool eq;
-    
-	mask = self.ptr->table.ptr->size - 1;
-    
-	CHECK(keyHash(ctx, entry, &key));
-	i = hash1(key) & mask;
+
 	tmp = self.ptr->table.ptr->table[i];
 	self.ptr->table.ptr->table[i] = *entry;
 	eq = keyIsNothing(ctx, tmp.key);
 	if(!eq) {
 		CHECK(keyEq(ctx, tmp.key, entry->key, &eq));
+		if(eq) {
+			// Keys are equal, destroy old entry
+			oobj.self = tmp.key.self;
+			oobj.vtable = (oct_ObjectVTable*)tmp.key.vtable;
+			CHECK(oct_Object_destroyOwned(ctx, oobj));
+			if(entry->val.variant == OCT_ANY_OOBJECT) {
+				CHECK(oct_Object_destroyOwned(ctx, tmp.val.oobject));
+			}
+		}
 	}
-	if(eq) {
-#error MAC WAS HERE
-		// Destroy old hash table entry here!
-		CHECK(oct_HashtableE
+	if(eq) { // Key was Nothing or equal to existing entry
+		*result = oct_True;
+	}
+	else {
+		*result = oct_False;
+		// Set entry to tmp to continue the cukoo chain on failure
+		*entry = tmp;
+	}
+
+	return oct_True;
+}
+
+static oct_Bool oct_Hashtable_tryPut(oct_Context* ctx, oct_BHashtable self, oct_HashtableEntry* entry, oct_Bool* out_result) {
+	oct_Uword i, mask, key;
+    
+	mask = self.ptr->table.ptr->size - 1;
+    
+	CHECK(keyHash(ctx, entry, &key));
+	i = hash1(key) & mask;
+	CHECK(oct_Hashtable_putOne(ctx, self, entry, i, out_result));
+	if(*out_result) {
 		return oct_True;
 	}
-	if(keyIsNothing(ctx, entry->key) || tmp.key == entry->key) {
-		++table->size;
+
+	CHECK(keyHash(ctx, entry, &key));
+	i = hash2(key) & mask;
+	CHECK(oct_Hashtable_putOne(ctx, self, entry, i, out_result));
+	if(*out_result) {
 		return oct_True;
 	}
-	*entry = tmp;
 
-	i = hash2(hashPointer(entry->key)) & mask;
-	tmp = table->table[i];
-	table->table[i] = *entry;
-	if(tmp.key == NULL || tmp.key == entry->key) {
-		++table->size;
-		return oct_True;
+	CHECK(keyHash(ctx, entry, &key));
+	i = hash3(key) & mask;
+	CHECK(oct_Hashtable_putOne(ctx, self, entry, i, out_result));
+
+	return oct_True;
+}
+
+static oct_Bool oct_Hashtable_grow(oct_Context* ctx, oct_BHashtable self) {
+	oct_Hashtable bigger;
+	oct_BHashtable bBigger;
+	oct_Uword i, j, cap;
+	oct_Bool didPut;
+	oct_HashtableEntry entry;
+
+	bBigger.ptr = &bigger;
+
+	CHECK(oct_Hashtable_ctor(ctx, bBigger, self.ptr->table.ptr->size + 1));
+	for(i = 0; i < self.ptr->table.ptr->size; ++i) {
+		if(self.ptr->table.ptr->table[i].key.vtable->type.ptr != ctx->rt->builtInTypes.Nothing.ptr) {
+			entry = self.ptr->table.ptr->table[i];
+			didPut = oct_False;
+			for(j = 0; j < 5 && (!didPut); ++j) {
+				CHECK(oct_Hashtable_tryPut(ctx, bBigger, &entry, &didPut));
+			}
+			if(!didPut) {
+				cap = bBigger.ptr->table.ptr->size + 1;
+				CHECK(oct_Hashtable_dtor(ctx, bBigger));
+				CHECK(oct_Hashtable_ctor(ctx, bBigger, cap));
+				i = 0;
+			}
+		}
 	}
-	*entry = tmp;
+	CHECK(oct_Hashtable_dtor(ctx, self));
+	(*self.ptr) = bigger;
 
-	i = hash3(hashPointer(entry->key)) & mask;
-	tmp = table->table[i];
-	table->table[i] = *entry;
-	if(tmp.key == NULL || tmp.key == entry->key) {
-		++table->size;
-		return oct_True;
-	}
-	*entry = tmp;
-
-	return oct_False;
-
+	return oct_True;
 }
 
 oct_Bool oct_Hashtable_put(struct oct_Context* ctx, oct_BHashtable self, oct_OHashtableKey key, oct_Any value) {
+	oct_Uword i;
+	oct_HashtableEntry entry;
+	oct_Bool didPut;
+
+	entry.key = key;
+	entry.val = value;
+	while(oct_True) {
+		for(i = 0; i < 5; ++i) {
+			CHECK(oct_Hashtable_tryPut(ctx, self, &entry, &didPut));
+			if(didPut) {
+				return oct_True;
+			}
+		}
+		CHECK(oct_Hashtable_grow(ctx, self));
+	}
 }
 
 // Get a value from the table. If the value is owned, it will be removed from the hash table and returned. If the value
@@ -182,105 +237,8 @@ oct_Bool oct_Hashtable_borrow(struct oct_Context* ctx, oct_BHashtable self, oct_
 
 
 
-typedef struct PointerTranslationTableEntry {
-    void* key;
-    void* val;
-} PointerTranslationTableEntry;
-
-typedef struct PointerTranslationTable {
-	oct_Uword capacity;
-	oct_Uword size;
-	PointerTranslationTableEntry* table;
-} PointerTranslationTable;
 
 
-
-static void PointerTranslationTable_Destroy(PointerTranslationTable* table) {
-	free(table->table);
-	table->capacity = 0;
-	table->size = 0;
-	table->table = NULL;
-}
-
-
-static oct_Bool PointerTranslationTable_TryPut(PointerTranslationTable* table, PointerTranslationTableEntry* entry) {
-	oct_Uword i, mask;
-    PointerTranslationTableEntry tmp;
-    
-	mask = table->capacity - 1;
-    
-	i = hash1(hashPointer(entry->key)) & mask;
-	tmp = table->table[i];
-	table->table[i] = *entry;
-	if(tmp.key == NULL || tmp.key == entry->key) {
-		++table->size;
-		return oct_True;
-	}
-	*entry = tmp;
-
-	i = hash2(hashPointer(entry->key)) & mask;
-	tmp = table->table[i];
-	table->table[i] = *entry;
-	if(tmp.key == NULL || tmp.key == entry->key) {
-		++table->size;
-		return oct_True;
-	}
-	*entry = tmp;
-
-	i = hash3(hashPointer(entry->key)) & mask;
-	tmp = table->table[i];
-	table->table[i] = *entry;
-	if(tmp.key == NULL || tmp.key == entry->key) {
-		++table->size;
-		return oct_True;
-	}
-	*entry = tmp;
-
-	return oct_False;
-}
-
-static oct_Bool PointerTranslationTable_Grow(oct_Context* ctx, PointerTranslationTable* table) {
-	PointerTranslationTable bigger;
-	oct_Uword i, cap;
-
-	if(!PointerTranslationTable_Create(ctx, table->capacity + 1, &bigger)) {
-		return oct_False;
-	}
-	for(i = 0; i < table->capacity; ++i) {
-		if(table->table[i].key != NULL) {
-			// Try more than once here? Table might balloon?
-			if(PointerTranslationTable_TryPut(&bigger, &table->table[i]) == oct_False) {
-				cap = bigger.capacity + 1;
-				PointerTranslationTable_Destroy(&bigger);
-				if(!PointerTranslationTable_Create(ctx, cap, &bigger)) {
-					return oct_False;
-				}
-				i = 0;
-			}
-		}
-	}
-	PointerTranslationTable_Destroy(table);
-	(*table) = bigger;
-    return oct_True;
-}
-
-static oct_Bool PointerTranslationTable_Put(oct_Context* ctx, PointerTranslationTable* table, void* key, void* val) {
-	oct_Uword i;
-	PointerTranslationTableEntry entry;
-
-	entry.key = key;
-	entry.val = val;
-	while(oct_True) {
-		for(i = 0; i < 5; ++i) {
-			if(PointerTranslationTable_TryPut(table, &entry)) {
-				return oct_True;
-			}
-		}
-		if(!PointerTranslationTable_Grow(ctx, table)) {
-			return oct_False;
-		}
-	}
-}
 
 static void* PointerTranslationTable_Get(PointerTranslationTable* table, void* key) {
 	oct_Uword i, mask, ptrHash;
