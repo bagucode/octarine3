@@ -6,6 +6,7 @@
 #include "oct_hashtable.h"
 #include "oct_string.h"
 #include "oct_symbol.h"
+#include "oct_nothing.h"
 
 struct oct_Context;
 struct oct_Namespace;
@@ -14,33 +15,27 @@ typedef struct oct_BNamespace {
 	struct oct_Namespace* ptr;
 } oct_BNamespace;
 
-//typedef struct oct_BindingInfo {
-//	oct_OHashtableKey key;
-//	oct_Any value;
-//} oct_BindingInfo;
-//
-//typedef struct oct_ABindingInfo {
-//	oct_Uword size;
-//	oct_BindingInfo data[];
-//} oct_ABindingInfo;
-//
-//typedef struct oct_OABindingInfo {
-//	oct_ABindingInfo* ptr;
-//} oct_OABindingInfo;
+#define OCT_NAMESPACEOPTION_NOTHING 0
+#define OCT_NAMESPACEOPTION_NAMESPACE 1
+
+typedef struct oct_NamespaceOption {
+	oct_Uword variant;
+	union {
+		oct_Nothing nothing;
+		oct_BNamespace ns;
+	};
+} oct_NamespaceOption;
 
 oct_Bool _oct_Namespace_init(struct oct_Context* ctx);
 
-oct_Bool oct_Namespace_create(struct oct_Context* ctx, oct_BString nsName, oct_BNamespace* out_ns);
-oct_Bool oct_Namespace_findNs(struct oct_Context* ctx, oct_BString nsName, oct_BNamespace* out_ns);
+oct_Bool oct_Namespace_create(struct oct_Context* ctx, oct_OString nsName, oct_BNamespace* out_ns);
+oct_Bool oct_Namespace_findNs(struct oct_Context* ctx, oct_BString nsName, oct_NamespaceOption* out_ns);
 oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_OHashtableKey key, oct_Any value);
 oct_Bool oct_Namespace_bindInCurrent(struct oct_Context* ctx, oct_OHashtableKey key, oct_Any value);
 oct_Bool oct_Namespace_lookup(struct oct_Context* ctx, oct_BHashtableKey key, oct_Any* out_value);
 
 oct_Bool oct_Namespace_cBind(struct oct_Context* ctx, const char* keySym, oct_OObject obj);
 
-
-//oct_Bool oct_Namespace_copyValueOwned(struct oct_Context* ctx, oct_BNamespace ns, oct_BHashtableKey key, oct_OObject* out_obj);
-//oct_Bool oct_Namespace_copyValueManaged(struct oct_Context* ctx, oct_BNamespace ns, oct_BHashtableKey key, oct_MObject* out_obj);
-//oct_Bool oct_Namespace_borrowGlobal(struct oct_Context* ctx, oct_BNamespace ns, oct_BHashtableKey key, oct_BObject* out_obj);
+oct_Bool oct_Namespace_asObject(struct oct_Context* ctx, oct_BNamespace ns, oct_BObject* out_obj);
 
 #endif

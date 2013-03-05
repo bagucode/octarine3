@@ -106,6 +106,10 @@ typedef struct oct_BuiltInTypes {
 	oct_BType OErrorOption; // INIT
 	// Any
 	oct_BType Any; // INIT
+	// Namespace
+	oct_BType Namespace; // INIT
+	oct_BType BNamespace; // INIT
+	oct_BType NamespaceOption; // INIT
 } oct_BuiltInTypes;
 
 typedef struct oct_BuiltInVTables {

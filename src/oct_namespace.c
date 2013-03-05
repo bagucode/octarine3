@@ -4,6 +4,10 @@
 #include "oct_runtime.h"
 #include "oct_exchangeheap.h"
 #include "oct_copyable.h"
+#include "oct_type.h"
+#include "oct_type_pointers.h"
+
+#include <stddef.h>
 
 typedef struct oct_Namespace {
 	oct_String name;
@@ -11,37 +15,119 @@ typedef struct oct_Namespace {
 	/* Mutex lock */
 } oct_Namespace;
 
-#define CHECK(X) if(!X) goto error;
+#define CHECK(X) if(!X) return oct_False;
 
-oct_Bool oct_Namespace_create(struct oct_Context* ctx, oct_BString nsName, oct_BNamespace* out_ns) {
+oct_Bool _oct_Namespace_init(struct oct_Context* ctx) {
 
+	// Namespace
+	oct_BType t = ctx->rt->builtInTypes.Namespace;
+	t.ptr->variant = OCT_TYPE_STRUCT;
+	t.ptr->structType.alignment = 0;
+	t.ptr->structType.size = sizeof(oct_Namespace);
+	CHECK(oct_AField_createOwned(ctx, 2, &t.ptr->structType.fields));
+	t.ptr->structType.fields.ptr->data[0].offset = offsetof(oct_Namespace, name);
+	t.ptr->structType.fields.ptr->data[0].type = ctx->rt->builtInTypes.String;
+	t.ptr->structType.fields.ptr->data[1].offset = offsetof(oct_Namespace, bindings);
+	t.ptr->structType.fields.ptr->data[1].type = ctx->rt->builtInTypes.Hashtable;
+
+	// BNamespace
+	t = ctx->rt->builtInTypes.BNamespace;
+	t.ptr->variant = OCT_TYPE_POINTER;
+	t.ptr->pointerType.kind = OCT_POINTER_BORROWED;
+	t.ptr->pointerType.type = ctx->rt->builtInTypes.Namespace;
+
+	// NamespaceOption
+	t = ctx->rt->builtInTypes.NamespaceOption;
+	t.ptr->variant = OCT_TYPE_VARIADIC;
+	t.ptr->variadicType.alignment = 0;
+	t.ptr->variadicType.size = sizeof(oct_NamespaceOption);
+	CHECK(oct_ABType_createOwned(ctx, 2, &t.ptr->variadicType.types));
+	t.ptr->variadicType.types.ptr->data[0] = ctx->rt->builtInTypes.Nothing;
+	t.ptr->variadicType.types.ptr->data[1] = ctx->rt->builtInTypes.BNamespace;
+
+	return oct_True;
 }
 
-oct_Bool oct_Namespace_findNs(struct oct_Context* ctx, oct_BString nsName, oct_BNamespace* out_ns) {
-	oct_BHashtableKey nsNameKey;
-	oct_BObject nsObject;
-	oct_BHashtable nsTable;
+#undef CHECK
+#define CHECK(X) if(!X) goto error;
+
+oct_Bool oct_Namespace_create(struct oct_Context* ctx, oct_OString nsName, oct_BNamespace* out_ns) {
+	oct_NamespaceOption existing;
+	oct_BString bstr;
+	oct_BHashtable bTable;
+	oct_OHashtableKey nameKey;
+	oct_Any nsAny;
+	oct_BNamespace newNs;
 	oct_Bool result = oct_True;
 	
-	CHECK(oct_String_asHashtableKeyBorrowed(ctx, nsName, &nsNameKey));
-	nsTable.ptr = &ctx->rt->namespaces;
-	CHECK(oct_Hashtable_borrow(ctx, nsTable, nsNameKey, &nsObject));
-	out_ns->ptr = (oct_Namespace*)nsObject.self.self;
+	// TODO: lock namespace table
+
+	bstr.ptr = nsName.ptr;
+	CHECK(oct_Namespace_findNs(ctx, bstr, &existing));
+	if(existing.variant == OCT_NAMESPACEOPTION_NAMESPACE) {
+		*out_ns = existing.ns;
+		CHECK(oct_String_destroyOwned(ctx, nsName));
+		goto end;
+	}
+
+	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_Namespace), (void**)&newNs.ptr));
+	bTable.ptr = &newNs.ptr->bindings;
+	CHECK(oct_Hashtable_ctor(ctx, bTable, 100));
+	newNs.ptr->name = (*nsName.ptr);
+
+	CHECK(oct_Namespace_asObject(ctx, newNs, &nsAny.bobject));
+	nsAny.variant = OCT_ANY_BOBJECT;
+
+	bTable.ptr = &ctx->rt->namespaces;
+	CHECK(oct_String_asHashtableKeyOwned(ctx, nsName, &nameKey));
+	CHECK(oct_Hashtable_put(ctx, bTable, nameKey, nsAny));
 
 	goto end;
 error:
 	result = oct_False;
 end:
+	// TODO: unlock namespace table
+	return result;
+}
+
+oct_Bool oct_Namespace_findNs(struct oct_Context* ctx, oct_BString nsName, oct_NamespaceOption* out_ns) {
+	oct_BHashtableKey nsNameKey;
+	oct_Any ns;
+	oct_BHashtable nsTable;
+	oct_Bool result = oct_True;
+
+	// TODO: lock namespace table (if not locked in create)
+	
+	CHECK(oct_String_asHashtableKeyBorrowed(ctx, nsName, &nsNameKey));
+	nsTable.ptr = &ctx->rt->namespaces;
+	CHECK(oct_Hashtable_borrow(ctx, nsTable, nsNameKey, &ns));
+	if(ns.variant == OCT_ANY_NOTHING) {
+		(*out_ns).variant = OCT_NAMESPACEOPTION_NOTHING;
+	}
+	else if(ns.bobject.vtable->type.ptr == ctx->rt->builtInTypes.BNamespace.ptr) {
+		(*out_ns).variant = OCT_NAMESPACEOPTION_NAMESPACE;
+		(*out_ns).ns.ptr = (oct_Namespace*)ns.bobject.self.self;
+	}
+	else {
+		CHECK(oct_Context_setErrorWithCMessage(ctx, "Key found in namespace table but value was not a namespace"));
+		goto error;
+	}
+
+	goto end;
+error:
+	result = oct_False;
+end:
+	// TODO: unlock namespace table (if not locked in create)
 	return oct_True;
 }
 
-oct_Bool oct_Namespace_bindInCurrent(struct oct_Context* ctx, oct_BindingInfo binding) {
+oct_Bool oct_Namespace_bindInCurrent(struct oct_Context* ctx, oct_OHashtableKey key, oct_Any value) {
 	oct_BNamespace bns;
 	bns.ptr = ctx->ns;
 	return oct_Namespace_bind(ctx, bns, binding);
 }
 
-oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_BindingInfo binding) {
+oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_OHashtableKey key, oct_Any value) {
 	oct_BHashtable bindingsTable;
 	oct_Bool result = oct_True;
 
@@ -54,6 +140,35 @@ error:
 end:
 	return result;
 }
+
+oct_Bool oct_Namespace_lookup(struct oct_Context* ctx, oct_BHashtableKey key, oct_Any* out_value) {
+}
+
+oct_Bool oct_Namespace_cBind(struct oct_Context* ctx, const char* keySym, oct_OObject obj) {
+	oct_OSymbol sym;
+	oct_BSymbol bs;
+	oct_OString str;
+	oct_BHashtableKey bhk;
+	oct_BindingInfo bi;
+	oct_Bool result = oct_True;
+
+	CHECK(oct_String_createOwnedFromCString(ctx, keySym, &str));
+	CHECK(oct_Symbol_createOwned(ctx, str, &sym));
+	bs.ptr = sym.ptr;
+	CHECK(oct_Symbol_asHashtableKey(ctx, bs, &bhk));
+	bi.object = obj;
+	bi.key.self.self = bhk.self.self;
+	bi.key.vtable = bhk.vtable;
+	CHECK(oct_Namespace_bindInCurrent(ctx, bi));
+
+	goto end;
+error:
+	result = oct_False;
+end:
+	return result;
+}
+
+// ********************************************************************************************************
 
 oct_Bool oct_Namespace_copyValueOwned(struct oct_Context* ctx, oct_BNamespace ns, oct_BHashtableKey key, oct_OObject* out_obj) {
 	oct_BHashtable bindingsTable;
@@ -91,29 +206,7 @@ end:
 	return result;
 }
 
-oct_Bool oct_Namespace_cBind(struct oct_Context* ctx, const char* keySym, oct_OObject obj) {
-	oct_OSymbol sym;
-	oct_BSymbol bs;
-	oct_OString str;
-	oct_BHashtableKey bhk;
-	oct_BindingInfo bi;
-	oct_Bool result = oct_True;
 
-	CHECK(oct_String_createOwnedFromCString(ctx, keySym, &str));
-	CHECK(oct_Symbol_createOwned(ctx, str, &sym));
-	bs.ptr = sym.ptr;
-	CHECK(oct_Symbol_asHashtableKey(ctx, bs, &bhk));
-	bi.object = obj;
-	bi.key.self.self = bhk.self.self;
-	bi.key.vtable = bhk.vtable;
-	CHECK(oct_Namespace_bindInCurrent(ctx, bi));
-
-	goto end;
-error:
-	result = oct_False;
-end:
-	return result;
-}
 
 //#include "oct_runtime.h"
 //#include "oct_type.h"
