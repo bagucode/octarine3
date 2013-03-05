@@ -18,98 +18,98 @@ typedef struct oct_ContextList {
 struct oct_Type;
 
 typedef struct oct_BuiltInTypes {
-	oct_BType U8; // INIT
-	oct_BType I8; // INIT
-	oct_BType U16; // INIT
-	oct_BType I16; // INIT
-	oct_BType U32; // INIT
-	oct_BType I32; // INIT
-	oct_BType U64; // INIT
-	oct_BType I64; // INIT
-	oct_BType F32; // INIT
-	oct_BType F64; // INIT
-	oct_BType Uword; // INIT
-	oct_BType Word; // INIT
-	oct_BType Char; // INIT
-	oct_BType Bool; // INIT
+	oct_BType U8;
+	oct_BType I8;
+	oct_BType U16;
+	oct_BType I16;
+	oct_BType U32;
+	oct_BType I32;
+	oct_BType U64;
+	oct_BType I64;
+	oct_BType F32;
+	oct_BType F64;
+	oct_BType Uword;
+	oct_BType Word;
+	oct_BType Char;
+	oct_BType Bool;
 	// Hashtable
-	oct_BType HashtableKey; // TYPE, INIT
-	oct_BType OHashtableKey; // TYPE, INIT
-	oct_BType BHashtableKey; // TYPE, INIT
-	oct_BType HashtableEntry; // TYPE, INIT
-	oct_BType AHashtableEntry; // TYPE, INIT
-	oct_BType OAHashtableEntry; // TYPE, INIT
-	oct_BType Hashtable; // TYPE, INIT
-	oct_BType BHashtable; // TYPE, INIT
+	oct_BType HashtableKey;
+	oct_BType OHashtableKey;
+	oct_BType BHashtableKey;
+	oct_BType HashtableEntry;
+	oct_BType AHashtableEntry;
+	oct_BType OAHashtableEntry;
+	oct_BType Hashtable;
+	oct_BType BHashtable;
 	// Type
-	oct_BType Type; // INIT
-	oct_BType BType; // INIT
-	oct_BType ABType; // INIT
-	oct_BType OABType; // INIT
+	oct_BType Type;
+	oct_BType BType;
+	oct_BType ABType;
+	oct_BType OABType;
 	// Protocol
-	oct_BType Protocol; // INIT
-	oct_BType VTable; // INIT
-	oct_BType BVTable; // INIT
-	oct_BType ProtocolBinding; // INIT
-	oct_BType BProtocolBinding; // INIT
+	oct_BType Protocol;
+	oct_BType VTable;
+	oct_BType BVTable;
+	oct_BType ProtocolBinding;
+	oct_BType BProtocolBinding;
 	// Function
-	oct_BType Function; // TYPE, INIT
-	oct_BType BFunction; // TYPE, INIT
-	oct_BType ABFunction; // TYPE, INIT
-	oct_BType OABFunction; // TYPE, INIT
+	oct_BType Function;
+	oct_BType BFunction;
+	oct_BType ABFunction;
+	oct_BType OABFunction;
 	// Object
-	oct_BType Object; // INIT
-	oct_BType OObject; // INIT
-	oct_BType BObject; // INIT
-	oct_BType OObjectOption; // INIT
+	oct_BType Object;
+	oct_BType OObject;
+	oct_BType BObject;
+	oct_BType OObjectOption;
 	// String
-	oct_BType String; // INIT
-	oct_BType OString; // INIT
-	oct_BType BString; // INIT
+	oct_BType String;
+	oct_BType OString;
+	oct_BType BString;
 	// Array
-	oct_BType Array; // INIT
-	oct_BType FixedSizeArray; // TYPE, INIT
+	oct_BType Array;
+	oct_BType FixedSizeArray;
 	// AChar
-	oct_BType AChar; // INIT
-	oct_BType OAChar; // INIT
+	oct_BType AChar;
+	oct_BType OAChar;
 	// AU8
-	oct_BType AU8; // INIT
-	oct_BType OAU8; // INIT
+	oct_BType AU8;
+	oct_BType OAU8;
 	// List
-	oct_BType List; // INIT
-	oct_BType OList; // INIT
-	oct_BType BList; // INIT
-	oct_BType OListOption; // INIT
-	oct_BType BListOption; // INIT
+	oct_BType List;
+	oct_BType OList;
+	oct_BType BList;
+	oct_BType OListOption;
+	oct_BType BListOption;
 	// Nothing
-	oct_BType Nothing; // TYPE, INIT
+	oct_BType Nothing;
 	// Pointer
-	oct_BType Pointer; // INIT
+	oct_BType Pointer;
 	// Struct
-	oct_BType Struct; // INIT
+	oct_BType Struct;
 	// Field
-	oct_BType Field; // TYPE, INIT
-	oct_BType AField; // TYPE, INIT
-	oct_BType OAField; // TYPE, INIT
+	oct_BType Field;
+	oct_BType AField;
+	oct_BType OAField;
 	// Symbol
-	oct_BType Symbol; // INIT
-	oct_BType OSymbol; // INIT
-	oct_BType BSymbol; // INIT
-	oct_BType OSymbolOption; // INIT
+	oct_BType Symbol;
+	oct_BType OSymbol;
+	oct_BType BSymbol;
+	oct_BType OSymbolOption;
 	// Prototype
-	oct_BType Prototype; // TYPE, INIT
+	oct_BType Prototype;
 	// Variadic
-	oct_BType Variadic; // TYPE, INIT
+	oct_BType Variadic;
 	// Error
-	oct_BType Error; // INIT
-	oct_BType OError; // INIT
-	oct_BType OErrorOption; // INIT
+	oct_BType Error;
+	oct_BType OError;
+	oct_BType OErrorOption;
 	// Any
-	oct_BType Any; // INIT
+	oct_BType Any;
 	// Namespace
-	oct_BType Namespace; // INIT
-	oct_BType BNamespace; // INIT
-	oct_BType NamespaceOption; // INIT
+	oct_BType Namespace;
+	oct_BType BNamespace;
+	oct_BType NamespaceOption;
 } oct_BuiltInTypes;
 
 typedef struct oct_BuiltInVTables {

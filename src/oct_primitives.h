@@ -69,7 +69,7 @@ typedef oct_U32 oct_Uword;
 
 struct oct_Context;
 
-oct_Bool _oct_Primitives_initType(struct oct_Context* ctx);
+oct_Bool _oct_Primitives_init(struct oct_Context* ctx);
 
 // Public
 

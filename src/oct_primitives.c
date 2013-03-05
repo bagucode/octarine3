@@ -11,7 +11,7 @@ static oct_Bool createPrimitiveType(oct_Context* ctx, oct_BType* t, oct_Uword si
 	return oct_AField_createOwned(ctx, 0, &t->ptr->structType.fields);
 }
 
-oct_Bool _oct_Primitives_initType(struct oct_Context* ctx) {
+oct_Bool _oct_Primitives_init(struct oct_Context* ctx) {
 	if(!createPrimitiveType(ctx, &ctx->rt->builtInTypes.U8, 1, 1)) return oct_False;
 	if(!createPrimitiveType(ctx, &ctx->rt->builtInTypes.I8, 1, 1)) return oct_False;
 	if(!createPrimitiveType(ctx, &ctx->rt->builtInTypes.U16, 2, 2)) return oct_False;

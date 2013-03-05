@@ -18,36 +18,35 @@
 
 #include <stdlib.h>
 
-static void alloc_builtIn(oct_Runtime* rt) {
-	oct_Uword iters = sizeof(oct_BuiltInTypes) / sizeof(oct_Type*);
+static void alloc_builtInTypes(oct_Runtime* rt) {
+	oct_Uword iters = sizeof(oct_BuiltInTypes) / sizeof(oct_BType);
 	oct_Uword i;
-	oct_Type** place;
+	oct_BType* place;
 
 	for(i = 0; i < iters; ++i) {
 		char* dummy = (char*)(&rt->builtInTypes);
-		dummy += sizeof(oct_Type*) * i;
-		place = (oct_Type**)dummy;
-		(*place) = (oct_Type*)malloc(sizeof(oct_Type));
+		dummy += sizeof(oct_BType) * i;
+		place = (oct_BType*)dummy;
+		place->ptr = (oct_Type*)malloc(sizeof(oct_Type));
 	}
 }
 
-static oct_Bool bind_type(oct_Context* ctx, oct_BNamespace ns, const char* name, oct_Type* type) {
+#define CHECK(X) if(!X) return oct_False;
+
+static oct_Bool bind_type(oct_Context* ctx, oct_BNamespace ns, const char* name, oct_BType type) {
 	oct_OString str;
 	oct_OSymbol sym;
-	oct_OObjectOption val;
-    oct_OType otype;
+	oct_BSymbol bSym;
+	oct_OHashtableKey key;
+    oct_Any value;
 	
-	if(!oct_String_createOwnedFromCString(ctx, name, &str)) return oct_False;
-	if(!oct_Symbol_createOwned(ctx, str, &sym)) return oct_False;
-	// TODO: Special case when binding types and functions?
-	// They should not really be stored as owned, or at least not be copied like bound values
-	// when looked up and used locally.
-    otype.ptr = type;
-    val.variant = OCT_OBJECTOPTION_OBJECT;
-    if(!oct_Type_asObject(ctx, otype, &val.object)) {
-        return oct_False;
-    }
-	return oct_Namespace_bind(ctx, ns, sym, val);
+	CHECK(oct_String_createOwnedFromCString(ctx, name, &str));
+	CHECK(oct_Symbol_createOwned(ctx, str, &sym));
+	bSym.ptr = sym.ptr;
+	CHECK(oct_Symbol_asHashtableKey(ctx, bSym, (oct_BHashtableKey*)&key));
+    value.variant = OCT_ANY_BOBJECT;
+	CHECK(oct_Type_asObject(ctx, type, &value.bobject));
+	return oct_Namespace_bind(ctx, ns, key, value);
 }
 
 struct oct_Runtime* oct_Runtime_create(const char** out_error) {
@@ -83,52 +82,32 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	//        of those types.
 
 	// Allocate memory for all built in types up front to resolve circular dependencies.
-	alloc_builtIn(rt);
+	alloc_builtInTypes(rt);
 
 	// Initialize all built in types
 	// TODO: intern the types? Difficult, have to care about order because pointers may change...
 
-	_oct_Primitives_initType(mainCtx);
-    _oct_List_initType(mainCtx);
-    _oct_OList_initType(mainCtx);
-    _oct_MList_initType(mainCtx);
-    _oct_BList_initType(mainCtx);
-    _oct_OListOption_initType(mainCtx);
-    _oct_ArrayType_initType(mainCtx);
-	_oct_FixedSizeArrayType_initType(mainCtx);
-	_oct_PointerType_initType(mainCtx);
-	_oct_ProtoType_initType(mainCtx);
-	_oct_VariadicType_initType(mainCtx);
-	_oct_StructType_initType(mainCtx);
-	_oct_Type_initType(mainCtx);
-	_oct_BType_initType(mainCtx);
-	_oct_ABType_initType(mainCtx);
-	_oct_OABType_initType(mainCtx);
-	_oct_Field_initType(mainCtx);
-	_oct_AField_initType(mainCtx);
-	_oct_OAField_initType(mainCtx);
-    _oct_AU8_initType(mainCtx);
-    _oct_OAU8_initType(mainCtx);
-	_oct_String_initType(mainCtx);
-	_oct_Nothing_initType(mainCtx);
-	_oct_Symbol_initType(mainCtx);
-	_oct_NamespaceBinding_initType(mainCtx);
-	_oct_ANamespaceBinding_initType(mainCtx);
-	_oct_OANamespaceBinding_initType(mainCtx);
-	_oct_Namespace_initType(mainCtx);
-	_oct_OSymbolOption_initType(mainCtx);
-	_oct_Protocol_initType(mainCtx);
-	_oct_Function_initType(mainCtx);
-	_oct_BFunction_initType(mainCtx);
-	_oct_ABFunction_initType(mainCtx);
-	_oct_OABFunction_initType(mainCtx);
-	_oct_AChar_initType(mainCtx);
-	_oct_OAChar_initType(mainCtx);
-    _oct_OObjectOption_initType(mainCtx);
-    _oct_OString_initType(mainCtx);
-
-	//_oct_ReadResult_initType(mainCtx);
-	//_oct_Reader_initType(mainCtx);
+	_oct_Primitives_init(mainCtx);
+	_oct_Hashtable_init(mainCtx);
+	_oct_Type_init(mainCtx);
+	_oct_Protocol_init(mainCtx);
+	_oct_Function_init(mainCtx);
+	_oct_Object_init(mainCtx);
+	_oct_String_init(mainCtx);
+	_oct_Array_init(mainCtx);
+	_oct_AChar_init(mainCtx);
+	_oct_AU8_init(mainCtx);
+	_oct_List_init(mainCtx);
+	_oct_Nothing_init(mainCtx);
+	_oct_PointerType_init(mainCtx);
+	_oct_StructType_init(mainCtx);
+	_oct_Field_init(mainCtx);
+	_oct_Symbol_init(mainCtx);
+	_oct_ProtoType_init(mainCtx);
+	_oct_VariadicType_init(mainCtx);
+	_oct_Error_init(mainCtx);
+	_oct_Any_init(mainCtx);
+	_oct_Namespace_init(mainCtx);
 
 	// *** 3. Create octarine namespace.
 
