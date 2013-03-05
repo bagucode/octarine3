@@ -135,6 +135,7 @@ typedef struct oct_BuiltInProtocols {
 	oct_BProtocolBinding EqComparable; // TODO
 	oct_BProtocolBinding Hashable; // TODO
 	oct_BProtocolBinding HashtableKey; // TODO
+	oct_BProtocolBinding Copyable; // TODO
 } oct_BuiltInProtocols;
 
 typedef struct oct_BuiltInFunctions {
