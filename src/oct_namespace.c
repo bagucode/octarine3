@@ -139,15 +139,13 @@ oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_OHas
 	return result;
 }
 
-oct_Bool oct_Namespace_lookup(struct oct_Context* ctx, oct_BHashtableKey key, oct_Any* out_value) {
+oct_Bool oct_Namespace_lookup(struct oct_Context* ctx, oct_BNamespace ns, oct_BHashtableKey key, oct_Any* out_value) {
 	oct_BHashtable bindingsTable;
-	oct_BNamespace bns;
 	oct_Any tmpValue;
 	oct_BCopyable copyable;
 	oct_Bool result = oct_True;
 
-	bns.ptr = ctx->ns;
-	bindingsTable.ptr = &bns.ptr->bindings;
+	bindingsTable.ptr = &ns.ptr->bindings;
 	// TODO: lock bindings table
 	CHECK(oct_Hashtable_borrow(ctx, bindingsTable, key, &tmpValue));
 	if(tmpValue.variant == OCT_ANY_OOBJECT) {

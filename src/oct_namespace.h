@@ -32,7 +32,7 @@ oct_Bool oct_Namespace_create(struct oct_Context* ctx, oct_OString nsName, oct_B
 oct_Bool oct_Namespace_findNs(struct oct_Context* ctx, oct_BString nsName, oct_NamespaceOption* out_ns);
 oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_OHashtableKey key, oct_Any value);
 oct_Bool oct_Namespace_bindInCurrent(struct oct_Context* ctx, oct_OHashtableKey key, oct_Any value);
-oct_Bool oct_Namespace_lookup(struct oct_Context* ctx, oct_BHashtableKey key, oct_Any* out_value);
+oct_Bool oct_Namespace_lookup(struct oct_Context* ctx, oct_BNamespace ns, oct_BHashtableKey key, oct_Any* out_value);
 
 oct_Bool oct_Namespace_cBind(struct oct_Context* ctx, const char* keySym, oct_OObject obj);
 
