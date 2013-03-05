@@ -24,13 +24,13 @@ typedef struct oct_OObject {
 #define OCT_OBJECTOPTION_NOTHING 0
 #define OCT_OBJECTOPTION_OBJECT 1
 
-typedef struct oct_OObjectOption {
+typedef struct oct_ObjectOption {
 	oct_Uword variant;
 	union {
 		oct_Nothing nothing;
 		oct_OObject object;
 	};
-} oct_OObjectOption;
+} oct_ObjectOption;
 
 struct oct_Context;
 

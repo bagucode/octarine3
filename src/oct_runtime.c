@@ -139,8 +139,78 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	bind_type(mainCtx, octarine, "~+HashtableEntry", rt->builtInTypes.OAHashtableEntry);
 	bind_type(mainCtx, octarine, "Hashtable", rt->builtInTypes.Hashtable);
 	bind_type(mainCtx, octarine, "&Hashtable", rt->builtInTypes.BHashtable);
+	// Type
+	bind_type(mainCtx, octarine, "Type", rt->builtInTypes.Type);
+	bind_type(mainCtx, octarine, "&Type", rt->builtInTypes.BType);
+	bind_type(mainCtx, octarine, "+&Type", rt->builtInTypes.ABType);
+	bind_type(mainCtx, octarine, "~+&Type", rt->builtInTypes.OABType);
+	// Protocol
+	bind_type(mainCtx, octarine, "Protocol", rt->builtInTypes.Protocol);
+	bind_type(mainCtx, octarine, "VTable", rt->builtInTypes.VTable);
+	bind_type(mainCtx, octarine, "&VTable", rt->builtInTypes.BVTable);
+	bind_type(mainCtx, octarine, "ProtocolBinding", rt->builtInTypes.ProtocolBinding);
+	bind_type(mainCtx, octarine, "&ProtocolBinding", rt->builtInTypes.BProtocolBinding);
+	// Function
+	bind_type(mainCtx, octarine, "Function", rt->builtInTypes.Function);
+	bind_type(mainCtx, octarine, "&Function", rt->builtInTypes.BFunction);
+	bind_type(mainCtx, octarine, "+&Function", rt->builtInTypes.ABFunction);
+	bind_type(mainCtx, octarine, "~+&Function", rt->builtInTypes.OABFunction);
+	// Object
+	bind_type(mainCtx, octarine, "Object", rt->builtInTypes.Object);
+	bind_type(mainCtx, octarine, "~Object", rt->builtInTypes.OObject);
+	bind_type(mainCtx, octarine, "&Object", rt->builtInTypes.BObject);
+	bind_type(mainCtx, octarine, "ObjectOption~", rt->builtInTypes.ObjectOption);
+	// String
+	bind_type(mainCtx, octarine, "String", rt->builtInTypes.String);
+	bind_type(mainCtx, octarine, "~String", rt->builtInTypes.OString);
+	bind_type(mainCtx, octarine, "&String", rt->builtInTypes.BString);
+	// Array
+	bind_type(mainCtx, octarine, "Array", rt->builtInTypes.Array);
+	bind_type(mainCtx, octarine, "FixedSizeArray", rt->builtInTypes.FixedSizeArray);
+	// AChar
+	bind_type(mainCtx, octarine, "+Char", rt->builtInTypes.AChar);
+	bind_type(mainCtx, octarine, "~+Char", rt->builtInTypes.OAChar);
+	// AU8
+	bind_type(mainCtx, octarine, "+U8", rt->builtInTypes.AU8);
+	bind_type(mainCtx, octarine, "~+U8", rt->builtInTypes.OAU8);
+	// List
+	bind_type(mainCtx, octarine, "List", rt->builtInTypes.List);
+	bind_type(mainCtx, octarine, "~List", rt->builtInTypes.OList);
+	bind_type(mainCtx, octarine, "&List", rt->builtInTypes.BList);
+	bind_type(mainCtx, octarine, "ListOption~", rt->builtInTypes.OListOption);
+	bind_type(mainCtx, octarine, "ListOption&", rt->builtInTypes.BListOption);
+	// Nothing
+	bind_type(mainCtx, octarine, "Nothing", rt->builtInTypes.Nothing);
+	// Pointer
+	bind_type(mainCtx, octarine, "Pointer", rt->builtInTypes.Pointer);
+	// Struct
+	bind_type(mainCtx, octarine, "Struct", rt->builtInTypes.Struct);
+	// Field
+	bind_type(mainCtx, octarine, "Field", rt->builtInTypes.Field);
+	bind_type(mainCtx, octarine, "+Field", rt->builtInTypes.AField);
+	bind_type(mainCtx, octarine, "~+Field", rt->builtInTypes.OAField);
+	// Symbol
+	bind_type(mainCtx, octarine, "Symbol", rt->builtInTypes.Symbol);
+	bind_type(mainCtx, octarine, "~Symbol", rt->builtInTypes.OSymbol);
+	bind_type(mainCtx, octarine, "&Symbol", rt->builtInTypes.BSymbol);
+	bind_type(mainCtx, octarine, "SymbolOption~", rt->builtInTypes.OSymbolOption);
+	// Prototype
+	bind_type(mainCtx, octarine, "Prototype", rt->builtInTypes.Prototype);
+	// Variadic
+	bind_type(mainCtx, octarine, "Variadic", rt->builtInTypes.Variadic);
+	// Error
+	bind_type(mainCtx, octarine, "Error", rt->builtInTypes.Error);
+	bind_type(mainCtx, octarine, "~Error", rt->builtInTypes.OError);
+	bind_type(mainCtx, octarine, "ErrorOption~", rt->builtInTypes.OErrorOption);
+	// Any
+	bind_type(mainCtx, octarine, "Any", rt->builtInTypes.Any);
+	// Namespace
+	bind_type(mainCtx, octarine, "Namespace", rt->builtInTypes.Namespace);
+	bind_type(mainCtx, octarine, "&Namespace", rt->builtInTypes.BNamespace);
+	bind_type(mainCtx, octarine, "NamespaceOption", rt->builtInTypes.NamespaceOption);
 
-
+	// *** 5. Profit?
+	
 	return rt;
 }
 

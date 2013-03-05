@@ -30,11 +30,11 @@ oct_Bool _oct_Object_init(struct oct_Context* ctx) {
 	t.ptr->pointerType.kind = OCT_POINTER_BORROWED_PROTOCOL;
 	t.ptr->pointerType.type = ctx->rt->builtInTypes.Object;
 
-	// OObjectOption
-	t = ctx->rt->builtInTypes.OObjectOption;
+	// ObjectOption
+	t = ctx->rt->builtInTypes.ObjectOption;
 	t.ptr->variant = OCT_TYPE_VARIADIC;
 	t.ptr->variadicType.alignment = 0;
-	t.ptr->variadicType.size = sizeof(oct_OObjectOption);
+	t.ptr->variadicType.size = sizeof(oct_ObjectOption);
 	CHECK(oct_ABType_createOwned(ctx, 2, &t.ptr->variadicType.types));
 	t.ptr->variadicType.types.ptr->data[0] = ctx->rt->builtInTypes.Nothing;
 	t.ptr->variadicType.types.ptr->data[1] = ctx->rt->builtInTypes.OObject;
@@ -50,7 +50,7 @@ oct_Bool oct_Object_as(oct_Context* ctx, oct_BSelf object, oct_BType selfType, o
 
 	table.ptr = &protocol.ptr->implementations;
 	CHECK(oct_BType_asHashtableKey(ctx, selfType, &key));
-	// TODO: change hashtable to return OObjectOption/BObjectOption instead of just OObject/BObject
+	// TODO: change hashtable to return ObjectOption/BObjectOption instead of just OObject/BObject
 	CHECK(oct_Hashtable_borrow(ctx, table, key, &vtableObject));
 	out_casted->self = object;
 	out_casted->vtable = (oct_ObjectVTable*)vtableObject.self.self;

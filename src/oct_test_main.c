@@ -68,8 +68,8 @@ static void NamespaceTests() {
 	oct_Runtime* rt;
 	oct_Context* ctx;
 	oct_BNamespace ns;
-	oct_OObjectOption val;
-	oct_OObjectOption lookedUp;
+	oct_ObjectOption val;
+	oct_ObjectOption lookedUp;
 	oct_OSymbol sym;
 	oct_BSymbol bsym;
 	oct_OString name;
@@ -107,7 +107,7 @@ static void defTest() {
 	oct_Runtime* rt;
 	oct_Context* ctx;
 	oct_BNamespace ns;
-	oct_OObjectOption lookedUp;
+	oct_ObjectOption lookedUp;
 	oct_OString str;
 	oct_BString bs1;
 	oct_BString bs2;
@@ -120,7 +120,7 @@ static void defTest() {
 	oct_BSymbol bsym;
 	oct_OSymbol osym;
 	oct_Bool result;
-	oct_OObjectOption evalResult;
+	oct_ObjectOption evalResult;
 	const char* error;
 
 	rt = oct_Runtime_create(&error);
@@ -190,7 +190,7 @@ int main(int argc, char** argv) {
 	oct_BString bstr;
 	oct_OStringStream ss;
 	oct_BStringStream bss;
-	oct_OObjectOption evalResult;
+	oct_ObjectOption evalResult;
 	reader.ptr = ctx->reader;
 
 	oct_String_createOwnedFromCString(ctx, "- . ! ? 1 2 3 -37 1.5 0.34 .34 1e16 -0.8 -.8 -.main .main -main { [ hello \"hej\" \"hell o workdl\" (this is a (nested) \"list\" of 8 readables ) ()", &str);
