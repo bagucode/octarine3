@@ -162,6 +162,7 @@ static oct_Bool oct_Hashtable_tryPut(oct_Context* ctx, oct_BHashtable self, oct_
 		return oct_True;
 	}
 
+	// Note: do not remove re-hash of key. Entry is changed after a failed call to putOne
 	CHECK(keyHash(ctx, entry->key, &key));
 	i = hash2(key) & mask;
 	CHECK(oct_Hashtable_putOne(ctx, self, entry, i, out_result));
@@ -169,6 +170,7 @@ static oct_Bool oct_Hashtable_tryPut(oct_Context* ctx, oct_BHashtable self, oct_
 		return oct_True;
 	}
 
+	// Note: do not remove re-hash of key. Entry is changed after a failed call to putOne
 	CHECK(keyHash(ctx, entry->key, &key));
 	i = hash3(key) & mask;
 	CHECK(oct_Hashtable_putOne(ctx, self, entry, i, out_result));
@@ -228,9 +230,7 @@ oct_Bool oct_Hashtable_put(struct oct_Context* ctx, oct_BHashtable self, oct_OHa
 #undef CHECK
 #define CHECK(X) if(!X) goto error;
 
-// Get a value from the table. If the value is owned, it will be removed from the hash table and returned. If the value
-// is borrowed, a reference to it will be returned and it will remain in the hash table.
-oct_Bool oct_Hashtable_take(struct oct_Context* ctx, oct_BHashtable self, oct_BHashtableKey key, oct_Any* out_value) {
+static oct_Bool oct_Hashtable_get(struct oct_Context* ctx, oct_BHashtable self, oct_BHashtableKey key, oct_Bool isTake, oct_Any* out_value) {
 	oct_Uword i, mask, hash;
 	oct_Bool eq;
 	oct_Bool result = oct_True;
@@ -268,13 +268,18 @@ oct_Bool oct_Hashtable_take(struct oct_Context* ctx, oct_BHashtable self, oct_BH
 match:
 	*out_value = self.ptr->table.ptr->table[i].val;
 	if((*out_value).variant == OCT_ANY_OOBJECT) {
-		// Remove entry from the table; just drop the key and replace with nil
-		// TODO: replace this nil stuff with an Option type for the key. nil feels wrong. It obscures information and when it is not a value type, can a global instance really be used safely?
-		oobject.self.self = self.ptr->table.ptr->table[i].key.self.self;
-		oobject.vtable = (oct_ObjectVTable*)self.ptr->table.ptr->table[i].key.vtable;
-		CHECK(oct_Object_destroyOwned(ctx, oobject));
-		self.ptr->table.ptr->table[i].key.self.self = &ctx->rt->nil;
-		self.ptr->table.ptr->table[i].key.vtable = (oct_HashtableKeyVTable*)ctx->rt->vtables.NothingAsHashtableKey.ptr;
+		if(isTake) {
+			// Remove entry from the table; just drop the key and replace with nil
+			// TODO: replace this nil stuff with an Option type for the key. nil feels wrong. It obscures information and when it is not a value type, can a global instance really be used safely?
+			oobject.self.self = self.ptr->table.ptr->table[i].key.self.self;
+			oobject.vtable = (oct_ObjectVTable*)self.ptr->table.ptr->table[i].key.vtable;
+			CHECK(oct_Object_destroyOwned(ctx, oobject));
+			self.ptr->table.ptr->table[i].key.self.self = &ctx->rt->nil;
+			self.ptr->table.ptr->table[i].key.vtable = (oct_HashtableKeyVTable*)ctx->rt->vtables.NothingAsHashtableKey.ptr;
+		}
+		else { // borrow
+			(*out_value).variant = OCT_ANY_BOBJECT;
+		}
 	}
 	goto end;
 error:
@@ -283,44 +288,14 @@ end:
 	return result;
 }
 
+// Get a value from the table. If the value is owned, it will be removed from the hash table and returned. If the value
+// is borrowed, a reference to it will be returned and it will remain in the hash table.
+oct_Bool oct_Hashtable_take(struct oct_Context* ctx, oct_BHashtable self, oct_BHashtableKey key, oct_Any* out_value) {
+	return oct_Hashtable_get(ctx, self, key, oct_True, out_value);
+}
+
 // Get a value from the table. If the value is borrowed, return a reference to it. If the value is owned, return
 // a borrowed reference to it. In both cases the value remains in the table.
 oct_Bool oct_Hashtable_borrow(struct oct_Context* ctx, oct_BHashtable self, oct_BHashtableKey key, oct_Any* out_value) {
-}
-
-
-
-
-
-
-static void* PointerTranslationTable_Get(PointerTranslationTable* table, void* key) {
-	oct_Uword i, mask, ptrHash;
-
-	mask = table->capacity - 1;
-	ptrHash = hashPointer(key);
-
-	i = hash1(ptrHash) & mask;
-	if(table->table[i].key == key)
-		return table->table[i].val;
-
-	i = hash2(ptrHash) & mask;
-	if(table->table[i].key == key)
-		return table->table[i].val;
-
-	i = hash3(ptrHash) & mask;
-	if(table->table[i].key == key)
-		return table->table[i].val;
-
-	return NULL;
-}
-
-
-oct_Bool oct_Hashtable_put(struct oct_Context* ctx, oct_BHashtable self, oct_OHashtableKey key, oct_OObject value) {
-
-}
-
-oct_Bool oct_Hashtable_take(struct oct_Context* ctx, oct_BHashtable self, oct_BHashtableKey key, oct_OObject* out_value) {
-}
-
-oct_Bool oct_Hashtable_borrow (struct oct_Context* ctx, oct_BHashtable self, oct_BHashtableKey key, oct_BObject* out_value) {
+	return oct_Hashtable_get(ctx, self, key, oct_False, out_value);
 }
