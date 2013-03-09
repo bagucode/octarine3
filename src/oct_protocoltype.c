@@ -6,6 +6,7 @@
 #include "oct_any.h"
 
 #include <stddef.h>
+#include <stdarg.h>
 
 #define CHECK(X) if(!X) return oct_False;
 

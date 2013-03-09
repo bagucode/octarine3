@@ -23,6 +23,9 @@ oct_Bool _oct_List_init(struct oct_Context* ctx) {
 	t.ptr->structType.fields.ptr->data[1].offset = offsetof(oct_List, next);
 	t.ptr->structType.fields.ptr->data[1].type = ctx->rt->builtInTypes.OListOption;
 
+	// Object protocol
+	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Object, 0, &ctx->rt->vtables.ListAsObject, t));
+
 	// OList
 	t = ctx->rt->builtInTypes.OList;
 	t.ptr->variant = OCT_TYPE_POINTER;
@@ -61,7 +64,7 @@ oct_Bool _oct_List_init(struct oct_Context* ctx) {
 
 // Create & Destroy
 oct_Bool oct_List_ctor(struct oct_Context* ctx, oct_List* self) {
-	self->data.variant = OCT_OBJECTOPTION_NOTHING;
+	self->data.variant = OCT_OOBJECTOPTION_NOTHING;
     self->next.variant = OCT_LISTOPTION_NOTHING;
     return oct_True;
 }
@@ -71,14 +74,14 @@ oct_Bool oct_List_dtor(struct oct_Context* ctx, oct_List* self) {
     oct_List* prev;
 
 	// Don't free first node, could be on stack or managed heap
-	if(self->data.variant == OCT_OBJECTOPTION_OBJECT) {
+	if(self->data.variant == OCT_OOBJECTOPTION_OBJECT) {
 		result = oct_Object_destroyOwned(ctx, self->data.object);
-		self->data.variant = OCT_OBJECTOPTION_NOTHING;
+		self->data.variant = OCT_OOBJECTOPTION_NOTHING;
 	}
 	if(self->next.variant == OCT_LISTOPTION_LIST) {
 		self = self->next.list.ptr;
 		while(oct_True) {
-			if(self->data.variant == OCT_OBJECTOPTION_OBJECT) {
+			if(self->data.variant == OCT_OOBJECTOPTION_OBJECT) {
 				result = oct_Object_destroyOwned(ctx, self->data.object) && result;
 			}
 			if(self->next.variant == OCT_LISTOPTION_NOTHING) {
@@ -113,7 +116,7 @@ oct_Bool oct_List_prepend(struct oct_Context* ctx, oct_OList lst, oct_OObject ob
 	out_lst->ptr->next.variant = OCT_LISTOPTION_LIST;
 	out_lst->ptr->next.list.ptr = lst.ptr;
 
-	out_lst->ptr->data.variant = OCT_OBJECTOPTION_OBJECT;
+	out_lst->ptr->data.variant = OCT_OOBJECTOPTION_OBJECT;
 	out_lst->ptr->data.object = obj;
 	return oct_True;
 }
@@ -124,7 +127,7 @@ oct_Bool oct_List_append(struct oct_Context* ctx, oct_BList lst, oct_OObject obj
 		return oct_False;
 	}
 	if(b) {
-		lst.ptr->data.variant = OCT_OBJECTOPTION_OBJECT;
+		lst.ptr->data.variant = OCT_OOBJECTOPTION_OBJECT;
 		lst.ptr->data.object = obj;
 	}
 	else {
@@ -135,14 +138,14 @@ oct_Bool oct_List_append(struct oct_Context* ctx, oct_BList lst, oct_OObject obj
 			return oct_False;
 		}
 		lst.ptr->next.variant = OCT_LISTOPTION_LIST;
-		lst.ptr->next.list.ptr->data.variant = OCT_OBJECTOPTION_OBJECT;
+		lst.ptr->next.list.ptr->data.variant = OCT_OOBJECTOPTION_OBJECT;
 		lst.ptr->next.list.ptr->data.object = obj;
 	}
 	return oct_True;
 }
 
 oct_Bool oct_List_emptyp(struct oct_Context* ctx, oct_BList lst, oct_Bool* out_result) {
-	if(lst.ptr->data.variant == OCT_OBJECTOPTION_NOTHING
+	if(lst.ptr->data.variant == OCT_OOBJECTOPTION_NOTHING
 		&& lst.ptr->next.variant == OCT_LISTOPTION_NOTHING) {
 		*out_result = oct_True;
 	}
@@ -152,16 +155,16 @@ oct_Bool oct_List_emptyp(struct oct_Context* ctx, oct_BList lst, oct_Bool* out_r
 	return oct_True;
 }
 
-oct_Bool oct_List_first(struct oct_Context* ctx, oct_OList lst, oct_ObjectOption* out_value, oct_OList* out_lst) {
+oct_Bool oct_List_first(struct oct_Context* ctx, oct_OList lst, oct_OObjectOption* out_value, oct_OList* out_lst) {
 	oct_Bool result = oct_True;
-	if(lst.ptr->data.variant == OCT_OBJECTOPTION_NOTHING) {
-		out_value->variant = OCT_OBJECTOPTION_NOTHING;
+	if(lst.ptr->data.variant == OCT_OOBJECTOPTION_NOTHING) {
+		out_value->variant = OCT_OOBJECTOPTION_NOTHING;
 		*out_lst = lst;
 	}
 	else {
-		out_value->variant = OCT_OBJECTOPTION_OBJECT;
+		out_value->variant = OCT_OOBJECTOPTION_OBJECT;
 		out_value->object = lst.ptr->data.object;
-		lst.ptr->data.variant = OCT_OBJECTOPTION_NOTHING;
+		lst.ptr->data.variant = OCT_OOBJECTOPTION_NOTHING;
 
 		if(lst.ptr->next.variant == OCT_LISTOPTION_NOTHING) {
 			*out_lst = lst;
@@ -202,7 +205,7 @@ oct_Bool oct_List_count(struct oct_Context* ctx, oct_BList lst, oct_Uword* out_c
 	return oct_True;
 }
 
-oct_Bool oct_List_nth(struct oct_Context* ctx, oct_OList lst, oct_Uword idx, oct_ObjectOption* out_value, oct_OList* out_lst) {
+oct_Bool oct_List_nth(struct oct_Context* ctx, oct_OList lst, oct_Uword idx, oct_OObjectOption* out_value, oct_OList* out_lst) {
 	oct_Uword current;
 	oct_List* prev;
 	oct_Bool result = oct_True;
@@ -216,17 +219,38 @@ oct_Bool oct_List_nth(struct oct_Context* ctx, oct_OList lst, oct_Uword idx, oct
 		prev = lst.ptr;
 		lst.ptr = lst.ptr->next.list.ptr;
 	}
-	if(current == idx && lst.ptr->data.variant == OCT_OBJECTOPTION_OBJECT) {
-		out_value->variant = OCT_OBJECTOPTION_OBJECT;
+	if(current == idx && lst.ptr->data.variant == OCT_OOBJECTOPTION_OBJECT) {
+		out_value->variant = OCT_OOBJECTOPTION_OBJECT;
 		out_value->object = lst.ptr->data.object;
-		lst.ptr->data.variant = OCT_OBJECTOPTION_NOTHING;
+		lst.ptr->data.variant = OCT_OOBJECTOPTION_NOTHING;
 		prev->next = lst.ptr->next;
 		lst.ptr->next.variant = OCT_LISTOPTION_NOTHING;
 		result = oct_List_destroyOwned(ctx, lst);
 	}
 	else {
 		// Out of bounds or the value was nothing
-		out_value->variant = OCT_OBJECTOPTION_NOTHING;
+		out_value->variant = OCT_OOBJECTOPTION_NOTHING;
 	}
 	return result;
 }
+
+oct_Bool oct_List_borrowFirst(struct oct_Context* ctx, oct_BList lst, oct_BObjectOption* out_value) {
+  if(lst.ptr->data.variant == OCT_OOBJECTOPTION_NOTHING) {
+  	out_value->nothing.dummy = 0;
+  	out_value->variant = OCT_OOBJECTOPTION_NOTHING;
+  }
+  else {
+  	out_value->object.self.self = lst.ptr->data.object.self.self;
+  	out_value->object.vtable = lst.ptr->data.object.vtable;
+  	out_value->variant = OCT_BOBJECTOPTION_OBJECT;
+  }
+  return oct_True;
+}
+
+oct_Bool oct_List_asObject(struct oct_Context* ctx, oct_OList lst, oct_OObject* out_object) {
+	out_object->self.self = lst.ptr;
+	out_object->vtable = (oct_ObjectVTable*)ctx->rt->vtables.ListAsObject.ptr;
+	return oct_True;
+}
+
+

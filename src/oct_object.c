@@ -30,14 +30,23 @@ oct_Bool _oct_Object_init(struct oct_Context* ctx) {
 	t.ptr->pointerType.kind = OCT_POINTER_BORROWED_PROTOCOL;
 	t.ptr->pointerType.type = ctx->rt->builtInTypes.Object;
 
-	// ObjectOption
-	t = ctx->rt->builtInTypes.ObjectOption;
+	// OObjectOption
+	t = ctx->rt->builtInTypes.OObjectOption;
 	t.ptr->variant = OCT_TYPE_VARIADIC;
 	t.ptr->variadicType.alignment = 0;
-	t.ptr->variadicType.size = sizeof(oct_ObjectOption);
+	t.ptr->variadicType.size = sizeof(oct_OObjectOption);
 	CHECK(oct_ABType_createOwned(ctx, 2, &t.ptr->variadicType.types));
 	t.ptr->variadicType.types.ptr->data[0] = ctx->rt->builtInTypes.Nothing;
 	t.ptr->variadicType.types.ptr->data[1] = ctx->rt->builtInTypes.OObject;
+
+	// BObjectOption
+	t = ctx->rt->builtInTypes.BObjectOption;
+	t.ptr->variant = OCT_TYPE_VARIADIC;
+	t.ptr->variadicType.alignment = 0;
+	t.ptr->variadicType.size = sizeof(oct_BObjectOption);
+	CHECK(oct_ABType_createOwned(ctx, 2, &t.ptr->variadicType.types));
+	t.ptr->variadicType.types.ptr->data[0] = ctx->rt->builtInTypes.Nothing;
+	t.ptr->variadicType.types.ptr->data[1] = ctx->rt->builtInTypes.BObject;
 
 	return oct_True;
 }
@@ -46,14 +55,17 @@ oct_Bool _oct_Object_init(struct oct_Context* ctx) {
 oct_Bool oct_Object_as(oct_Context* ctx, oct_BSelf object, oct_BType selfType, oct_BProtocolBinding protocol, oct_BObject* out_casted) {
 	oct_BHashtable table;
 	oct_BHashtableKey key;
-	oct_BObject vtableObject;
+	oct_Any vtable;
 
 	table.ptr = &protocol.ptr->implementations;
 	CHECK(oct_BType_asHashtableKey(ctx, selfType, &key));
-	// TODO: change hashtable to return ObjectOption/BObjectOption instead of just OObject/BObject
-	CHECK(oct_Hashtable_borrow(ctx, table, key, &vtableObject));
+	CHECK(oct_Hashtable_borrow(ctx, table, key, &vtable));
+	if(vtable.variant == OCT_ANY_NOTHING) {
+		CHECK(oct_Context_setErrorWithCMessage(ctx, "No implementation of protocol found"));
+		return oct_False;
+	}
 	out_casted->self = object;
-	out_casted->vtable = (oct_ObjectVTable*)vtableObject.self.self;
+	out_casted->vtable = (oct_ObjectVTable*)vtable.bobject.self.self;
 	return oct_True;
 }
 

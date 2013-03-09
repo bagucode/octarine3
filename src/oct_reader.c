@@ -227,7 +227,7 @@ static oct_Bool readI32(struct oct_Context* ctx, oct_BReader reader, oct_Charstr
 	out_result->variant = OCT_READRESULT_OK;
 	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_I32), (void**)&instance.ptr));
 	
-	out_result->result.variant = OCT_OBJECTOPTION_OBJECT;
+	out_result->result.variant = OCT_OOBJECTOPTION_OBJECT;
 	CHECK(oct_I32_asObject(ctx, instance, &out_result->result.object));
 
 	printf("Read an I32: %d\n", *instance.ptr);
@@ -282,7 +282,7 @@ static oct_Bool readF32(struct oct_Context* ctx, oct_BReader reader, oct_Charstr
 	out_result->variant = OCT_READRESULT_OK;
 	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_F32), (void**)&instance.ptr));
 
-	out_result->result.variant = OCT_OBJECTOPTION_OBJECT;
+	out_result->result.variant = OCT_OOBJECTOPTION_OBJECT;
 	CHECK(oct_F32_asObject(ctx, instance, &out_result->result.object));
 
 	printf("Read an F32: %f\n", *instance.ptr);
@@ -323,7 +323,7 @@ static oct_Bool readString(struct oct_Context* ctx, oct_BReader reader, oct_Char
 	out_result->variant = OCT_READRESULT_OK;
 	CHECK(oct_String_createOwnedFromCharArray(ctx, reader.ptr->readBuffer, 0, reader.ptr->nchars, &instance));
 
-	out_result->result.variant = OCT_OBJECTOPTION_OBJECT;
+	out_result->result.variant = OCT_OOBJECTOPTION_OBJECT;
 	CHECK(oct_String_asObject(ctx, instance, &out_result->result.object));
 
 	printf("Read a String: \"%s\"\n", &instance.ptr->utf8Data.ptr->data[0]);
@@ -352,7 +352,7 @@ static oct_Bool readSymbol(struct oct_Context* ctx, oct_BReader reader, oct_Char
 	CHECK(oct_Symbol_createOwned(ctx, name, &instance));
 
 	out_result->variant = OCT_READRESULT_OK;
-	out_result->result.variant = OCT_OBJECTOPTION_OBJECT;
+	out_result->result.variant = OCT_OOBJECTOPTION_OBJECT;
 
 	bsym.ptr = instance.ptr;
 	CHECK(oct_Symbol_asObject(ctx, bsym, (oct_BObject*)&out_result->result.object));
@@ -414,7 +414,7 @@ static oct_Bool readList(struct oct_Context* ctx, oct_BReader reader, oct_Charst
 	DISCARD_CHAR;
 
 	out_result->variant = OCT_READRESULT_OK;
-	out_result->result.variant = OCT_OBJECTOPTION_OBJECT;
+	out_result->result.variant = OCT_OOBJECTOPTION_OBJECT;
 	CHECK(oct_List_asObject(ctx, olist, &out_result->result.object));
 
 	oct_List_count(ctx, blist, &DEBUG_I);

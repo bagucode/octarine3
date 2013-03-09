@@ -15,7 +15,7 @@ typedef struct oct_ReadResult {
 	oct_Uword variant;
 	union {
 		oct_Uword errorCode; // change this to a type that has an error code and an error message string?
-		oct_ObjectOption result;
+		oct_OObjectOption result;
 	};
 } oct_ReadResult;
 
