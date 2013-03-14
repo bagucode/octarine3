@@ -19,7 +19,7 @@ oct_Bool _oct_List_init(struct oct_Context* ctx) {
 	t.ptr->structType.size = sizeof(oct_List);
 	CHECK(oct_AField_createOwned(ctx, 2, &t.ptr->structType.fields));
 	t.ptr->structType.fields.ptr->data[0].offset = offsetof(oct_List, data);
-	t.ptr->structType.fields.ptr->data[0].type = ctx->rt->builtInTypes.ObjectOption;
+	t.ptr->structType.fields.ptr->data[0].type = ctx->rt->builtInTypes.OObjectOption;
 	t.ptr->structType.fields.ptr->data[1].offset = offsetof(oct_List, next);
 	t.ptr->structType.fields.ptr->data[1].type = ctx->rt->builtInTypes.OListOption;
 

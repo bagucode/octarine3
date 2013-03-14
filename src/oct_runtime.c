@@ -159,7 +159,8 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	bind_type(mainCtx, octarine, "Object", rt->builtInTypes.Object);
 	bind_type(mainCtx, octarine, "~Object", rt->builtInTypes.OObject);
 	bind_type(mainCtx, octarine, "&Object", rt->builtInTypes.BObject);
-	bind_type(mainCtx, octarine, "ObjectOption~", rt->builtInTypes.ObjectOption);
+	bind_type(mainCtx, octarine, "ObjectOption~", rt->builtInTypes.OObjectOption);
+	bind_type(mainCtx, octarine, "ObjectOption&", rt->builtInTypes.BObjectOption);
 	// String
 	bind_type(mainCtx, octarine, "String", rt->builtInTypes.String);
 	bind_type(mainCtx, octarine, "~String", rt->builtInTypes.OString);

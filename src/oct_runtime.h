@@ -84,6 +84,7 @@ typedef struct oct_BuiltInTypes {
 	oct_BType BListOption;
 	// Nothing
 	oct_BType Nothing;
+	oct_BType BNothing;
 	// Pointer
 	oct_BType Pointer;
 	// Struct
@@ -127,8 +128,10 @@ typedef struct oct_BuiltInVTables {
 	oct_BVTable SymbolAsHashable;
 	oct_BVTable SymbolAsHashtableKey;
 	// Nothing
-	oct_BVTable NothingAsObject; // TODO
-	oct_BVTable NothingAsHashtableKey; // TODO
+	oct_BVTable NothingAsObject;
+	oct_BVTable NothingAsEqComparable;
+	oct_BVTable NothingAsHashable;
+	oct_BVTable NothingAsHashtableKey;
 	// List
 	oct_BVTable ListAsObject;
 } oct_BuiltInVTables;
