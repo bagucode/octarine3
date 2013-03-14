@@ -182,6 +182,7 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	bind_type(mainCtx, octarine, "ListOption&", rt->builtInTypes.BListOption);
 	// Nothing
 	bind_type(mainCtx, octarine, "Nothing", rt->builtInTypes.Nothing);
+	bind_type(mainCtx, octarine, "&Nothing", rt->builtInTypes.BNothing);
 	// Pointer
 	bind_type(mainCtx, octarine, "Pointer", rt->builtInTypes.Pointer);
 	// Struct
