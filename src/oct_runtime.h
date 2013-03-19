@@ -112,6 +112,10 @@ typedef struct oct_BuiltInTypes {
 	oct_BType Namespace;
 	oct_BType BNamespace;
 	oct_BType NamespaceOption;
+	// Charstream
+	oct_BType Charstream;
+	oct_BType OCharstream;
+	oct_BType BCharstream;
 } oct_BuiltInTypes;
 
 typedef struct oct_BuiltInVTables {
@@ -147,6 +151,8 @@ typedef struct oct_BuiltInProtocols {
 typedef struct oct_BuiltInFunctions {
 	oct_BFunction hash; // TODO
 	oct_BFunction eq; // TODO
+	oct_BFunction readChar; // TODO
+	oct_BFunction peekChar; // TODO
 } oct_BuiltInFunctions;
 
 typedef struct oct_Runtime {

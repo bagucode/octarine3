@@ -1,45 +1,32 @@
 #include "oct_charstream.h"
+#include "oct_context.h"
+#include "oct_runtime.h"
+#include "oct_type.h"
+#include "oct_type_pointers.h"
 
-// typedef struct oct_CharstreamFunctions {
-// 	oct_Bool (*read)(struct oct_Context* ctx, oct_BSelf self, oct_Char* out_read);
-// 	oct_Bool (*peek)(struct oct_Context* ctx, oct_BSelf self, oct_Char* out_peeked);
-// } oct_CharstreamFunctions;
-
-// typedef struct oct_CharstreamVTable {
-// 	oct_BType type;
-// 	oct_CharstreamFunctions functions;
-// } oct_CharstreamVTable;
-
-// typedef struct oct_BCharstream {
-// 	oct_BSelf object;
-// 	oct_CharstreamVTable* vtable;
-// } oct_BCharstream;
-
-// typedef struct oct_OCharstream {
-// 	oct_OSelf object;
-// 	oct_CharstreamVTable* vtable;
-// } oct_OCharstream;
-
-// oct_Bool _oct_Charstream_init(struct oct_Context* ctx);
-
-	// Protocol
-	// t = ctx->rt->builtInTypes.Protocol;
-	// t.ptr->variant = OCT_TYPE_STRUCT;
-	// t.ptr->structType.size = sizeof(oct_ProtocolType);
-	// t.ptr->structType.alignment = 0;
-	// CHECK(oct_AField_createOwned(ctx, 1, &t.ptr->structType.fields));
-	// t.ptr->structType.fields.ptr->data[0].offset = offsetof(oct_ProtocolType, functions);
-	// t.ptr->structType.fields.ptr->data[0].type = ctx->rt->builtInTypes.OABFunction;
+#define CHECK(X) if(!X) return oct_False;
 
 oct_Bool _oct_Charstream_init(struct oct_Context* ctx) {
-	Protocol
-	t = ctx->rt->builtInTypes.Protocol;
-	t.ptr->variant = OCT_TYPE_STRUCT;
-	t.ptr->structType.size = sizeof(oct_ProtocolType);
-	t.ptr->structType.alignment = 0;
-	CHECK(oct_AField_createOwned(ctx, 1, &t.ptr->structType.fields));
-	t.ptr->structType.fields.ptr->data[0].offset = offsetof(oct_ProtocolType, functions);
-	t.ptr->structType.fields.ptr->data[0].type = ctx->rt->builtInTypes.OABFunction;
-	
+
+	// Charstream protocol
+	oct_BType t = ctx->rt->builtInTypes.Charstream;
+	t.ptr->variant = OCT_TYPE_PROTOCOL;
+	CHECK(oct_ABFunction_createOwned(ctx, 2, &t.ptr->protocolType.functions));
+	t.ptr->protocolType.functions.ptr->data[0] = ctx->rt->functions.readChar;
+	t.ptr->protocolType.functions.ptr->data[1] = ctx->rt->functions.peekChar;
+
+	// OCharstream
+	t = ctx->rt->builtInTypes.OCharstream;
+	t.ptr->variant = OCT_TYPE_POINTER;
+	t.ptr->pointerType.kind = OCT_POINTER_OWNED_PROTOCOL;
+	t.ptr->pointerType.type = ctx->rt->builtInTypes.Charstream;
+
+	// BCharstream
+	t = ctx->rt->builtInTypes.BCharstream;
+	t.ptr->variant = OCT_TYPE_POINTER;
+	t.ptr->pointerType.kind = OCT_POINTER_BORROWED_PROTOCOL;
+	t.ptr->pointerType.type = ctx->rt->builtInTypes.Charstream;
+
+	return oct_True;
 }
 

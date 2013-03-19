@@ -15,6 +15,7 @@
 #include "oct_reader.h"
 #include "oct_primitive_pointers.h"
 #include "oct_initTarget.h"
+#include "oct_charstream.h"
 
 #include <stdlib.h>
 
@@ -107,6 +108,7 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	_oct_Error_init(mainCtx);
 	_oct_Any_init(mainCtx);
 	_oct_Namespace_init(mainCtx);
+	_oct_Charstream_init(mainCtx);
 
 	// *** 3. Create octarine namespace.
 

@@ -10,8 +10,8 @@
 // Charstream protocol. Used by the reader
 
 typedef struct oct_CharstreamFunctions {
-	oct_Bool (*read)(struct oct_Context* ctx, oct_BSelf self, oct_Char* out_read);
-	oct_Bool (*peek)(struct oct_Context* ctx, oct_BSelf self, oct_Char* out_peeked);
+	oct_Bool (*readChar)(struct oct_Context* ctx, oct_BSelf self, oct_Char* out_read);
+	oct_Bool (*peekChar)(struct oct_Context* ctx, oct_BSelf self, oct_Char* out_peeked);
 } oct_CharstreamFunctions;
 
 typedef struct oct_CharstreamVTable {
