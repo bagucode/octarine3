@@ -76,6 +76,7 @@ typedef struct oct_BuiltInTypes {
 	// AU8
 	oct_BType AU8;
 	oct_BType OAU8;
+	oct_BType BAU8;
 	// List
 	oct_BType List;
 	oct_BType OList;

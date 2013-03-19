@@ -160,6 +160,12 @@ oct_Bool oct_BStringCString_equals(struct oct_Context* ctx, oct_BString str, con
 	return oct_True;
 }
 
+oct_Bool oct_String_hash(struct oct_Context* ctx, oct_BString str, oct_Uword* out_hash) {
+	oct_BAU8 arr;
+	arr.ptr = str.ptr->utf8Data.ptr;
+	return oct_AU8_hash(ctx, arr, out_hash);
+}
+
 oct_Bool oct_String_asObjectOwned(struct oct_Context* ctx, oct_OString str, oct_OObject* out_object) {
 	out_object->self.self = str.ptr;
 	out_object->vtable = (oct_ObjectVTable*)ctx->rt->vtables.StringAsObject.ptr;

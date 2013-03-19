@@ -87,7 +87,7 @@ oct_Bool oct_OStringstream_destroy(struct oct_Context* ctx, oct_OStringstream st
     return oct_ExchangeHeap_freeRaw(ctx, stream.ptr);
 }
 
-oct_Bool oct_BStringstream_asCharStream(struct oct_Context* ctx, oct_BStringstream stream, oct_BCharstream* out_cs) {
+oct_Bool oct_Stringstream_asCharStream(struct oct_Context* ctx, oct_BStringstream stream, oct_BCharstream* out_cs) {
 	out_cs->self.self = stream.ptr;
 	out_cs->vtable = (oct_CharstreamVTable*)ctx->rt->vtables.StringstreamAsCharstream.ptr;
 	return oct_True;

@@ -19,6 +19,11 @@ oct_Bool _oct_AU8_init(struct oct_Context* ctx) {
 	ctx->rt->builtInTypes.OAU8.ptr->pointerType.kind = OCT_POINTER_OWNED;
 	ctx->rt->builtInTypes.OAU8.ptr->pointerType.type = ctx->rt->builtInTypes.AU8;
 
+	// BAU8
+	ctx->rt->builtInTypes.BAU8.ptr->variant = OCT_TYPE_POINTER;
+	ctx->rt->builtInTypes.BAU8.ptr->pointerType.kind = OCT_POINTER_BORROWED;
+	ctx->rt->builtInTypes.BAU8.ptr->pointerType.type = ctx->rt->builtInTypes.AU8;
+
 	return oct_True;
 }
 
@@ -31,5 +36,31 @@ oct_Bool oct_AU8_createOwned(struct oct_Context* ctx, oct_Uword size, oct_OAU8* 
 	out_result->ptr->size = size;
 	// "construct"
 	memset(&out_result->ptr->data[0], 0, (sizeof(oct_U8) * size));
+	return oct_True;
+}
+
+// FNV1a hash algorithm
+
+#ifdef OCT64
+#define FNV_OFFSET_BASIS 14695981039346656037
+#define FNV_PRIME 1099511628211
+#else
+#define FNV_OFFSET_BASIS 2166136261
+#define FNV_PRIME 16777619
+#endif
+
+static oct_Uword fnv1a(void* data, oct_Uword length) {
+	oct_Uword hash = FNV_OFFSET_BASIS;
+	char* p = (char*)data;
+	char* end = p + length;
+	while(p < end) {
+		hash ^= (oct_Uword)*p++;
+		hash *= FNV_PRIME;
+	}
+	return hash;
+}
+
+oct_Bool oct_AU8_hash(struct oct_Context* ctx, oct_BAU8 self, oct_Uword* out_hash) {
+	*out_hash = fnv1a(self.ptr->data, self.ptr->size);
 	return oct_True;
 }
