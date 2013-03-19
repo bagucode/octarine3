@@ -15,8 +15,8 @@ static void StringTests() {
 	oct_BString bs2;
 	oct_Bool result;
 	oct_Charstream charStream;
-	oct_OStringStream ss;
-	oct_BStringStream bss;
+	oct_OStringstream ss;
+	oct_BStringstream bss;
 	oct_ReadResult readResult;
 	oct_BReader reader;
 	const char* error;
@@ -40,16 +40,16 @@ static void StringTests() {
 	// Reading
 	TEST(oct_String_createOwnedFromCString(ctx, "\"Hello\"", &s1));
 	bs1.ptr = s1.ptr; // borrow s1
-	TEST(oct_OStringStream_create(ctx, bs1, &ss));
+	TEST(oct_OStringstream_create(ctx, bs1, &ss));
 	bss.ptr = ss.ptr;
-	TEST(oct_BStringStream_asCharStream(ctx, bss, &charStream));
+	TEST(oct_BStringstream_asCharStream(ctx, bss, &charStream));
 	reader.ptr = ctx->reader; // TODO: method for this
 	TEST(oct_Reader_read(ctx, reader, charStream, &readResult));
 	TEST(readResult.variant == OCT_READRESULT_OK);
 	TEST(oct_Any_stringp(ctx, readResult.result, &result));
 	TEST(result);
 	TEST(oct_Any_getPtr(ctx, readResult.result, (void**)&bs2.ptr));
-	TEST(oct_OStringStream_destroy(ctx, ss));
+	TEST(oct_OStringstream_destroy(ctx, ss));
 
 	TEST(oct_String_destroyOwned(ctx, s1));
 	TEST(oct_String_createOwnedFromCString(ctx, "Hello", &s1));
@@ -114,8 +114,8 @@ static void defTest() {
 	oct_ReadResult readResult;
 	oct_BReader reader;
 	oct_BString bstr;
-	oct_OStringStream ss;
-	oct_BStringStream bss;
+	oct_OStringstream ss;
+	oct_BStringstream bss;
 	oct_Charstream stream;
 	oct_BSymbol bsym;
 	oct_OSymbol osym;
@@ -134,10 +134,10 @@ static void defTest() {
 	TEST(oct_String_createOwnedFromCString(ctx, "(def hello \"Hello\")", &str));
     TEST(str.ptr);
 	bstr.ptr = str.ptr;
-	TEST(oct_OStringStream_create(ctx, bstr, &ss));
+	TEST(oct_OStringstream_create(ctx, bstr, &ss));
     TEST(ss.ptr);
 	bss.ptr = ss.ptr;
-	TEST(oct_BStringStream_asCharStream(ctx, bss, &stream));
+	TEST(oct_BStringstream_asCharStream(ctx, bss, &stream));
     TEST(stream.vtable);
 	reader.ptr = ctx->reader;
 	TEST(oct_Reader_read(ctx, reader, stream, &readResult));
@@ -188,8 +188,8 @@ int main(int argc, char** argv) {
 	oct_Context* ctx = oct_Runtime_currentContext(rt);
 	oct_OString str;
 	oct_BString bstr;
-	oct_OStringStream ss;
-	oct_BStringStream bss;
+	oct_OStringstream ss;
+	oct_BStringstream bss;
 	oct_OObjectOption evalResult;
 	reader.ptr = ctx->reader;
 
@@ -198,10 +198,10 @@ int main(int argc, char** argv) {
 	// Borrow string pointer
 	bstr.ptr = str.ptr;
 
-	oct_OStringStream_create(ctx, bstr, &ss);
+	oct_OStringstream_create(ctx, bstr, &ss);
 
 	bss.ptr = ss.ptr;
-	oct_BStringStream_asCharStream(ctx, bss, &stream);
+	oct_BStringstream_asCharStream(ctx, bss, &stream);
 
 	while(oct_True) {
 		oct_Reader_read(ctx, reader, stream, &rr);
@@ -216,7 +216,7 @@ int main(int argc, char** argv) {
 	};
 
 	// End of scope, destroy in reverse order.
-	oct_OStringStream_destroy(ctx, ss);
+	oct_OStringstream_destroy(ctx, ss);
 	oct_String_destroyOwned(ctx, str);
 	oct_Runtime_destroy(rt, &error);
 

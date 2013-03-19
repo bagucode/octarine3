@@ -5,7 +5,6 @@
 #include "oct_arraytype.h"
 #include "oct_pointertype.h"
 #include "oct_u8array.h"
-#include "oct_string.h"
 #include "oct_list.h"
 #include "oct_string.h"
 #include "oct_symbol.h"
@@ -16,6 +15,7 @@
 #include "oct_primitive_pointers.h"
 #include "oct_initTarget.h"
 #include "oct_charstream.h"
+#include "oct_stringstream.h"
 
 #include <stdlib.h>
 

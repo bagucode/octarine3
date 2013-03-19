@@ -4,20 +4,49 @@
 #include "oct_context.h"
 #include "oct_runtime.h"
 #include "oct_exchangeheap.h"
+#include "oct_type.h"
 
-#include <stdlib.h>
+//#include <stdlib.h>
+#include <stddef.h>
 
 // Private
 
-oct_Bool _oct_StringStream_initType(struct oct_Context* ctx) {
-}
+#define CHECK(X) if(!X) return oct_False;
 
-oct_Bool _oct_OStringStream_initType(struct oct_Context* ctx) {
+oct_Bool _oct_Stringstream_init(struct oct_Context* ctx) {
+
+	// Stringstream
+	oct_BType t = ctx->rt->builtInTypes.Stringstream;
+	t.ptr->variant = OCT_TYPE_STRUCT;
+	t.ptr->structType.alignment = 0;
+	t.ptr->structType.size = sizeof(oct_Stringstream);
+	CHECK(oct_AField_createOwned(ctx, 2, &t.ptr->structType.fields));
+	t.ptr->structType.fields.ptr->data[0].offset = offsetof(oct_Stringstream, idx);
+	t.ptr->structType.fields.ptr->data[0].type = ctx->rt->builtInTypes.Uword;
+	t.ptr->structType.fields.ptr->data[1].offset = offsetof(oct_Stringstream, str);
+	t.ptr->structType.fields.ptr->data[1].type = ctx->rt->builtInTypes.BString;
+
+	// Stringstream vtable for Charstream {readChar, peekChar}
+	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Charstream, 2, &ctx->rt->vtables.StringstreamAsCharstream, t, oct_Stringstream_readChar, oct_Stringstream_peekChar));
+
+	// OStringstream
+	t = ctx->rt->builtInTypes.OStringstream;
+	t.ptr->variant = OCT_TYPE_POINTER;
+	t.ptr->pointerType.kind = OCT_POINTER_OWNED;
+	t.ptr->pointerType.type = ctx->rt->builtInTypes.Stringstream;
+
+	// BStringstream
+	t = ctx->rt->builtInTypes.BStringstream;
+	t.ptr->variant = OCT_TYPE_POINTER;
+	t.ptr->pointerType.kind = OCT_POINTER_BORROWED;
+	t.ptr->pointerType.type = ctx->rt->builtInTypes.Stringstream;
+
+	return oct_True;
 }
 
 // Public
 
-oct_Bool oct_BStringStream_readChar(struct oct_Context* ctx, oct_BStringStream stream, oct_Char* out_char) {
+oct_Bool oct_BStringstream_readChar(struct oct_Context* ctx, oct_BStringstream stream, oct_Char* out_char) {
 	if(stream.ptr->idx == stream.ptr->str.ptr->size) {
 		*out_char = -1;
 		return oct_True;
@@ -27,7 +56,7 @@ oct_Bool oct_BStringStream_readChar(struct oct_Context* ctx, oct_BStringStream s
 	return oct_True;
 }
 
-oct_Bool oct_BStringStream_peekChar(struct oct_Context* ctx, oct_BStringStream stream, oct_Char* out_char) {
+oct_Bool oct_BStringstream_peekChar(struct oct_Context* ctx, oct_BStringstream stream, oct_Char* out_char) {
 	if(stream.ptr->idx == stream.ptr->str.ptr->size) {
 		*out_char = -1;
 		return oct_True;
@@ -37,40 +66,29 @@ oct_Bool oct_BStringStream_peekChar(struct oct_Context* ctx, oct_BStringStream s
 	return oct_True;
 }
 
-oct_Bool oct_StringStream_ctor(struct oct_Context* ctx, oct_StringStream* stream, oct_BString str) {
+oct_Bool oct_Stringstream_ctor(struct oct_Context* ctx, oct_Stringstream* stream, oct_BString str) {
 	stream->idx = 0;
 	stream->str = str;
 	return oct_True;
 }
 
-oct_Bool oct_StringStream_dtor(struct oct_Context* ctx, oct_StringStream* stream) {
+oct_Bool oct_Stringstream_dtor(struct oct_Context* ctx, oct_Stringstream* stream) {
 	return oct_True;
 }
 
-oct_Bool oct_OStringStream_create(struct oct_Context* ctx, oct_BString str, oct_OStringStream* out_stream) {
-    if(!oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_StringStream), (void**)&out_stream->ptr)) {
+oct_Bool oct_OStringstream_create(struct oct_Context* ctx, oct_BString str, oct_OStringstream* out_stream) {
+    if(!oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_Stringstream), (void**)&out_stream->ptr)) {
         return oct_False;
     }
-	return oct_StringStream_ctor(ctx, out_stream->ptr, str);
+	return oct_Stringstream_ctor(ctx, out_stream->ptr, str);
 }
 
-oct_Bool oct_OStringStream_destroy(struct oct_Context* ctx, oct_OStringStream stream) {
+oct_Bool oct_OStringstream_destroy(struct oct_Context* ctx, oct_OStringstream stream) {
     return oct_ExchangeHeap_freeRaw(ctx, stream.ptr);
 }
 
-oct_Bool oct_BStringStream_asCharStream(struct oct_Context* ctx, oct_BStringStream stream, oct_Charstream* out_cs) {
-	oct_CharstreamVTable* vtable;
-	// TODO: Do not malloc and construct the vtable here. It is supposed to be stored with the type info somehow...
-	vtable = (oct_CharstreamVTable*)malloc(sizeof(oct_CharstreamVTable));
-	if(!vtable) {
-		return oct_False;
-	}
-	vtable->instanceType.ptr = ctx->rt->builtInTypes.BStringStream;
-	vtable->read = (oct_Bool(*)(struct oct_Context*, void*, oct_Char*)) oct_BStringStream_readChar;
-	vtable->peek = (oct_Bool(*)(struct oct_Context*, void*, oct_Char*)) oct_BStringStream_peekChar;
-
-	out_cs->object = stream.ptr;
-	out_cs->vtable = vtable;
-
+oct_Bool oct_BStringstream_asCharStream(struct oct_Context* ctx, oct_BStringstream stream, oct_BCharstream* out_cs) {
+	out_cs->self.self = stream.ptr;
+	out_cs->vtable = (oct_CharstreamVTable*)ctx->rt->vtables.StringstreamAsCharstream.ptr;
 	return oct_True;
 }

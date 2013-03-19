@@ -116,6 +116,10 @@ typedef struct oct_BuiltInTypes {
 	oct_BType Charstream;
 	oct_BType OCharstream;
 	oct_BType BCharstream;
+	// Stringstream
+	oct_BType Stringstream;
+	oct_BType OStringstream;
+	oct_BType BStringstream;
 } oct_BuiltInTypes;
 
 typedef struct oct_BuiltInVTables {
@@ -138,6 +142,8 @@ typedef struct oct_BuiltInVTables {
 	oct_BVTable NothingAsHashtableKey;
 	// List
 	oct_BVTable ListAsObject;
+	// Stringstream
+	oct_BVTable StringstreamAsCharstream;
 } oct_BuiltInVTables;
 
 typedef struct oct_BuiltInProtocols {
@@ -146,6 +152,7 @@ typedef struct oct_BuiltInProtocols {
 	oct_BProtocolBinding Hashable; // TODO
 	oct_BProtocolBinding HashtableKey; // TODO
 	oct_BProtocolBinding Copyable; // TODO
+	oct_BProtocolBinding Charstream; // TODO
 } oct_BuiltInProtocols;
 
 typedef struct oct_BuiltInFunctions {

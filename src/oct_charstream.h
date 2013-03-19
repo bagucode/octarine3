@@ -20,12 +20,12 @@ typedef struct oct_CharstreamVTable {
 } oct_CharstreamVTable;
 
 typedef struct oct_BCharstream {
-	oct_BSelf object;
+	oct_BSelf self;
 	oct_CharstreamVTable* vtable;
 } oct_BCharstream;
 
 typedef struct oct_OCharstream {
-	oct_OSelf object;
+	oct_OSelf self;
 	oct_CharstreamVTable* vtable;
 } oct_OCharstream;
 
