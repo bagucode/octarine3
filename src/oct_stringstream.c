@@ -46,7 +46,7 @@ oct_Bool _oct_Stringstream_init(struct oct_Context* ctx) {
 
 // Public
 
-oct_Bool oct_BStringstream_readChar(struct oct_Context* ctx, oct_BStringstream stream, oct_Char* out_char) {
+oct_Bool oct_Stringstream_readChar(struct oct_Context* ctx, oct_BStringstream stream, oct_Char* out_char) {
 	if(stream.ptr->idx == stream.ptr->str.ptr->size) {
 		*out_char = -1;
 		return oct_True;
@@ -56,7 +56,7 @@ oct_Bool oct_BStringstream_readChar(struct oct_Context* ctx, oct_BStringstream s
 	return oct_True;
 }
 
-oct_Bool oct_BStringstream_peekChar(struct oct_Context* ctx, oct_BStringstream stream, oct_Char* out_char) {
+oct_Bool oct_Stringstream_peekChar(struct oct_Context* ctx, oct_BStringstream stream, oct_Char* out_char) {
 	if(stream.ptr->idx == stream.ptr->str.ptr->size) {
 		*out_char = -1;
 		return oct_True;
