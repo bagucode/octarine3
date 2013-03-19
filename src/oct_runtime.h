@@ -145,6 +145,28 @@ typedef struct oct_BuiltInVTables {
 	oct_BVTable ListAsObject;
 	// Stringstream
 	oct_BVTable StringstreamAsCharstream;
+	// Type
+	oct_BVTable TypeAsObject;
+	oct_BVTable TypeAsEqComparable;
+	oct_BVTable TypeAsHashable;
+	oct_BVTable TypeAsHashtableKey;
+	// Primitives
+    oct_BVTable U8AsObject;
+    oct_BVTable I8AsObject;
+    oct_BVTable U16AsObject;
+    oct_BVTable I16AsObject;
+    oct_BVTable U32AsObject;
+    oct_BVTable I32AsObject;
+    oct_BVTable U64AsObject;
+    oct_BVTable I64AsObject;
+    oct_BVTable F32AsObject;
+    oct_BVTable F64AsObject;
+    oct_BVTable BoolAsObject;
+    oct_BVTable CharAsObject;
+    oct_BVTable UwordAsObject;
+    oct_BVTable WordAsObject;
+	// Namespace
+	oct_BVTable NamespaceAsObject;
 } oct_BuiltInVTables;
 
 typedef struct oct_BuiltInProtocols {

@@ -31,6 +31,9 @@ oct_Bool _oct_Namespace_init(struct oct_Context* ctx) {
 	t.ptr->structType.fields.ptr->data[1].offset = offsetof(oct_Namespace, bindings);
 	t.ptr->structType.fields.ptr->data[1].type = ctx->rt->builtInTypes.Hashtable;
 
+	// Type VTable for Namespace {}
+	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Object, 0, &ctx->rt->vtables.NamespaceAsObject, t));
+
 	// BNamespace
 	t = ctx->rt->builtInTypes.BNamespace;
 	t.ptr->variant = OCT_TYPE_POINTER;
@@ -189,5 +192,11 @@ error:
 	result = oct_False;
 end:
 	return result;
+}
+
+oct_Bool oct_Namespace_asObject(struct oct_Context* ctx, oct_BNamespace ns, oct_BObject* out_obj) {
+	out_obj->self.self = ns.ptr;
+	out_obj->vtable = (oct_ObjectVTable*)ctx->rt->vtables.NamespaceAsObject.ptr;
+	return oct_True;
 }
 

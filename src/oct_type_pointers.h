@@ -29,6 +29,9 @@ oct_Bool oct_ABType_createOwned(struct oct_Context* ctx, oct_Uword size, oct_OAB
 struct oct_BHashtableKey;
 struct oct_BObject;
 
+oct_Bool oct_Type_equals(struct oct_Context* ctx, oct_BType t1, oct_BType t2, oct_Bool* out_eq);
+oct_Bool oct_Type_hash(struct oct_Context* ctx, oct_BType self, oct_Uword* out_hash);
+
 oct_Bool oct_BType_asHashtableKey(struct oct_Context* ctx, oct_BType self, struct oct_BHashtableKey* key);
 oct_Bool oct_Type_asObject(struct oct_Context* ctx, oct_BType self, struct oct_BObject* out_obj);
 

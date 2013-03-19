@@ -8,7 +8,7 @@
 
 #define CHECK(X) if(!X) return oct_False;
 
-oct_Bool _oct_Function_initType(struct oct_Context* ctx) {
+oct_Bool _oct_Function_init(struct oct_Context* ctx) {
 
 	// Function
 	oct_BType t = ctx->rt->builtInTypes.Function;

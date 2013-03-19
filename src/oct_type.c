@@ -29,6 +29,18 @@ oct_Bool _oct_Type_init(oct_Context* ctx) {
 	t.ptr->variadicType.types.ptr->data[5] = ctx->rt->builtInTypes.Pointer;
 	t.ptr->variadicType.types.ptr->data[6] = ctx->rt->builtInTypes.Protocol;
 
+	// Type VTable for Object {}
+	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Object, 0, &ctx->rt->vtables.TypeAsObject, t));
+
+	// Type VTable for Hashable {hash}
+	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Hashable, 1, &ctx->rt->vtables.TypeAsHashable, t, oct_Type_hash));
+
+	// Type VTable for EqComparable {eq}
+	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.EqComparable, 1, &ctx->rt->vtables.TypeAsEqComparable, t, oct_Type_equals));
+
+	// Type VTable for HashabletableKey {hash, eq}
+	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.HashtableKey, 2, &ctx->rt->vtables.TypeAsHashtableKey, t, oct_Type_hash, oct_Type_equals));
+
 	// BType
 	ctx->rt->builtInTypes.BType.ptr->variant = OCT_TYPE_POINTER;
 	ctx->rt->builtInTypes.BType.ptr->pointerType.kind = OCT_POINTER_BORROWED;
@@ -90,7 +102,24 @@ oct_Bool oct_Type_sizeOf(struct oct_Context* ctx, oct_BType type, oct_Uword* out
 	return oct_True;
 }
 
+oct_Bool oct_Type_asObject(struct oct_Context* ctx, oct_BType self, struct oct_BObject* out_obj) {
+	out_obj->self.self = self.ptr;
+	out_obj->vtable = (oct_ObjectVTable*)ctx->rt->vtables.TypeAsObject.ptr;
+	return oct_True;
+}
 
+oct_Bool oct_BType_asHashtableKey(struct oct_Context* ctx, oct_BType self, struct oct_BHashtableKey* key) {
+	key->self.self = self.ptr;
+	key->vtable = (oct_HashtableKeyVTable*)ctx->rt->vtables.TypeAsHashtableKey.ptr;
+	return oct_True;
+}
 
+oct_Bool oct_Type_equals(struct oct_Context* ctx, oct_BType t1, oct_BType t2, oct_Bool* out_eq) {
+	*out_eq = t1.ptr == t2.ptr;
+	return oct_True;
+}
 
-
+oct_Bool oct_Type_hash(struct oct_Context* ctx, oct_BType self, oct_Uword* out_hash) {
+	*out_hash = (oct_Uword)self.ptr;
+	return oct_True;
+}

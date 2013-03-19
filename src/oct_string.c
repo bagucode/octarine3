@@ -76,7 +76,7 @@ oct_Bool oct_String_ctorCharArray(struct oct_Context* ctx, oct_String* str, oct_
 	return oct_True;
 }
 
-oct_Bool oct_OString_createFromCharArray(struct oct_Context* ctx, oct_OAChar chars, oct_Uword idx, oct_Uword len, oct_OString* out_str) {
+oct_Bool oct_String_createOwnedFromCharArray(struct oct_Context* ctx, oct_OAChar chars, oct_Uword idx, oct_Uword len, oct_OString* out_str) {
     if(!oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_String), (void**)&out_str->ptr)) {
         return oct_False;
     }

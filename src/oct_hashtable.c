@@ -4,6 +4,7 @@
 #include "oct_symbol.h"
 #include "oct_context.h"
 #include "oct_runtime.h"
+#include "oct_exchangeheap.h"
 
 #include <stddef.h>
 
@@ -88,6 +89,15 @@ static oct_Uword hash2(oct_Uword h) {
 
 static oct_Uword hash3(oct_Uword h) {
 	return h * 751;
+}
+
+oct_Bool oct_AHashtableEntry_createOwned(struct oct_Context* ctx, oct_Uword initialCap, oct_OAHashtableEntry* out_result) {
+	return oct_ExchangeHeap_allocRaw(ctx, initialCap * sizeof(oct_HashtableEntry) + sizeof(oct_AHashtableEntry), (void**)&out_result->ptr);
+}
+
+oct_Bool oct_AHashtableEntry_destroyOwned(struct oct_Context* ctx, oct_OAHashtableEntry self) {
+	// TODO: Actually destroy values here! This currently creates memory leaks!
+	return oct_ExchangeHeap_freeRaw(ctx, self.ptr);
 }
 
 oct_Bool oct_Hashtable_ctor(struct oct_Context* ctx, oct_BHashtable self, oct_Uword initialCap) {

@@ -38,3 +38,8 @@ oct_Bool oct_ExchangeHeap_freeRaw(struct oct_Context* ctx, void* box) {
 	free(box);
 	return oct_True;
 }
+
+oct_Bool oct_ExchangeHeap_free(struct oct_Context* ctx, void* box, oct_BType type) {
+	// what the heck is the type for here?
+	return oct_ExchangeHeap_freeRaw(ctx, box);
+}
