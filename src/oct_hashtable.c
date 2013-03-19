@@ -10,6 +10,14 @@
 
 #define CHECK(X) if(!X) return oct_False;
 
+oct_Bool _oct_Hashtable_initProtocol(struct oct_Context* ctx) {
+	oct_BHashtable table;
+	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_ProtocolBinding), (void**)&ctx->rt->builtInProtocols.HashtableKey.ptr));
+	ctx->rt->builtInProtocols.HashtableKey.ptr->protocolType = ctx->rt->builtInTypes.HashtableKey;
+	table.ptr = &ctx->rt->builtInProtocols.HashtableKey.ptr->implementations;
+	return oct_Hashtable_ctor(ctx, table, 100);
+}
+
 oct_Bool _oct_Hashtable_init(struct oct_Context* ctx) {
 
 	// HashtableKey
@@ -92,7 +100,9 @@ static oct_Uword hash3(oct_Uword h) {
 }
 
 oct_Bool oct_AHashtableEntry_createOwned(struct oct_Context* ctx, oct_Uword initialCap, oct_OAHashtableEntry* out_result) {
-	return oct_ExchangeHeap_allocRaw(ctx, initialCap * sizeof(oct_HashtableEntry) + sizeof(oct_AHashtableEntry), (void**)&out_result->ptr);
+	oct_Bool result = oct_ExchangeHeap_allocRaw(ctx, initialCap * sizeof(oct_HashtableEntry) + sizeof(oct_AHashtableEntry), (void**)&out_result->ptr);
+	out_result->ptr->size = initialCap;
+	return result;
 }
 
 oct_Bool oct_AHashtableEntry_destroyOwned(struct oct_Context* ctx, oct_OAHashtableEntry self) {

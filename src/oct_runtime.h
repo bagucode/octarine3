@@ -170,7 +170,7 @@ typedef struct oct_BuiltInVTables {
 } oct_BuiltInVTables;
 
 typedef struct oct_BuiltInProtocols {
-	oct_BProtocolBinding Object; // TODO
+	oct_BProtocolBinding Object;
 	oct_BProtocolBinding EqComparable; // TODO
 	oct_BProtocolBinding Hashable; // TODO
 	oct_BProtocolBinding HashtableKey; // TODO

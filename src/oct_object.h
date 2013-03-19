@@ -45,6 +45,7 @@ typedef struct oct_BObjectOption {
 
 struct oct_Context;
 
+oct_Bool _oct_Object_protocolInit(struct oct_Context* ctx);
 oct_Bool _oct_Object_init(struct oct_Context* ctx);
 
 // The output is BObject because C does not have templates but the output should be safe to manually cast to the given protocol

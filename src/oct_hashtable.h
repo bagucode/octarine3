@@ -58,6 +58,7 @@ typedef struct oct_BHashtable {
 
 struct oct_Context;
 
+oct_Bool _oct_Hashtable_initProtocol(struct oct_Context* ctx);
 oct_Bool _oct_Hashtable_init(struct oct_Context* ctx);
 
 oct_Bool oct_AHashtableEntry_createOwned(struct oct_Context* ctx, oct_Uword initialCap, oct_OAHashtableEntry* out_result);

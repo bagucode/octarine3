@@ -11,6 +11,14 @@
 
 #define CHECK(X) if(!X) return oct_False;
 
+oct_Bool _oct_Object_protocolInit(struct oct_Context* ctx) {
+	oct_BHashtable table;
+	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_ProtocolBinding), (void**)&ctx->rt->builtInProtocols.Object.ptr));
+	ctx->rt->builtInProtocols.Object.ptr->protocolType = ctx->rt->builtInTypes.Object;
+	table.ptr = &ctx->rt->builtInProtocols.Object.ptr->implementations;
+	return oct_Hashtable_ctor(ctx, table, 100);
+}
+
 oct_Bool _oct_Object_init(struct oct_Context* ctx) {
 
 	// Object protocol. No functions.

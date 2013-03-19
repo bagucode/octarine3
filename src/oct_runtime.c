@@ -73,19 +73,24 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	}
 	mainCtx->rt = rt;
 	mainCtx->reader = (oct_Reader*)malloc(sizeof(oct_Reader));
-	oct_Reader_ctor(mainCtx, mainCtx->reader); // This is a little weird
     oct_TLSInit(&rt->currentContext);
 	oct_TLSSet(rt->currentContext, mainCtx);
+
+	// Allocate memory for all built in types up front to resolve circular dependencies.
+	alloc_builtInTypes(rt);
+
+	// *** 1.5 Create the built in protocols so that type init functions may add themselves
+
+	add hardcoded init of vtables for protocol implementations for type here, they are used in the add_protocol function
+
+	_oct_Object_protocolInit(mainCtx);
+	_oct_Hashtable_initProtocol(mainCtx);
 
 	// *** 2. Initialize all the built in types
 	//        I.e. those needed by the reader and compiler and any dependencies
 	//        of those types.
 
-	// Allocate memory for all built in types up front to resolve circular dependencies.
-	alloc_builtInTypes(rt);
-
 	// Initialize all built in types
-	// TODO: intern the types? Difficult, have to care about order because pointers may change...
 
 	_oct_Primitives_init(mainCtx);
 	_oct_Hashtable_init(mainCtx);
@@ -109,6 +114,8 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	_oct_Any_init(mainCtx);
 	_oct_Namespace_init(mainCtx);
 	_oct_Charstream_init(mainCtx);
+
+	oct_Reader_ctor(mainCtx, mainCtx->reader); // This is a little weird
 
 	// *** 3. Create octarine namespace.
 
