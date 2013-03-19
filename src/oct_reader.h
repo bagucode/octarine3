@@ -36,7 +36,7 @@ oct_Bool _oct_Reader_initType(struct oct_Context* ctx);
 // Public
 
 oct_Bool oct_Reader_ctor(struct oct_Context* ctx, oct_Reader* reader);
-oct_Bool oct_Reader_read(struct oct_Context* ctx, oct_BReader reader, oct_Charstream input, oct_ReadResult* out_result);
+oct_Bool oct_Reader_read(struct oct_Context* ctx, oct_BReader reader, oct_BCharstream input, oct_ReadResult* out_result);
 
 oct_Bool oct_Reader_readFromCString(struct oct_Context* ctx, oct_BReader reader, const char* source, oct_ReadResult* out_result);
 

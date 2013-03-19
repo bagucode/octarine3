@@ -14,7 +14,7 @@ static void StringTests() {
 	oct_BString bs1;
 	oct_BString bs2;
 	oct_Bool result;
-	oct_Charstream charStream;
+	oct_BCharstream charStream;
 	oct_OStringstream ss;
 	oct_BStringstream bss;
 	oct_ReadResult readResult;
@@ -42,7 +42,7 @@ static void StringTests() {
 	bs1.ptr = s1.ptr; // borrow s1
 	TEST(oct_OStringstream_create(ctx, bs1, &ss));
 	bss.ptr = ss.ptr;
-	TEST(oct_BStringstream_asCharStream(ctx, bss, &charStream));
+	TEST(oct_Stringstream_asCharStream(ctx, bss, &charStream));
 	reader.ptr = ctx->reader; // TODO: method for this
 	TEST(oct_Reader_read(ctx, reader, charStream, &readResult));
 	TEST(readResult.variant == OCT_READRESULT_OK);

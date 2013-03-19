@@ -60,24 +60,24 @@ static oct_Char reader_getChar(oct_BReader reader, oct_Uword idx) {
 	return reader.ptr->readBuffer.ptr->data[idx];
 }
 
-static oct_Bool stream_peekChar(oct_Context* ctx, oct_Charstream source, oct_Char* c_out) {
-	return source.vtable->peek(ctx, source.object, c_out);
+static oct_Bool stream_peekChar(oct_Context* ctx, oct_BCharstream source, oct_Char* c_out) {
+	return source.vtable->functions.peekChar(ctx, source.self, c_out);
 }
 
-static oct_Bool stream_discardChar(oct_Context* ctx, oct_Charstream source) {
+static oct_Bool stream_discardChar(oct_Context* ctx, oct_BCharstream source) {
 	oct_Char c;
-	return source.vtable->read(ctx, source.object, &c);
+	return source.vtable->functions.readChar(ctx, source.self, &c);
 }
 
-typedef oct_Bool(*readFn)(struct oct_Context*, oct_BReader, oct_Charstream, oct_ReadResult*);
+typedef oct_Bool(*readFn)(struct oct_Context*, oct_BReader, oct_BCharstream, oct_ReadResult*);
 
-static oct_Bool readI32(struct oct_Context*, oct_BReader, oct_Charstream, oct_ReadResult*);
-static oct_Bool readF32(struct oct_Context*, oct_BReader, oct_Charstream, oct_ReadResult*);
-static oct_Bool readString(struct oct_Context*, oct_BReader, oct_Charstream, oct_ReadResult*);
-static oct_Bool readSymbol(struct oct_Context*, oct_BReader, oct_Charstream, oct_ReadResult*);
-static oct_Bool readList(struct oct_Context*, oct_BReader, oct_Charstream, oct_ReadResult*);
-static oct_Bool readVector(struct oct_Context*, oct_BReader, oct_Charstream, oct_ReadResult*);
-static oct_Bool readMap(struct oct_Context*, oct_BReader, oct_Charstream, oct_ReadResult*);
+static oct_Bool readI32(struct oct_Context*, oct_BReader, oct_BCharstream, oct_ReadResult*);
+static oct_Bool readF32(struct oct_Context*, oct_BReader, oct_BCharstream, oct_ReadResult*);
+static oct_Bool readString(struct oct_Context*, oct_BReader, oct_BCharstream, oct_ReadResult*);
+static oct_Bool readSymbol(struct oct_Context*, oct_BReader, oct_BCharstream, oct_ReadResult*);
+static oct_Bool readList(struct oct_Context*, oct_BReader, oct_BCharstream, oct_ReadResult*);
+static oct_Bool readVector(struct oct_Context*, oct_BReader, oct_BCharstream, oct_ReadResult*);
+static oct_Bool readMap(struct oct_Context*, oct_BReader, oct_BCharstream, oct_ReadResult*);
 
 typedef struct DispatchTableEntry {
 	char c;
@@ -131,7 +131,7 @@ static oct_Bool isdelim(oct_Char c) {
 				  out_result->variant = OCT_READRESULT_ERROR; \
 	              goto end
 
-oct_Bool oct_Reader_read(struct oct_Context* ctx, oct_BReader reader, oct_Charstream source, oct_ReadResult* out_result) {
+oct_Bool oct_Reader_read(struct oct_Context* ctx, oct_BReader reader, oct_BCharstream source, oct_ReadResult* out_result) {
 	oct_Bool result = oct_True;
 	oct_Uword i;
 	oct_Char next;
@@ -183,7 +183,7 @@ end:
 	return result;
 }
 
-static oct_Bool readI32(struct oct_Context* ctx, oct_BReader reader, oct_Charstream source, oct_ReadResult* out_result) {
+static oct_Bool readI32(struct oct_Context* ctx, oct_BReader reader, oct_BCharstream source, oct_ReadResult* out_result) {
 	char* end;
 	long l;
 	oct_Uword i = 0;
@@ -243,7 +243,7 @@ end:
 	return result;
 }
 
-static oct_Bool readF32(struct oct_Context* ctx, oct_BReader reader, oct_Charstream source, oct_ReadResult* out_result) {
+static oct_Bool readF32(struct oct_Context* ctx, oct_BReader reader, oct_BCharstream source, oct_ReadResult* out_result) {
 	char* end;
 	double d;
 	oct_Uword i;
@@ -298,7 +298,7 @@ end:
 	return result;
 }
 
-static oct_Bool readString(struct oct_Context* ctx, oct_BReader reader, oct_Charstream source, oct_ReadResult* out_result) {
+static oct_Bool readString(struct oct_Context* ctx, oct_BReader reader, oct_BCharstream source, oct_ReadResult* out_result) {
 	oct_Bool result = oct_True;
 	oct_Char next;
 	oct_OString instance;
@@ -339,7 +339,7 @@ end:
 	return result;
 }
 
-static oct_Bool readSymbol(struct oct_Context* ctx, oct_BReader reader, oct_Charstream source, oct_ReadResult* out_result) {
+static oct_Bool readSymbol(struct oct_Context* ctx, oct_BReader reader, oct_BCharstream source, oct_ReadResult* out_result) {
 	oct_Bool result = oct_True;
 	oct_OString name;
 	oct_OSymbol instance;
@@ -373,7 +373,7 @@ end:
 	return result;
 }
 
-static oct_Bool readList(struct oct_Context* ctx, oct_BReader reader, oct_Charstream source, oct_ReadResult* out_result) {
+static oct_Bool readList(struct oct_Context* ctx, oct_BReader reader, oct_BCharstream source, oct_ReadResult* out_result) {
 	oct_Bool result = oct_True;
 	oct_Char next;
 	oct_ReadResult content;
@@ -431,13 +431,13 @@ end:
 	return result;
 }
 
-static oct_Bool readVector(struct oct_Context* ctx, oct_BReader reader, oct_Charstream source, oct_ReadResult* out_result) {
+static oct_Bool readVector(struct oct_Context* ctx, oct_BReader reader, oct_BCharstream source, oct_ReadResult* out_result) {
 	reader_clearChars(reader);
 	out_result->variant = OCT_READRESULT_OK;
 	return oct_True;
 }
 
-static oct_Bool readMap(struct oct_Context* ctx, oct_BReader reader, oct_Charstream source, oct_ReadResult* out_result) {
+static oct_Bool readMap(struct oct_Context* ctx, oct_BReader reader, oct_BCharstream source, oct_ReadResult* out_result) {
 	reader_clearChars(reader);
 	out_result->variant = OCT_READRESULT_OK;
 	return oct_True;
@@ -448,7 +448,7 @@ oct_Bool oct_Reader_readFromCString(struct oct_Context* ctx, oct_BReader reader,
 	oct_BString bstr;
 	oct_OStringstream ss;
 	oct_BStringstream bss;
-	oct_Charstream stream;
+	oct_BCharstream stream;
     oct_Bool result = oct_True;
     
     str.ptr = NULL;
