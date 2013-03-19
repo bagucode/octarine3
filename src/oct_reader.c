@@ -8,6 +8,7 @@
 #include "oct_object.h"
 #include "oct_object_vtable.h"
 #include "oct_primitives_functions.h"
+#include "oct_string.h"
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -324,7 +325,7 @@ static oct_Bool readString(struct oct_Context* ctx, oct_BReader reader, oct_BCha
 	CHECK(oct_String_createOwnedFromCharArray(ctx, reader.ptr->readBuffer, 0, reader.ptr->nchars, &instance));
 
 	out_result->result.variant = OCT_OOBJECTOPTION_OBJECT;
-	CHECK(oct_String_asObject(ctx, instance, &out_result->result.object));
+	CHECK(oct_String_asObjectOwned(ctx, instance, &out_result->result.object));
 
 	printf("Read a String: \"%s\"\n", &instance.ptr->utf8Data.ptr->data[0]);
 
@@ -458,7 +459,7 @@ oct_Bool oct_Reader_readFromCString(struct oct_Context* ctx, oct_BReader reader,
 	bstr.ptr = str.ptr;
 	CHECK(oct_OStringstream_create(ctx, bstr, &ss));
 	bss.ptr = ss.ptr;
-	CHECK(oct_BStringstream_asCharStream(ctx, bss, &stream));
+	CHECK(oct_Stringstream_asCharStream(ctx, bss, &stream));
 	CHECK(oct_Reader_read(ctx, reader, stream, out_result));
     
     goto end;

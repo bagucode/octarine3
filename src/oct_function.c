@@ -12,7 +12,6 @@ oct_Bool _oct_Function_initType(struct oct_Context* ctx) {
 
 	// Function
 	oct_BType t = ctx->rt->builtInTypes.Function;
-	oct_Bool result;
 	t.ptr->variant = OCT_TYPE_STRUCT;
 	t.ptr->structType.size = sizeof(oct_Function);
 	t.ptr->structType.alignment = 0;
