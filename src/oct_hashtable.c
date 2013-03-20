@@ -39,6 +39,15 @@ oct_Bool _oct_Hashtable_init(struct oct_Context* ctx) {
 	t.ptr->pointerType.kind = OCT_POINTER_BORROWED_PROTOCOL;
 	t.ptr->pointerType.type = ctx->rt->builtInTypes.HashtableKey;
 
+	// HashtableKeyOption
+	t = ctx->rt->builtInTypes.HashtableKeyOption;
+	t.ptr->variant = OCT_TYPE_VARIADIC;
+	t.ptr->variadicType.alignment = 0;
+	CHECK(oct_ABType_createOwned(ctx, 3, &t.ptr->variadicType.types));
+	t.ptr->variadicType.types.ptr->data[0] = ctx->rt->builtInTypes.Nothing;
+	t.ptr->variadicType.types.ptr->data[1] = ctx->rt->builtInTypes.OHashtableKey;
+	t.ptr->variadicType.types.ptr->data[2] = ctx->rt->builtInTypes.BHashtableKey;
+
 	// HashtableEntry
 	t = ctx->rt->builtInTypes.HashtableEntry;
 	t.ptr->variant = OCT_TYPE_STRUCT;
@@ -104,14 +113,33 @@ oct_Bool oct_AHashtableEntry_createOwned(struct oct_Context* ctx, oct_Uword init
 	CHECK(oct_ExchangeHeap_allocRaw(ctx, initialCap * sizeof(oct_HashtableEntry) + sizeof(oct_AHashtableEntry), (void**)&out_result->ptr));
 	out_result->ptr->size = initialCap;
 	for(i = 0; i < out_result->ptr->size; ++i) {
-		out_result->ptr->table[i].key.self.self = ctx->rt->nil.self.self;
-		out_result->ptr->table[i].key.vtable = (oct_HashtableKeyVTable*)ctx->rt->vtables.NothingAsHashtableKey.ptr;
+		out_result->ptr->table[i].key.variant = OCT_HASHTABLEKEYOPTION_NOTHING;
 	}
 	return oct_True;
 }
 
+static oct_Bool destroyEntry(oct_Context* ctx, oct_HashtableEntry* entry) {
+	oct_OObject obj;
+	if(entry->key.variant != OCT_HASHTABLEKEYOPTION_NOTHING) {
+		if(entry->key.variant == OCT_HASHTABLEKEYOPTION_OWNED) {
+			obj.self.self = entry->key.owned.self.self;
+			obj.vtable = (oct_ObjectVTable*)entry->key.owned.vtable;
+			oct_Object_destroyOwned(ctx, obj);
+		}
+		if(entry->val.variant == OCT_ANY_OOBJECT) {
+			obj.self.self = entry->val.oobject.self.self;
+			obj.vtable = (oct_ObjectVTable*)entry->val.oobject.vtable;
+			oct_Object_destroyOwned(ctx, obj);
+		}
+		entry->key.variant = OCT_HASHTABLEKEYOPTION_NOTHING;
+	}
+}
+
 oct_Bool oct_AHashtableEntry_destroyOwned(struct oct_Context* ctx, oct_OAHashtableEntry self) {
-	// TODO: Actually destroy values here! This currently creates memory leaks!
+	oct_Uword i;
+	for(i = 0; i < self.ptr->size; ++i) {
+		destroyEntry(ctx, &self.ptr->table[i]);
+	}
 	return oct_ExchangeHeap_freeRaw(ctx, self.ptr);
 }
 
@@ -123,29 +151,32 @@ oct_Bool oct_Hashtable_dtor(struct oct_Context* ctx, oct_BHashtable self) {
 	return oct_AHashtableEntry_destroyOwned(ctx, self.ptr->table);
 }
 
-static oct_Bool keyHash(oct_Context* ctx, oct_OHashtableKey key, oct_Uword* result) {
+static oct_Bool keyHash(oct_Context* ctx, oct_BHashtableKey key, oct_Uword* result) {
 	oct_BSelf bself;
 	bself.self = key.self.self;
 	return key.vtable->functions.hashable.hash(ctx, bself, result);
 }
 
-static oct_Bool keyIsNothing(oct_Context* ctx, oct_OHashtableKey key) {
-	return key.vtable->type.ptr == ctx->rt->builtInTypes.Nothing.ptr;
-}
+static oct_Bool keyEq(oct_Context* ctx, oct_HashtableKeyOption key1, oct_HashtableKeyOption key2, oct_Bool* out_eq) {
+	oct_Bool result = oct_True;
 
-static oct_Bool keyEq(oct_Context* ctx, oct_OHashtableKey key1, oct_OHashtableKey key2, oct_Bool* out_eq) {
-	oct_BSelf key1Self;
-	oct_BSelf key2Self;
-
-	if(key1.vtable->type.ptr != key2.vtable->type.ptr) {
+	if(key1.variant == OCT_HASHTABLEKEYOPTION_NOTHING && key2.variant == OCT_HASHTABLEKEYOPTION_NOTHING) {
+		*out_eq = oct_True; // ehrm, do we really want it this way?
+	}
+	else if(key1.variant == OCT_HASHTABLEKEYOPTION_NOTHING && key2.variant != OCT_HASHTABLEKEYOPTION_NOTHING) {
 		*out_eq = oct_False;
-		return oct_True;
+	}
+	else if(key2.variant == OCT_HASHTABLEKEYOPTION_NOTHING && key1.variant != OCT_HASHTABLEKEYOPTION_NOTHING) {
+		*out_eq = oct_False;
+	}
+	else if(key1.borrowed.vtable->type.ptr != key2.borrowed.vtable->type.ptr) {
+		*out_eq = oct_False;
+	}
+	else {
+		result = key1.borrowed.vtable->functions.eq.equals(ctx, key1.borrowed.self, key2.borrowed.self, out_eq);
 	}
 
-	key1Self.self = key1.self.self;
-	key2Self.self = key2.self.self;
-
-	return key1.vtable->functions.eq.equals(ctx, key1Self, key2Self, out_eq);
+	return result;
 }
 
 static oct_Bool oct_Hashtable_putOne(oct_Context* ctx, oct_BHashtable self, oct_HashtableEntry* entry, oct_Uword i, oct_Bool* result) {
@@ -155,17 +186,12 @@ static oct_Bool oct_Hashtable_putOne(oct_Context* ctx, oct_BHashtable self, oct_
 
 	tmp = self.ptr->table.ptr->table[i];
 	self.ptr->table.ptr->table[i] = *entry;
-	eq = keyIsNothing(ctx, tmp.key);
+	eq = tmp.key.variant == OCT_HASHTABLEKEYOPTION_NOTHING;
 	if(!eq) {
 		CHECK(keyEq(ctx, tmp.key, entry->key, &eq));
 		if(eq) {
 			// Keys are equal, destroy old entry
-			oobj.self = tmp.key.self;
-			oobj.vtable = (oct_ObjectVTable*)tmp.key.vtable;
-			CHECK(oct_Object_destroyOwned(ctx, oobj));
-			if(entry->val.variant == OCT_ANY_OOBJECT) {
-				CHECK(oct_Object_destroyOwned(ctx, tmp.val.oobject));
-			}
+			destroyEntry(ctx, &tmp);
 		}
 	}
 	if(eq) { // Key was Nothing or equal to existing entry
@@ -185,7 +211,7 @@ static oct_Bool oct_Hashtable_tryPut(oct_Context* ctx, oct_BHashtable self, oct_
     
 	mask = self.ptr->table.ptr->size - 1;
     
-	CHECK(keyHash(ctx, entry->key, &key));
+	CHECK(keyHash(ctx, entry->key.borrowed, &key));
 	i = hash1(key) & mask;
 	CHECK(oct_Hashtable_putOne(ctx, self, entry, i, out_result));
 	if(*out_result) {
@@ -193,7 +219,7 @@ static oct_Bool oct_Hashtable_tryPut(oct_Context* ctx, oct_BHashtable self, oct_
 	}
 
 	// Note: do not remove re-hash of key. Entry is changed after a failed call to putOne
-	CHECK(keyHash(ctx, entry->key, &key));
+	CHECK(keyHash(ctx, entry->key.borrowed, &key));
 	i = hash2(key) & mask;
 	CHECK(oct_Hashtable_putOne(ctx, self, entry, i, out_result));
 	if(*out_result) {
@@ -201,7 +227,7 @@ static oct_Bool oct_Hashtable_tryPut(oct_Context* ctx, oct_BHashtable self, oct_
 	}
 
 	// Note: do not remove re-hash of key. Entry is changed after a failed call to putOne
-	CHECK(keyHash(ctx, entry->key, &key));
+	CHECK(keyHash(ctx, entry->key.borrowed, &key));
 	i = hash3(key) & mask;
 	CHECK(oct_Hashtable_putOne(ctx, self, entry, i, out_result));
 
@@ -219,7 +245,7 @@ static oct_Bool oct_Hashtable_grow(oct_Context* ctx, oct_BHashtable self) {
 
 	CHECK(oct_Hashtable_ctor(ctx, bBigger, self.ptr->table.ptr->size + 1));
 	for(i = 0; i < self.ptr->table.ptr->size; ++i) {
-		if(self.ptr->table.ptr->table[i].key.vtable->type.ptr != ctx->rt->builtInTypes.Nothing.ptr) {
+		if(self.ptr->table.ptr->table[i].key.variant != OCT_HASHTABLEKEYOPTION_NOTHING) {
 			entry = self.ptr->table.ptr->table[i];
 			didPut = oct_False;
 			for(j = 0; j < 5 && (!didPut); ++j) {
@@ -227,19 +253,21 @@ static oct_Bool oct_Hashtable_grow(oct_Context* ctx, oct_BHashtable self) {
 			}
 			if(!didPut) {
 				cap = bBigger.ptr->table.ptr->size + 1;
-				CHECK(oct_Hashtable_dtor(ctx, bBigger));
+				// Just free the memory. If we run destructors here we will nuke part of the table
+				CHECK(oct_ExchangeHeap_freeRaw(ctx, bBigger.ptr->table.ptr));
 				CHECK(oct_Hashtable_ctor(ctx, bBigger, cap));
 				i = 0;
 			}
 		}
 	}
-	CHECK(oct_Hashtable_dtor(ctx, self));
+	// Just free the memory. If we run destructors here we will nuke the new table
+	CHECK(oct_ExchangeHeap_freeRaw(ctx, self.ptr->table.ptr));
 	(*self.ptr) = bigger;
 
 	return oct_True;
 }
 
-oct_Bool oct_Hashtable_put(struct oct_Context* ctx, oct_BHashtable self, oct_OHashtableKey key, oct_Any value) {
+oct_Bool oct_Hashtable_put(struct oct_Context* ctx, oct_BHashtable self, oct_HashtableKeyOption key, oct_Any value) {
 	oct_Uword i;
 	oct_HashtableEntry entry;
 	oct_Bool didPut;
@@ -264,29 +292,29 @@ static oct_Bool oct_Hashtable_get(struct oct_Context* ctx, oct_BHashtable self, 
 	oct_Uword i, mask, hash;
 	oct_Bool eq;
 	oct_Bool result = oct_True;
-	oct_OHashtableKey tmpOwnedKey; // not really owned
-	oct_OObject oobject;
+	oct_HashtableKeyOption tmpKey;
 
-	tmpOwnedKey.self.self = key.self.self;
-	tmpOwnedKey.vtable = key.vtable;
+	tmpKey.variant = OCT_HASHTABLEKEYOPTION_BORROWED;
+	tmpKey.borrowed.self.self = key.self.self;
+	tmpKey.borrowed.vtable = key.vtable;
 
 	mask = self.ptr->table.ptr->size - 1;
-	CHECK(keyHash(ctx, tmpOwnedKey, &hash));
+	CHECK(keyHash(ctx, tmpKey.borrowed, &hash));
 
 	i = hash1(hash) & mask;
-	CHECK(keyEq(ctx, tmpOwnedKey, self.ptr->table.ptr->table[i].key, &eq));
+	CHECK(keyEq(ctx, tmpKey, self.ptr->table.ptr->table[i].key, &eq));
 	if(eq) {
 		goto match;
 	}
 
 	i = hash2(hash) & mask;
-	CHECK(keyEq(ctx, tmpOwnedKey, self.ptr->table.ptr->table[i].key, &eq));
+	CHECK(keyEq(ctx, tmpKey, self.ptr->table.ptr->table[i].key, &eq));
 	if(eq) {
 		goto match;
 	}
 
 	i = hash3(hash) & mask;
-	CHECK(keyEq(ctx, tmpOwnedKey, self.ptr->table.ptr->table[i].key, &eq));
+	CHECK(keyEq(ctx, tmpKey, self.ptr->table.ptr->table[i].key, &eq));
 	if(eq) {
 		goto match;
 	}
@@ -299,13 +327,8 @@ match:
 	*out_value = self.ptr->table.ptr->table[i].val;
 	if((*out_value).variant == OCT_ANY_OOBJECT) {
 		if(isTake) {
-			// Remove entry from the table; just drop the key and replace with nil
-			// TODO: replace this nil stuff with an Option type for the key. nil feels wrong. It obscures information and when it is not a value type, can a global instance really be used safely?
-			oobject.self.self = self.ptr->table.ptr->table[i].key.self.self;
-			oobject.vtable = (oct_ObjectVTable*)self.ptr->table.ptr->table[i].key.vtable;
-			CHECK(oct_Object_destroyOwned(ctx, oobject));
-			self.ptr->table.ptr->table[i].key.self.self = &ctx->rt->nil;
-			self.ptr->table.ptr->table[i].key.vtable = (oct_HashtableKeyVTable*)ctx->rt->vtables.NothingAsHashtableKey.ptr;
+			self.ptr->table.ptr->table[i].val.variant = OCT_ANY_NOTHING;
+			destroyEntry(ctx, &self.ptr->table.ptr->table[i]);
 		}
 		else { // borrow
 			(*out_value).variant = OCT_ANY_BOBJECT;

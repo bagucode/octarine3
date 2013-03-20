@@ -59,7 +59,7 @@ oct_Bool oct_Namespace_create(struct oct_Context* ctx, oct_OString nsName, oct_B
 	oct_NamespaceOption existing;
 	oct_BString bstr;
 	oct_BHashtable bTable;
-	oct_OHashtableKey nameKey;
+	oct_HashtableKeyOption nameKey;
 	oct_Any nsAny;
 	oct_BNamespace newNs;
 	oct_Bool result = oct_True;
@@ -83,7 +83,8 @@ oct_Bool oct_Namespace_create(struct oct_Context* ctx, oct_OString nsName, oct_B
 	nsAny.variant = OCT_ANY_BOBJECT;
 
 	bTable.ptr = &ctx->rt->namespaces;
-	CHECK(oct_String_asHashtableKeyOwned(ctx, nsName, &nameKey));
+	nameKey.variant = OCT_HASHTABLEKEYOPTION_OWNED;
+	CHECK(oct_String_asHashtableKeyOwned(ctx, nsName, &nameKey.owned));
 	CHECK(oct_Hashtable_put(ctx, bTable, nameKey, nsAny));
 
 	out_ns->ptr = newNs.ptr;
@@ -127,13 +128,13 @@ end:
 	return oct_True;
 }
 
-oct_Bool oct_Namespace_bindInCurrent(struct oct_Context* ctx, oct_OHashtableKey key, oct_Any value) {
+oct_Bool oct_Namespace_bindInCurrent(struct oct_Context* ctx, oct_HashtableKeyOption key, oct_Any value) {
 	oct_BNamespace bns;
 	bns.ptr = ctx->ns;
 	return oct_Namespace_bind(ctx, bns, key, value);
 }
 
-oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_OHashtableKey key, oct_Any value) {
+oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_HashtableKeyOption key, oct_Any value) {
 	oct_BHashtable bindingsTable;
 	oct_Bool result;
 	bindingsTable.ptr = &ns.ptr->bindings;
@@ -170,29 +171,6 @@ error:
 	result = oct_False;
 end:
 	// TODO: unlock bindings table
-	return result;
-}
-
-oct_Bool oct_Namespace_cBind(struct oct_Context* ctx, const char* keySym, oct_OObject obj) {
-	oct_OSymbol sym;
-	oct_BSymbol bs;
-	oct_OString str;
-	oct_OHashtableKey key;
-	oct_Any value;
-	oct_Bool result = oct_True;
-
-	CHECK(oct_String_createOwnedFromCString(ctx, keySym, &str));
-	CHECK(oct_Symbol_createOwned(ctx, str, &sym));
-	bs.ptr = sym.ptr;
-	CHECK(oct_Symbol_asHashtableKey(ctx, bs, (oct_BHashtableKey*)&key));
-	value.oobject = obj;
-	value.variant = OCT_ANY_OOBJECT;
-	CHECK(oct_Namespace_bindInCurrent(ctx, key, value));
-
-	goto end;
-error:
-	result = oct_False;
-end:
 	return result;
 }
 

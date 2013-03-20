@@ -16,6 +16,7 @@
 #include "oct_initTarget.h"
 #include "oct_charstream.h"
 #include "oct_stringstream.h"
+#include "oct_copyable.h"
 
 #include <stdlib.h>
 
@@ -32,19 +33,50 @@ static void alloc_builtInTypes(oct_Runtime* rt) {
 	}
 }
 
+static void dealloc_buintInTypes(oct_Runtime* rt) {
+	oct_Uword iters = sizeof(oct_BuiltInTypes) / sizeof(oct_BType);
+	oct_Uword i;
+	oct_BType* place;
+
+	for(i = 0; i < iters; ++i) {
+		char* dummy = (char*)(&rt->builtInTypes);
+		dummy += sizeof(oct_BType) * i;
+		place = (oct_BType*)dummy;
+		free(place->ptr);
+	}
+}
+
+static void dealloc_builtInProtocols(oct_Context* ctx) {
+	oct_Uword iters = sizeof(oct_BuiltInProtocols) / sizeof(oct_BProtocolBinding);
+	oct_Uword i;
+	oct_BProtocolBinding* place;
+	oct_BHashtable tbl;
+	oct_Runtime* rt = ctx->rt;
+
+	for(i = 0; i < iters; ++i) {
+		char* dummy = (char*)(&rt->builtInProtocols);
+		dummy += sizeof(oct_BProtocolBinding) * i;
+		place = (oct_BProtocolBinding*)dummy;
+		tbl.ptr = &place->ptr->implementations;
+		oct_Hashtable_dtor(ctx, tbl);
+		free(place->ptr);
+	}
+}
+
 #define CHECK(X) if(!X) return oct_False;
 
 static oct_Bool bind_type(oct_Context* ctx, oct_BNamespace ns, const char* name, oct_BType type) {
 	oct_OString str;
 	oct_OSymbol sym;
 	oct_BSymbol bSym;
-	oct_OHashtableKey key;
+	oct_HashtableKeyOption key;
     oct_Any value;
 	
 	CHECK(oct_String_createOwnedFromCString(ctx, name, &str));
 	CHECK(oct_Symbol_createOwned(ctx, str, &sym));
 	bSym.ptr = sym.ptr;
-	CHECK(oct_Symbol_asHashtableKey(ctx, bSym, (oct_BHashtableKey*)&key));
+	CHECK(oct_Symbol_asHashtableKey(ctx, bSym, &key.borrowed));
+	key.variant = OCT_HASHTABLEKEYOPTION_OWNED;
     value.variant = OCT_ANY_BOBJECT;
 	CHECK(oct_Type_asObject(ctx, type, &value.bobject));
 	return oct_Namespace_bind(ctx, ns, key, value);
@@ -80,15 +112,13 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	// Allocate memory for all built in types up front to resolve circular dependencies.
 	alloc_builtInTypes(rt);
 
-	// Fix up nil, it is used as default value in some places (hash table keys for example)
-	rt->nilAsObject.type = rt->builtInTypes.Nothing;
-	rt->nilInstance.dummy = 0;
-	rt->nil.self.self = &rt->nilInstance;
-	rt->nil.vtable = &rt->nilAsObject;
-
 	// *** 1.5 Create the built in protocols so that type init functions may add themselves
 	
 	rt->vtables.NothingAsHashtableKey.ptr = (oct_VTable*)malloc(sizeof(oct_VTable) + (sizeof(void*) * 2));
+	if(!rt->vtables.NothingAsHashtableKey.ptr) {
+		(*out_error) = "Out of memory";
+		return NULL;
+	}
 	rt->vtables.NothingAsHashtableKey.ptr->objectType = rt->builtInTypes.Nothing;
 
 	_oct_Object_initProtocol(mainCtx);
@@ -96,6 +126,7 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	_oct_Hashable_initProtocol(mainCtx);
 	_oct_Hashtable_initProtocol(mainCtx);
 	_oct_Charstream_initProtocol(mainCtx);
+	_oct_Copyable_initProtocol(mainCtx);
 
 	// *** 1.5.1 Manually fix up the dependencies for oct_Protocol_addImplementation
 	_oct_VTable_init(mainCtx);
@@ -131,6 +162,7 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	_oct_Namespace_init(mainCtx);
 	_oct_Charstream_init(mainCtx);
 	_oct_Stringstream_init(mainCtx);
+	_oct_Copyable_init(mainCtx);
 
 	oct_Reader_ctor(mainCtx, mainCtx->reader); // This is a little weird
 
@@ -245,7 +277,13 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 }
 
 oct_Bool oct_Runtime_destroy(oct_Runtime* rt, const char** out_error) {
-	// TODO: ... implement?
+	oct_Uword i;
+	oct_Context* ctx = oct_Runtime_currentContext(rt);
+	oct_BHashtable tbl;
+	tbl.ptr = &rt->namespaces;
+	oct_Hashtable_dtor(ctx, tbl);
+	dealloc_builtInProtocols(ctx);
+	dealloc_buintInTypes(rt);
 	return oct_True;
 }
 

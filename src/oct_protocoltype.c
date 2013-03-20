@@ -88,19 +88,13 @@ static oct_Bool oct_VTable_asObject(oct_Context* ctx, oct_BVTable vtable, oct_BO
 
 oct_Bool oct_Protocol_addImplementation(struct oct_Context* ctx, oct_BProtocolBinding protocol, oct_BType type, oct_BVTable vtable) {
 	oct_BHashtable impls;
-	oct_OHashtableKey key;
+	oct_HashtableKeyOption key;
 	oct_Any val;
-	CHECK(oct_BType_asHashtableKey(ctx, type, (oct_BHashtableKey*)&key));
+	key.variant = OCT_HASHTABLEKEYOPTION_BORROWED;
+	CHECK(oct_BType_asHashtableKey(ctx, type, &key.borrowed));
 	CHECK(oct_VTable_asObject(ctx, vtable, &val.bobject));
 	val.variant = OCT_ANY_BOBJECT;
 	impls.ptr = &protocol.ptr->implementations;
 	return oct_Hashtable_put(ctx, impls, key, val);
 }
 
-
-
-	//self.self = type.ptr;
-	//CHECK(oct_Object_as(ctx, self, ctx->rt->builtInTypes.Type, ctx->rt->builtInProtocols.HashtableKey, (oct_BObject*)&key));
-
-	//self.self = vtable.ptr;
-	//CHECK(oct_Object_as(ctx, self, ctx->rt->builtInTypes.VTable, ctx->rt->builtInProtocols.Object, &val.bobject));

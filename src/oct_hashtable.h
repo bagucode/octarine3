@@ -28,10 +28,23 @@ typedef struct oct_BHashtableKey {
 	oct_HashtableKeyVTable* vtable;
 } oct_BHashtableKey;
 
+#define OCT_HASHTABLEKEYOPTION_NOTHING 0
+#define OCT_HASHTABLEKEYOPTION_OWNED 1
+#define OCT_HASHTABLEKEYOPTION_BORROWED 2
+
+typedef struct oct_HashtableKeyOption {
+	oct_Uword variant;
+	union {
+		oct_Nothing nothing;
+		oct_OHashtableKey owned;
+		oct_BHashtableKey borrowed;
+	};
+} oct_HashtableKeyOption;
+
 // Hash table
 
 typedef struct oct_HashtableEntry {
-	oct_OHashtableKey key;
+	oct_HashtableKeyOption key;
 	oct_Any val;
 } oct_HashtableEntry;
 
@@ -66,7 +79,7 @@ oct_Bool oct_AHashtableEntry_destroyOwned(struct oct_Context* ctx, oct_OAHashtab
 
 oct_Bool oct_Hashtable_ctor(struct oct_Context* ctx, oct_BHashtable self, oct_Uword initialCap);
 oct_Bool oct_Hashtable_dtor(struct oct_Context* ctx, oct_BHashtable self);
-oct_Bool oct_Hashtable_put(struct oct_Context* ctx, oct_BHashtable self, oct_OHashtableKey key, oct_Any value);
+oct_Bool oct_Hashtable_put(struct oct_Context* ctx, oct_BHashtable self, oct_HashtableKeyOption key, oct_Any value);
 // Get a value from the table. If the value is owned, it will be removed from the hash table and returned. If the value
 // is borrowed, a reference to it will be returned and it will remain in the hash table.
 oct_Bool oct_Hashtable_take(struct oct_Context* ctx, oct_BHashtable self, oct_BHashtableKey key, oct_Any* out_value);

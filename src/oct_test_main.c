@@ -1,3 +1,16 @@
+#ifdef _MSC_VER
+#ifdef _DEBUG
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+void LEAK_DETECT() {
+	_CrtDumpMemoryLeaks();
+}
+#endif
+#else
+void LEAK_DETECT() {}
+#endif
+
 #include "octarine.h"
 
 #include <stdio.h>
@@ -38,26 +51,26 @@ static void StringTests() {
 	// END Equals
 
 	// Reading
-	TEST(oct_String_createOwnedFromCString(ctx, "\"Hello\"", &s1));
-	bs1.ptr = s1.ptr; // borrow s1
-	TEST(oct_OStringstream_create(ctx, bs1, &ss));
-	bss.ptr = ss.ptr;
-	TEST(oct_Stringstream_asCharStream(ctx, bss, &charStream));
-	reader.ptr = ctx->reader; // TODO: method for this
-	TEST(oct_Reader_read(ctx, reader, charStream, &readResult));
-	TEST(readResult.variant == OCT_READRESULT_OK);
-	TEST((readResult.result.object.vtable->type.ptr == ctx->rt->builtInTypes.String.ptr));
-	bs2.ptr = (oct_String*)readResult.result.object.self.self;
-	TEST(oct_OStringstream_destroy(ctx, ss));
+	//TEST(oct_String_createOwnedFromCString(ctx, "\"Hello\"", &s1));
+	//bs1.ptr = s1.ptr; // borrow s1
+	//TEST(oct_OStringstream_create(ctx, bs1, &ss));
+	//bss.ptr = ss.ptr;
+	//TEST(oct_Stringstream_asCharStream(ctx, bss, &charStream));
+	//reader.ptr = ctx->reader; // TODO: method for this
+	//TEST(oct_Reader_read(ctx, reader, charStream, &readResult));
+	//TEST(readResult.variant == OCT_READRESULT_OK);
+	//TEST((readResult.result.object.vtable->type.ptr == ctx->rt->builtInTypes.String.ptr));
+	//bs2.ptr = (oct_String*)readResult.result.object.self.self;
+	//TEST(oct_OStringstream_destroy(ctx, ss));
 
-	TEST(oct_String_destroyOwned(ctx, s1));
-	TEST(oct_String_createOwnedFromCString(ctx, "Hello", &s1));
-	bs1.ptr = s1.ptr; // borrow s1
+	//TEST(oct_String_destroyOwned(ctx, s1));
+	//TEST(oct_String_createOwnedFromCString(ctx, "Hello", &s1));
+	//bs1.ptr = s1.ptr; // borrow s1
 
-	TEST(oct_BString_equals(ctx, bs1, bs2, &result));
-	TEST(result);
-	TEST(oct_String_destroyOwned(ctx, s1));
-	TEST(oct_ReadResult_dtor(ctx, &readResult));
+	//TEST(oct_BString_equals(ctx, bs1, bs2, &result));
+	//TEST(result);
+	//TEST(oct_String_destroyOwned(ctx, s1));
+	//TEST(oct_ReadResult_dtor(ctx, &readResult));
 	// END Reading
 
 	TEST(oct_Runtime_destroy(rt, &error));
@@ -73,8 +86,7 @@ static void NamespaceTests() {
 	oct_BSymbol bsym;
 	oct_OString name;
 	oct_OString valStr;
-	oct_OHashtableKey okey;
-	oct_BHashtableKey bkey;
+	oct_HashtableKeyOption key;
 	const char* error;
 
 	rt = oct_Runtime_create(&error);
@@ -91,14 +103,13 @@ static void NamespaceTests() {
 	val.variant = OCT_OOBJECTOPTION_OBJECT;
 	TEST(oct_String_asObjectOwned(ctx, valStr, &val.oobject));
 	bsym.ptr = sym.ptr;
-	TEST(oct_Symbol_asHashtableKey(ctx, bsym, &bkey));
-	okey.self.self = bkey.self.self;
-	okey.vtable = bkey.vtable;
-	TEST(oct_Namespace_bind(ctx, ns, okey, val));
+	TEST(oct_Symbol_asHashtableKey(ctx, bsym, &key.borrowed));
+	key.variant = OCT_HASHTABLEKEYOPTION_OWNED;
+	TEST(oct_Namespace_bind(ctx, ns, key, val));
 	// End Binding
 
 	// Lookup
-	TEST(oct_Namespace_lookup(ctx, ns, bkey, &lookedUp));
+	TEST(oct_Namespace_lookup(ctx, ns, key.borrowed, &lookedUp));
 	TEST(lookedUp.variant == val.variant);
 	TEST((lookedUp.oobject.self.self == (void*)valStr.ptr));
 	// End Lookup
@@ -229,9 +240,12 @@ int main(int argc, char** argv) {
 	//oct_Runtime_destroy(rt, &error);
 
 	StringTests();
-	NamespaceTests();
-	defTest();
+	//NamespaceTests();
+	//defTest();
     //graphCopyOwnedTest();
 
+	//Sleep(10000);
+
+	LEAK_DETECT();
 	return 0;
 }

@@ -32,6 +32,7 @@ typedef struct oct_BCopyable {
 
 oct_BType _oct_BCopyableType;
 
+oct_Bool _oct_Copyable_initProtocol(struct oct_Context* ctx);
 oct_Bool _oct_Copyable_init(struct oct_Context* ctx);
 
 // Helpers

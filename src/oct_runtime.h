@@ -36,6 +36,7 @@ typedef struct oct_BuiltInTypes {
 	oct_BType HashtableKey;
 	oct_BType OHashtableKey;
 	oct_BType BHashtableKey;
+	oct_BType HashtableKeyOption;
 	oct_BType HashtableEntry;
 	oct_BType AHashtableEntry;
 	oct_BType OAHashtableEntry;
@@ -125,6 +126,8 @@ typedef struct oct_BuiltInTypes {
 	oct_BType EqComparable;
 	// Hashable
 	oct_BType Hashable;
+	// Copyable
+	oct_BType Copyable;
 } oct_BuiltInTypes;
 
 typedef struct oct_BuiltInVTables {
@@ -177,11 +180,11 @@ typedef struct oct_BuiltInVTables {
 
 typedef struct oct_BuiltInProtocols {
 	oct_BProtocolBinding Object;
-	oct_BProtocolBinding EqComparable; // TODO
-	oct_BProtocolBinding Hashable; // TODO
-	oct_BProtocolBinding HashtableKey; // TODO
-	oct_BProtocolBinding Copyable; // TODO
-	oct_BProtocolBinding Charstream; // TODO
+	oct_BProtocolBinding EqComparable;
+	oct_BProtocolBinding Hashable;
+	oct_BProtocolBinding HashtableKey;
+	oct_BProtocolBinding Copyable;
+	oct_BProtocolBinding Charstream;
 } oct_BuiltInProtocols;
 
 typedef struct oct_BuiltInFunctions {
@@ -189,6 +192,7 @@ typedef struct oct_BuiltInFunctions {
 	oct_BFunction eq; // TODO
 	oct_BFunction readChar; // TODO
 	oct_BFunction peekChar; // TODO
+	oct_BFunction copyOwned; // TODO
 } oct_BuiltInFunctions;
 
 typedef struct oct_Runtime {
@@ -201,10 +205,6 @@ typedef struct oct_Runtime {
 	oct_BuiltInProtocols builtInProtocols;
 	oct_BuiltInVTables vtables;
 	oct_BuiltInFunctions functions;
-	// nil
-	oct_BObject nil;
-	oct_Nothing nilInstance;
-	oct_ObjectVTable nilAsObject;
 } oct_Runtime;
 
 struct oct_Context;

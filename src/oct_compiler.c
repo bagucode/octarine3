@@ -71,7 +71,7 @@ static oct_Bool eval_def(struct oct_Context* ctx, oct_OObject form, oct_Any* out
 	// (def <symbol> <value>)
 	oct_BNamespace ns;
 	oct_Uword count;
-	oct_OHashtableKey key;
+	oct_HashtableKeyOption key;
 	oct_OList olist;
     oct_BList blist;
     oct_OListOption listOpt;
@@ -97,7 +97,8 @@ static oct_Bool eval_def(struct oct_Context* ctx, oct_OObject form, oct_Any* out
 		goto error;
     }
 	bsym.ptr = (oct_Symbol*)tmp.object.self.self;
-	CHECK(oct_Symbol_asHashtableKey(ctx, bsym, (oct_BHashtableKey*)&key));
+	CHECK(oct_Symbol_asHashtableKey(ctx, bsym, &key.borrowed));
+	key.variant = OCT_HASHTABLEKEYOPTION_OWNED;
 	// eval second argument if we have one
 	if(count == 3) {
         CHECK(oct_List_first(ctx, olist, &tmp, &olist));
