@@ -86,6 +86,8 @@ oct_Bool oct_Namespace_create(struct oct_Context* ctx, oct_OString nsName, oct_B
 	CHECK(oct_String_asHashtableKeyOwned(ctx, nsName, &nameKey));
 	CHECK(oct_Hashtable_put(ctx, bTable, nameKey, nsAny));
 
+	out_ns->ptr = newNs.ptr;
+
 	goto end;
 error:
 	result = oct_False;

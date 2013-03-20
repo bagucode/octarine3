@@ -6,12 +6,11 @@
 #include "oct_type.h"
 #include "oct_function.h"
 
-#include <stddef.h>
 #include <memory.h>
 
 #define CHECK(X) if(!X) return oct_False;
 
-oct_Bool _oct_Object_protocolInit(struct oct_Context* ctx) {
+oct_Bool _oct_Object_initProtocol(struct oct_Context* ctx) {
 	oct_BHashtable table;
 	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_ProtocolBinding), (void**)&ctx->rt->builtInProtocols.Object.ptr));
 	ctx->rt->builtInProtocols.Object.ptr->protocolType = ctx->rt->builtInTypes.Object;

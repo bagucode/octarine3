@@ -3,10 +3,36 @@
 #include "oct_runtime.h"
 #include "oct_type.h"
 #include "oct_context.h"
+#include "oct_exchangeheap.h"
 
 #include <stddef.h>
 
 #define CHECK(X) if(!X) return oct_False;
+
+oct_Bool _oct_Nothing_VTableInit(struct oct_Context* ctx) {
+	// Object
+	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_VTable), (void**)&ctx->rt->vtables.NothingAsObject.ptr));
+	ctx->rt->vtables.NothingAsObject.ptr->objectType = ctx->rt->builtInTypes.Nothing;
+
+	// EqComparable
+	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_VTable) + (sizeof(void*) * 1), (void**)&ctx->rt->vtables.NothingAsEqComparable.ptr));
+	ctx->rt->vtables.NothingAsEqComparable.ptr->functions[0] = oct_Nothing_equals;
+	ctx->rt->vtables.NothingAsEqComparable.ptr->objectType = ctx->rt->builtInTypes.Nothing;
+	
+	// Hashable
+	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_VTable) + (sizeof(void*) * 1), (void**)&ctx->rt->vtables.NothingAsHashable.ptr));
+	ctx->rt->vtables.NothingAsHashable.ptr->functions[0] = oct_Nothing_hash;
+	ctx->rt->vtables.NothingAsHashable.ptr->objectType = ctx->rt->builtInTypes.Nothing;
+	
+	// HashtableKey (already allocated in runtime init)
+	ctx->rt->vtables.NothingAsHashtableKey.ptr->functions[0] = oct_Nothing_hash;
+	ctx->rt->vtables.NothingAsHashtableKey.ptr->functions[1] = oct_Nothing_equals;
+
+	oct_Protocol_addImplementation(ctx, ctx->rt->builtInProtocols.Object, ctx->rt->builtInTypes.Nothing, ctx->rt->vtables.NothingAsObject);
+	oct_Protocol_addImplementation(ctx, ctx->rt->builtInProtocols.EqComparable, ctx->rt->builtInTypes.Nothing, ctx->rt->vtables.NothingAsEqComparable);
+	oct_Protocol_addImplementation(ctx, ctx->rt->builtInProtocols.Hashable, ctx->rt->builtInTypes.Nothing, ctx->rt->vtables.NothingAsHashable);
+	oct_Protocol_addImplementation(ctx, ctx->rt->builtInProtocols.HashtableKey, ctx->rt->builtInTypes.Nothing, ctx->rt->vtables.NothingAsHashtableKey);
+}
 
 oct_Bool _oct_Nothing_init(struct oct_Context* ctx) {
 
@@ -16,18 +42,6 @@ oct_Bool _oct_Nothing_init(struct oct_Context* ctx) {
 	t.ptr->structType.alignment = 0;
 	t.ptr->structType.size = sizeof(oct_Nothing);
 	CHECK(oct_AField_createOwned(ctx, 0, &t.ptr->structType.fields));
-
-	// Nothing VTable for Object {}
-	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Object, 0, &ctx->rt->vtables.NothingAsObject, t));
-
-	// Nothing VTable for EqComparable {eq}
-	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.EqComparable, 1, &ctx->rt->vtables.NothingAsEqComparable, t, oct_Nothing_equals));
-
-	// Nothing VTable for Hashable {hash}
-	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Hashable, 1, &ctx->rt->vtables.NothingAsHashable, t, oct_Nothing_hash));
-
-	// Nothing VTable for HashtableKey {hash, eq}
-	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.HashtableKey, 2, &ctx->rt->vtables.NothingAsHashtableKey, t, oct_Nothing_hash, oct_Nothing_equals));
 
 	// BNothing
 	t = ctx->rt->builtInTypes.BNothing;
@@ -44,7 +58,7 @@ oct_Bool oct_Nothing_equals(struct oct_Context* ctx, oct_BNothing self, oct_BNot
 }
 
 oct_Bool oct_Nothing_hash(struct oct_Context* ctx, oct_BNothing self, oct_Uword* out_hash) {
-	*out_hash = self.ptr->dummy * 983;
+	*out_hash = ((oct_Uword)self.ptr) * 983;
 	return oct_True;
 }
 

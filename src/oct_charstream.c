@@ -3,8 +3,17 @@
 #include "oct_runtime.h"
 #include "oct_type.h"
 #include "oct_type_pointers.h"
+#include "oct_exchangeheap.h"
 
 #define CHECK(X) if(!X) return oct_False;
+
+oct_Bool _oct_Charstream_initProtocol(struct oct_Context* ctx) {
+	oct_BHashtable table;
+	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_ProtocolBinding), (void**)&ctx->rt->builtInProtocols.Charstream.ptr));
+	ctx->rt->builtInProtocols.Charstream.ptr->protocolType = ctx->rt->builtInTypes.Charstream;
+	table.ptr = &ctx->rt->builtInProtocols.Charstream.ptr->implementations;
+	return oct_Hashtable_ctor(ctx, table, 100);
+}
 
 oct_Bool _oct_Charstream_init(struct oct_Context* ctx) {
 

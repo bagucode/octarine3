@@ -10,6 +10,12 @@
 
 #define CHECK(X) if(!X) return oct_False;
 
+oct_Bool _oct_VTable_init(struct oct_Context* ctx) {
+	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_VTable), (void**)&ctx->rt->vtables.VTableAsObject.ptr));
+	ctx->rt->vtables.VTableAsObject.ptr->objectType = ctx->rt->builtInTypes.VTable;
+	return oct_True;
+}
+
 oct_Bool _oct_Protocol_init(struct oct_Context* ctx) {
 	oct_BType t;
 
@@ -50,10 +56,6 @@ oct_Bool _oct_Protocol_init(struct oct_Context* ctx) {
 	t.ptr->structType.fields.ptr->data[1].offset = offsetof(oct_ProtocolBinding, implementations);
 	t.ptr->structType.fields.ptr->data[1].type = ctx->rt->builtInTypes.Hashtable;
 
-	// ProtocolBinding must participate in Object protocol
-	// Bit of a chicken and egg problem here.
-	// The init for the runtime must contain a hardcoded init for some of
-	// the protocol bindings to make calls like this valid in the init phase
 	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Object, 0, &ctx->rt->vtables.ProtocolBindingAsObject, t))
 
 	// BProtocolBinding
@@ -68,7 +70,8 @@ oct_Bool _oct_Protocol_init(struct oct_Context* ctx) {
 oct_Bool _oct_Protocol_addBuiltIn(struct oct_Context* ctx, oct_BProtocolBinding pb, oct_Uword fnCount, oct_BVTable* table, oct_BType type, ...) {
 	va_list fns;
 	oct_Uword i;
-	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_BType) + (sizeof(void*) * fnCount), (void**)&table->ptr));
+	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_VTable) + (sizeof(void*) * fnCount), (void**)&table->ptr));
+	table->ptr->objectType = type;
 	va_start(fns, type);
 	for(i = 0; i < fnCount; ++i) {
 		table->ptr->functions[i] = va_arg(fns, void*);
@@ -77,24 +80,27 @@ oct_Bool _oct_Protocol_addBuiltIn(struct oct_Context* ctx, oct_BProtocolBinding 
 	return oct_Protocol_addImplementation(ctx, pb, type, *table);
 }
 
+static oct_Bool oct_VTable_asObject(oct_Context* ctx, oct_BVTable vtable, oct_BObject* out_obj) {
+	out_obj->self.self = vtable.ptr;
+	out_obj->vtable = (oct_ObjectVTable*)ctx->rt->vtables.VTableAsObject.ptr;
+	return oct_True;
+}
+
 oct_Bool oct_Protocol_addImplementation(struct oct_Context* ctx, oct_BProtocolBinding protocol, oct_BType type, oct_BVTable vtable) {
 	oct_BHashtable impls;
-	// TODO: What to do with the fact that types and vtables are borrowed, not owned??
-	// make a special hashtable that has borrowed keys and values to use for globals?
 	oct_OHashtableKey key;
 	oct_Any val;
-	oct_BSelf self;
-
-	self.self = type.ptr;
-	if(!oct_Object_as(ctx, self, ctx->rt->builtInTypes.Type, ctx->rt->builtInProtocols.HashtableKey, (oct_BObject*)&key)) {
-		return oct_False;
-	}
-	self.self = vtable.ptr;
-	if(!oct_Object_as(ctx, self, ctx->rt->builtInTypes.VTable, ctx->rt->builtInProtocols.Object, &val.bobject)) {
-		return oct_False;
-	}
+	CHECK(oct_BType_asHashtableKey(ctx, type, (oct_BHashtableKey*)&key));
+	CHECK(oct_VTable_asObject(ctx, vtable, &val.bobject));
 	val.variant = OCT_ANY_BOBJECT;
-
 	impls.ptr = &protocol.ptr->implementations;
 	return oct_Hashtable_put(ctx, impls, key, val);
 }
+
+
+
+	//self.self = type.ptr;
+	//CHECK(oct_Object_as(ctx, self, ctx->rt->builtInTypes.Type, ctx->rt->builtInProtocols.HashtableKey, (oct_BObject*)&key));
+
+	//self.self = vtable.ptr;
+	//CHECK(oct_Object_as(ctx, self, ctx->rt->builtInTypes.VTable, ctx->rt->builtInProtocols.Object, &val.bobject));

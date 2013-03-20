@@ -13,6 +13,7 @@ typedef struct oct_BNothing {
 
 struct oct_Context;
 
+oct_Bool _oct_Nothing_VTableInit(struct oct_Context* ctx);
 oct_Bool _oct_Nothing_init(struct oct_Context* ctx);
 
 #endif

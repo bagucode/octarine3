@@ -29,6 +29,7 @@ typedef struct oct_OCharstream {
 	oct_CharstreamVTable* vtable;
 } oct_OCharstream;
 
+oct_Bool _oct_Charstream_initProtocol(struct oct_Context* ctx);
 oct_Bool _oct_Charstream_init(struct oct_Context* ctx);
 
 #endif

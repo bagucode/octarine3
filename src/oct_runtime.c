@@ -55,6 +55,7 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	oct_Context* mainCtx;
 	oct_OString str;
 	oct_BNamespace octarine;
+	oct_BHashtable namespaceTable;
 
 	oct_initJITTarget();
 
@@ -79,12 +80,27 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	// Allocate memory for all built in types up front to resolve circular dependencies.
 	alloc_builtInTypes(rt);
 
+	// Fix up nil, it is used as default value in some places (hash table keys for example)
+	rt->nilAsObject.type = rt->builtInTypes.Nothing;
+	rt->nilInstance.dummy = 0;
+	rt->nil.self.self = &rt->nilInstance;
+	rt->nil.vtable = &rt->nilAsObject;
+
 	// *** 1.5 Create the built in protocols so that type init functions may add themselves
+	
+	rt->vtables.NothingAsHashtableKey.ptr = (oct_VTable*)malloc(sizeof(oct_VTable) + (sizeof(void*) * 2));
+	rt->vtables.NothingAsHashtableKey.ptr->objectType = rt->builtInTypes.Nothing;
 
-	add hardcoded init of vtables for protocol implementations for type here, they are used in the add_protocol function
-
-	_oct_Object_protocolInit(mainCtx);
+	_oct_Object_initProtocol(mainCtx);
+	_oct_EqComparable_initProtocol(mainCtx);
+	_oct_Hashable_initProtocol(mainCtx);
 	_oct_Hashtable_initProtocol(mainCtx);
+	_oct_Charstream_initProtocol(mainCtx);
+
+	// *** 1.5.1 Manually fix up the dependencies for oct_Protocol_addImplementation
+	_oct_VTable_init(mainCtx);
+	_oct_Type_VTableInit(mainCtx);
+	_oct_Nothing_VTableInit(mainCtx);
 
 	// *** 2. Initialize all the built in types
 	//        I.e. those needed by the reader and compiler and any dependencies
@@ -114,11 +130,14 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	_oct_Any_init(mainCtx);
 	_oct_Namespace_init(mainCtx);
 	_oct_Charstream_init(mainCtx);
+	_oct_Stringstream_init(mainCtx);
 
 	oct_Reader_ctor(mainCtx, mainCtx->reader); // This is a little weird
 
 	// *** 3. Create octarine namespace.
 
+	namespaceTable.ptr = &rt->namespaces;
+	oct_Hashtable_ctor(mainCtx, namespaceTable, 100);
 	oct_String_createOwnedFromCString(mainCtx, "octarine", &str);
 	oct_Namespace_create(mainCtx, str, &octarine);
 	mainCtx->ns = octarine.ptr;

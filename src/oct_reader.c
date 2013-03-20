@@ -227,6 +227,7 @@ static oct_Bool readI32(struct oct_Context* ctx, oct_BReader reader, oct_BCharst
 	// OK
 	out_result->variant = OCT_READRESULT_OK;
 	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_I32), (void**)&instance.ptr));
+	*instance.ptr = (oct_I32)l;
 	
 	out_result->result.variant = OCT_OOBJECTOPTION_OBJECT;
 	CHECK(oct_I32_asObject(ctx, instance, &out_result->result.object));
@@ -282,6 +283,7 @@ static oct_Bool readF32(struct oct_Context* ctx, oct_BReader reader, oct_BCharst
 	// OK
 	out_result->variant = OCT_READRESULT_OK;
 	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_F32), (void**)&instance.ptr));
+	*instance.ptr = (oct_F32)d;
 
 	out_result->result.variant = OCT_OOBJECTOPTION_OBJECT;
 	CHECK(oct_F32_asObject(ctx, instance, &out_result->result.object));
@@ -435,12 +437,16 @@ end:
 static oct_Bool readVector(struct oct_Context* ctx, oct_BReader reader, oct_BCharstream source, oct_ReadResult* out_result) {
 	reader_clearChars(reader);
 	out_result->variant = OCT_READRESULT_OK;
+	out_result->result.variant = OCT_OOBJECTOPTION_NOTHING;
+	out_result->result.nothing.dummy = 0;
 	return oct_True;
 }
 
 static oct_Bool readMap(struct oct_Context* ctx, oct_BReader reader, oct_BCharstream source, oct_ReadResult* out_result) {
 	reader_clearChars(reader);
 	out_result->variant = OCT_READRESULT_OK;
+	out_result->result.variant = OCT_OOBJECTOPTION_NOTHING;
+	out_result->result.nothing.dummy = 0;
 	return oct_True;
 }
 

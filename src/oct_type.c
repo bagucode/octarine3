@@ -13,6 +13,36 @@
 
 #define CHECK(X) if(!X) return oct_False;
 
+// For Type, the vtables need to be added manually because of a circular dependency with protocols
+oct_Bool _oct_Type_VTableInit(struct oct_Context* ctx) {
+	// Object
+	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_VTable), (void**)&ctx->rt->vtables.TypeAsObject.ptr));
+	ctx->rt->vtables.TypeAsObject.ptr->objectType = ctx->rt->builtInTypes.Type;
+
+	// EqComparable
+	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_VTable) + (sizeof(void*) * 1), (void**)&ctx->rt->vtables.TypeAsEqComparable.ptr));
+	ctx->rt->vtables.TypeAsEqComparable.ptr->functions[0] = oct_Type_equals;
+	ctx->rt->vtables.TypeAsEqComparable.ptr->objectType = ctx->rt->builtInTypes.Type;
+	
+	// Hashable
+	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_VTable) + (sizeof(void*) * 1), (void**)&ctx->rt->vtables.TypeAsHashable.ptr));
+	ctx->rt->vtables.TypeAsHashable.ptr->functions[0] = oct_Type_hash;
+	ctx->rt->vtables.TypeAsHashable.ptr->objectType = ctx->rt->builtInTypes.Type;
+	
+	// HashtableKey
+	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_VTable) + (sizeof(void*) * 2), (void**)&ctx->rt->vtables.TypeAsHashtableKey.ptr));
+	ctx->rt->vtables.TypeAsHashtableKey.ptr->functions[0] = oct_Type_hash;
+	ctx->rt->vtables.TypeAsHashtableKey.ptr->functions[1] = oct_Type_equals;
+	ctx->rt->vtables.TypeAsHashtableKey.ptr->objectType = ctx->rt->builtInTypes.Type;
+
+	oct_Protocol_addImplementation(ctx, ctx->rt->builtInProtocols.Object, ctx->rt->builtInTypes.Type, ctx->rt->vtables.TypeAsObject);
+	oct_Protocol_addImplementation(ctx, ctx->rt->builtInProtocols.EqComparable, ctx->rt->builtInTypes.Type, ctx->rt->vtables.TypeAsEqComparable);
+	oct_Protocol_addImplementation(ctx, ctx->rt->builtInProtocols.Hashable, ctx->rt->builtInTypes.Type, ctx->rt->vtables.TypeAsHashable);
+	oct_Protocol_addImplementation(ctx, ctx->rt->builtInProtocols.HashtableKey, ctx->rt->builtInTypes.Type, ctx->rt->vtables.TypeAsHashtableKey);
+
+	return oct_True;
+}
+
 oct_Bool _oct_Type_init(oct_Context* ctx) {
 
 	// Type
@@ -28,18 +58,6 @@ oct_Bool _oct_Type_init(oct_Context* ctx) {
 	t.ptr->variadicType.types.ptr->data[4] = ctx->rt->builtInTypes.FixedSizeArray;
 	t.ptr->variadicType.types.ptr->data[5] = ctx->rt->builtInTypes.Pointer;
 	t.ptr->variadicType.types.ptr->data[6] = ctx->rt->builtInTypes.Protocol;
-
-	// Type VTable for Object {}
-	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Object, 0, &ctx->rt->vtables.TypeAsObject, t));
-
-	// Type VTable for Hashable {hash}
-	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Hashable, 1, &ctx->rt->vtables.TypeAsHashable, t, oct_Type_hash));
-
-	// Type VTable for EqComparable {eq}
-	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.EqComparable, 1, &ctx->rt->vtables.TypeAsEqComparable, t, oct_Type_equals));
-
-	// Type VTable for HashabletableKey {hash, eq}
-	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.HashtableKey, 2, &ctx->rt->vtables.TypeAsHashtableKey, t, oct_Type_hash, oct_Type_equals));
 
 	// BType
 	ctx->rt->builtInTypes.BType.ptr->variant = OCT_TYPE_POINTER;

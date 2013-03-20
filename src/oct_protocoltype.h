@@ -35,6 +35,7 @@ typedef struct oct_ProtocolBinding {
 
 struct oct_Context;
 
+oct_Bool _oct_VTable_init(struct oct_Context* ctx);
 oct_Bool _oct_Protocol_init(struct oct_Context* ctx);
 oct_Bool _oct_Protocol_addBuiltIn(struct oct_Context* ctx, oct_BProtocolBinding pb, oct_Uword fnCount, oct_BVTable* table, oct_BType type, ...);
 

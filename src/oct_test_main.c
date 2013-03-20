@@ -214,10 +214,12 @@ int main(int argc, char** argv) {
 		if(rr.variant == OCT_READRESULT_ERROR) {
 			break;
 		}
-		oct_Compiler_eval(ctx, rr.result.object, &evalResult);
-		oct_ReadResult_dtor(ctx, &rr);
-		if(evalResult.variant == OCT_OOBJECTOPTION_OBJECT) {
-			oct_Object_destroyOwned(ctx, evalResult.oobject);
+		if(rr.result.variant == OCT_OOBJECTOPTION_OBJECT) {
+			oct_Compiler_eval(ctx, rr.result.object, &evalResult);
+			oct_ReadResult_dtor(ctx, &rr);
+			if(evalResult.variant == OCT_OOBJECTOPTION_OBJECT) {
+				oct_Object_destroyOwned(ctx, evalResult.oobject);
+			}
 		}
 	};
 

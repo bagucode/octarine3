@@ -44,8 +44,8 @@ oct_Bool oct_String_hash(struct oct_Context* ctx, oct_BString str, oct_Uword* ou
 
 // Protocol casts
 oct_Bool oct_String_asObjectOwned(struct oct_Context* ctx, oct_OString str, oct_OObject* out_object);
-oct_Bool oct_String_asHashableOwned(struct oct_Context* ctx, oct_OString str, oct_OHashable* out_hashable);
-oct_Bool oct_String_asEqComparableOwned(struct oct_Context* ctx, oct_OString str, oct_OEqComparable* out_eq);
+//oct_Bool oct_String_asHashableOwned(struct oct_Context* ctx, oct_OString str, oct_OHashable* out_hashable);
+//oct_Bool oct_String_asEqComparableOwned(struct oct_Context* ctx, oct_OString str, oct_OEqComparable* out_eq);
 oct_Bool oct_String_asHashtableKeyOwned(struct oct_Context* ctx, oct_OString str, oct_OHashtableKey* out_key);
 oct_Bool oct_String_asHashtableKeyBorrowed(struct oct_Context* ctx, oct_BString str, oct_BHashtableKey* out_key);
 

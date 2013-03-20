@@ -100,9 +100,14 @@ static oct_Uword hash3(oct_Uword h) {
 }
 
 oct_Bool oct_AHashtableEntry_createOwned(struct oct_Context* ctx, oct_Uword initialCap, oct_OAHashtableEntry* out_result) {
-	oct_Bool result = oct_ExchangeHeap_allocRaw(ctx, initialCap * sizeof(oct_HashtableEntry) + sizeof(oct_AHashtableEntry), (void**)&out_result->ptr);
+	oct_Uword i;
+	CHECK(oct_ExchangeHeap_allocRaw(ctx, initialCap * sizeof(oct_HashtableEntry) + sizeof(oct_AHashtableEntry), (void**)&out_result->ptr));
 	out_result->ptr->size = initialCap;
-	return result;
+	for(i = 0; i < out_result->ptr->size; ++i) {
+		out_result->ptr->table[i].key.self.self = ctx->rt->nil.self.self;
+		out_result->ptr->table[i].key.vtable = (oct_HashtableKeyVTable*)ctx->rt->vtables.NothingAsHashtableKey.ptr;
+	}
+	return oct_True;
 }
 
 oct_Bool oct_AHashtableEntry_destroyOwned(struct oct_Context* ctx, oct_OAHashtableEntry self) {
@@ -131,6 +136,11 @@ static oct_Bool keyIsNothing(oct_Context* ctx, oct_OHashtableKey key) {
 static oct_Bool keyEq(oct_Context* ctx, oct_OHashtableKey key1, oct_OHashtableKey key2, oct_Bool* out_eq) {
 	oct_BSelf key1Self;
 	oct_BSelf key2Self;
+
+	if(key1.vtable->type.ptr != key2.vtable->type.ptr) {
+		*out_eq = oct_False;
+		return oct_True;
+	}
 
 	key1Self.self = key1.self.self;
 	key2Self.self = key2.self.self;
