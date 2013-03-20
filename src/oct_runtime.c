@@ -63,6 +63,19 @@ static void dealloc_builtInProtocols(oct_Context* ctx) {
 	}
 }
 
+static void dealloc_builtInVTables(oct_Runtime* rt) {
+	oct_Uword iters = sizeof(oct_BuiltInVTables) / sizeof(oct_BVTable);
+	oct_Uword i;
+	oct_BVTable* place;
+
+	for(i = 0; i < iters; ++i) {
+		char* dummy = (char*)(&rt->vtables);
+		dummy += sizeof(oct_BVTable) * i;
+		place = (oct_BVTable*)dummy;
+		free(place->ptr);
+	}
+}
+
 #define CHECK(X) if(!X) return oct_False;
 
 static oct_Bool bind_type(oct_Context* ctx, oct_BNamespace ns, const char* name, oct_BType type) {
@@ -283,6 +296,7 @@ oct_Bool oct_Runtime_destroy(oct_Runtime* rt, const char** out_error) {
 	tbl.ptr = &rt->namespaces;
 	oct_Hashtable_dtor(ctx, tbl);
 	dealloc_builtInProtocols(ctx);
+	dealloc_builtInVTables(rt);
 	dealloc_buintInTypes(rt);
 	return oct_True;
 }
