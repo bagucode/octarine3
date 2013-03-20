@@ -42,7 +42,7 @@ oct_Bool oct_AU8_createOwned(struct oct_Context* ctx, oct_Uword size, oct_OAU8* 
 // FNV1a hash algorithm
 
 #ifdef OCT64
-#define FNV_OFFSET_BASIS 14695981039346656037
+#define FNV_OFFSET_BASIS 14695981039346656037ul
 #define FNV_PRIME 1099511628211
 #else
 #define FNV_OFFSET_BASIS 2166136261

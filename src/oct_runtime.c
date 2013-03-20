@@ -290,7 +290,6 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 }
 
 oct_Bool oct_Runtime_destroy(oct_Runtime* rt, const char** out_error) {
-	oct_Uword i;
 	oct_Context* ctx = oct_Runtime_currentContext(rt);
 	oct_BHashtable tbl;
 	tbl.ptr = &rt->namespaces;

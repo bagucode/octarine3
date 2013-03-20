@@ -133,6 +133,7 @@ static oct_Bool destroyEntry(oct_Context* ctx, oct_HashtableEntry* entry) {
 		}
 		entry->key.variant = OCT_HASHTABLEKEYOPTION_NOTHING;
 	}
+    return oct_True;
 }
 
 oct_Bool oct_AHashtableEntry_destroyOwned(struct oct_Context* ctx, oct_OAHashtableEntry self) {
@@ -181,7 +182,6 @@ static oct_Bool keyEq(oct_Context* ctx, oct_HashtableKeyOption key1, oct_Hashtab
 
 static oct_Bool oct_Hashtable_putOne(oct_Context* ctx, oct_BHashtable self, oct_HashtableEntry* entry, oct_Uword i, oct_Bool* result) {
 	oct_HashtableEntry tmp;
-	oct_OObject oobj;
 	oct_Bool eq;
 
 	tmp = self.ptr->table.ptr->table[i];

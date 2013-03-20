@@ -32,6 +32,8 @@ oct_Bool _oct_Nothing_VTableInit(struct oct_Context* ctx) {
 	oct_Protocol_addImplementation(ctx, ctx->rt->builtInProtocols.EqComparable, ctx->rt->builtInTypes.Nothing, ctx->rt->vtables.NothingAsEqComparable);
 	oct_Protocol_addImplementation(ctx, ctx->rt->builtInProtocols.Hashable, ctx->rt->builtInTypes.Nothing, ctx->rt->vtables.NothingAsHashable);
 	oct_Protocol_addImplementation(ctx, ctx->rt->builtInProtocols.HashtableKey, ctx->rt->builtInTypes.Nothing, ctx->rt->vtables.NothingAsHashtableKey);
+    
+    return oct_True;
 }
 
 oct_Bool _oct_Nothing_init(struct oct_Context* ctx) {
