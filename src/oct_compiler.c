@@ -100,7 +100,7 @@ static oct_Bool eval_def(struct oct_Context* ctx, oct_OObject form, oct_Any* out
 	CHECK(oct_Symbol_asHashtableKey(ctx, bsym, (oct_BHashtableKey*)&key));
 	// eval second argument if we have one
 	if(count == 3) {
-        CHECK(oct_List_nth(ctx, olist, 1, &tmp, &olist));
+        CHECK(oct_List_first(ctx, olist, &tmp, &olist));
 		CHECK(oct_Compiler_eval(ctx, tmp.object, out_result));
 	}
 	else {

@@ -217,25 +217,31 @@ static oct_Bool PointerTranslationTable_Put(oct_Context* ctx, PointerTranslation
 	}
 }
 
-static void* PointerTranslationTable_Get(PointerTranslationTable* table, void* key) {
+static oct_Bool PointerTranslationTable_Get(PointerTranslationTable* table, void* key, void** val) {
 	oct_Uword i, mask, ptrHash;
 
 	mask = table->capacity - 1;
 	ptrHash = hashPointer(key);
 
 	i = hash1(ptrHash) & mask;
-	if(table->table[i].key == key)
-		return table->table[i].val;
+	if(table->table[i].key == key) {
+		*val = table->table[i].val;
+		return oct_True;
+	}
 
 	i = hash2(ptrHash) & mask;
-	if(table->table[i].key == key)
-		return table->table[i].val;
+	if(table->table[i].key == key) {
+		*val = table->table[i].val;
+		return oct_True;
+	}
 
 	i = hash3(ptrHash) & mask;
-	if(table->table[i].key == key)
-		return table->table[i].val;
+	if(table->table[i].key == key) {
+		*val = table->table[i].val;
+		return oct_True;
+	}
 
-	return NULL;
+	return oct_False;
 }
 
 // Util functions to find embedded pointers in an object and return them in an array
@@ -490,7 +496,9 @@ oct_Bool oct_Object_preWalk(oct_Context* ctx, oct_OSelf root, oct_BType rootType
 	oct_Bool result;
     oct_OSelf object;
     oct_Uword i;
+	oct_Type* type;
     void** embeddedPtr;
+	void* dummy;
 
 	ptt.table = NULL;
 	stack.stack = NULL;
@@ -511,12 +519,13 @@ oct_Bool oct_Object_preWalk(oct_Context* ctx, oct_OSelf root, oct_BType rootType
     while (oct_True) {
         if(currentFrame.fieldIndex < currentFrame.fieldPointers.size) {
             object.self = currentFrame.fieldPointers.data[currentFrame.fieldIndex].value;
+			type = currentFrame.fieldPointers.data[currentFrame.fieldIndex].type;
             ++currentFrame.fieldIndex;
-            if(PointerTranslationTable_Get(&ptt, object.self) == NULL) {
+            if(PointerTranslationTable_Get(&ptt, object.self, &dummy) == oct_False) {
                 // Go depth first so we can fix the child pointers in the same pass
                 CHECK(FrameStack_Push(ctx, &stack, &currentFrame));
                 currentFrame.original = object;
-                currentFrame.type.ptr = currentFrame.fieldPointers.data[currentFrame.fieldIndex].type;
+                currentFrame.type.ptr = type;
                 currentFrame.fieldIndex = 0;
 			    CHECK(FieldPointerArray_Create(ctx, &currentFrame.fieldPointers, 10));
 				CHECK(findEmbeddedPointers(ctx, currentFrame.type.ptr, currentFrame.original.self, &currentFrame.fieldPointers, 0));    
@@ -527,8 +536,10 @@ oct_Bool oct_Object_preWalk(oct_Context* ctx, oct_OSelf root, oct_BType rootType
         else {
             // All children traversed. Fix up the pointers.
             for(i = 0; i < currentFrame.fieldPointers.size; ++i) {
-				embeddedPtr = (void**)(((char*)currentFrame.updated.self) + currentFrame.fieldPointers.data[i].offset);
-                *embeddedPtr = PointerTranslationTable_Get(&ptt, *embeddedPtr);
+				if(currentFrame.updated.self != NULL) {
+					embeddedPtr = (void**)(((char*)currentFrame.updated.self) + currentFrame.fieldPointers.data[i].offset);
+					PointerTranslationTable_Get(&ptt, *embeddedPtr, embeddedPtr);
+				}
             }
             CHECK(FieldPointerArray_Destroy(ctx, &currentFrame.fieldPointers));
             // Pop previous frame off stack
