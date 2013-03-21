@@ -12,6 +12,7 @@ void LEAK_DETECT() {}
 #endif
 
 #include "octarine.h"
+#include "oct_any.h"
 #include "oct_exchangeheap.h"
 
 #include <stdio.h>
@@ -157,7 +158,11 @@ static void defTest() {
     TEST(stream.vtable);
 	reader.ptr = ctx->reader;
 	TEST(oct_Reader_read(ctx, reader, stream, &readResult));
+	TEST(oct_OStringstream_destroy(ctx, ss));
 	TEST(oct_Compiler_eval(ctx, readResult.result.object, &evalResult));
+	if(evalResult.variant == OCT_ANY_OOBJECT) {
+		TEST(oct_Object_destroyOwned(ctx, evalResult.oobject));
+	}
 
 	// Lookup
 	TEST(oct_String_createOwnedFromCString(ctx, "hello", &str));
@@ -240,16 +245,12 @@ int main(int argc, char** argv) {
 	//oct_String_destroyOwned(ctx, str);
 	//oct_Runtime_destroy(rt, &error);
 
-	//StringTests();
-	//NamespaceTests();
-	//defTest();
+	StringTests();
+	NamespaceTests();
+	defTest();
     //graphCopyOwnedTest();
 
 	//Sleep(10000);
-
-	char* err;
-	oct_Runtime* rt = oct_Runtime_create(&err);
-	oct_Runtime_destroy(rt, &err);
 
 #ifdef _DEBUG
 	oct_ExchangeHeap_report(NULL);

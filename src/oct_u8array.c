@@ -65,3 +65,15 @@ oct_Bool oct_AU8_hash(struct oct_Context* ctx, oct_BAU8 self, oct_Uword* out_has
 	*out_hash = fnv1a(self.ptr->data, self.ptr->size);
 	return oct_True;
 }
+
+oct_Bool oct_AU8_copyOwned(struct oct_Context* ctx, oct_BSelf orig, oct_OSelf* out_copy) {
+	oct_BAU8 bau8;
+	oct_Uword allocSize;
+	bau8.ptr = (oct_AU8*)orig.self;
+	allocSize = sizeof(oct_AU8) + (sizeof(oct_U8) * bau8.ptr->size);
+    if(!OCT_ALLOCRAW(allocSize, (void**)&out_copy->self, "oct_AU8_copyOwned")) {
+        return oct_False;
+    }
+	memcpy(out_copy->self, orig.self, allocSize);
+	return oct_True;
+}

@@ -6,6 +6,7 @@
 #include "oct_pointertype.h"
 #include "oct_list.h"
 #include "oct_object.h"
+#include "oct_copyable.h"
 
 // DEBUG
 #include <stdio.h>
@@ -77,6 +78,9 @@ static oct_Bool eval_def(struct oct_Context* ctx, oct_OObject form, oct_Any* out
     oct_OListOption listOpt;
     oct_OObjectOption tmp;
 	oct_BSymbol bsym;
+	oct_Any nsVal;
+	oct_BCopyable bcopyable;
+	oct_BSelf bself;
 	oct_Bool result = oct_True;
 
 	printf("eval_def\n");
@@ -118,7 +122,24 @@ end:
 	if(result) {
 		// bind in current namespace
 		ns.ptr = ctx->ns;
-		result = oct_Namespace_bind(ctx, ns, key, *out_result) && result;
+		nsVal = *out_result;
+		if(nsVal.variant == OCT_ANY_OOBJECT) {
+			// if the result of the call to eval is an owned object we need to copy it because
+			// otherwise we will not be able to both store it in the ns and return it
+			bself.self = out_result->bobject.self.self;
+			if(!oct_Object_as(ctx, bself, out_result->bobject.vtable->type, ctx->rt->builtInProtocols.Copyable, (oct_BObject*)&bcopyable)) {
+				oct_Object_destroyOwned(ctx, out_result->oobject);
+				return oct_False;
+			}
+			if(!oct_Copyable_copyOwned(ctx, bcopyable, &nsVal.oobject)) {
+				oct_Object_destroyOwned(ctx, out_result->oobject);
+				return oct_False;
+			}
+		}
+		result = oct_Namespace_bind(ctx, ns, key, nsVal) && result;
+	}
+	else if(out_result->variant == OCT_ANY_OOBJECT) {
+		oct_Object_destroyOwned(ctx, out_result->oobject);
 	}
 	return result;
 }

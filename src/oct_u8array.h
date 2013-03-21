@@ -2,6 +2,7 @@
 #define oct_u8array_private
 
 #include "oct_primitives.h"
+#include "oct_self.h"
 
 typedef struct oct_AU8 {
 	oct_Uword size;
@@ -27,6 +28,8 @@ oct_Bool _oct_AU8_init(struct oct_Context* ctx);
 oct_Bool oct_AU8_createOwned(struct oct_Context* ctx, oct_Uword size, oct_OAU8* out_result);
 
 oct_Bool oct_AU8_hash(struct oct_Context* ctx, oct_BAU8 self, oct_Uword* out_hash);
+
+oct_Bool oct_AU8_copyOwned(struct oct_Context* ctx, oct_BSelf orig, oct_OSelf* out_copy);
 
 #endif
 

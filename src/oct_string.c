@@ -37,6 +37,9 @@ oct_Bool _oct_String_init(struct oct_Context* ctx) {
 	// String VTable for HashtableKey {hash, eq}
 	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.HashtableKey, 2, &ctx->rt->vtables.StringAsHashtableKey, t, oct_String_hash, oct_BString_equals));
 
+	// String VTable for Copyable {copyOwned}
+	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Copyable, 1, &ctx->rt->vtables.StringAsCopyable, t, oct_String_copyOwned));
+
 	// OString
 	t = ctx->rt->builtInTypes.OString;
 	t.ptr->variant = OCT_TYPE_POINTER;
@@ -198,3 +201,24 @@ oct_Bool oct_String_asHashtableKeyBorrowed(struct oct_Context* ctx, oct_BString 
 	out_key->vtable = (oct_HashtableKeyVTable*)ctx->rt->vtables.StringAsHashtableKey.ptr;
 	return oct_True;
 }
+
+oct_Bool oct_String_asCopyable(struct oct_Context* ctx, oct_BString str, oct_BCopyable* out_key) {
+	out_key->self.self = str.ptr;
+	out_key->vtable = (oct_CopyableVTable*)ctx->rt->vtables.StringAsCopyable.ptr;
+	return oct_True;
+}
+
+oct_Bool oct_String_copyOwned(struct oct_Context* ctx, oct_BSelf orig, oct_OSelf* out_cpy) {
+	oct_Bool result;
+	oct_String* org;
+	oct_String* cpy;
+    if(!OCT_ALLOCRAW(sizeof(oct_String), &out_cpy->self, "oct_String_copyOwned")) {
+        return oct_False;
+    }
+	org = (oct_String*)orig.self;
+	cpy = (oct_String*)out_cpy->self;
+	cpy->size = org->size;
+	orig.self = org->utf8Data.ptr;
+	return oct_AU8_copyOwned(ctx, orig, (oct_OSelf*)&cpy->utf8Data);
+}
+
