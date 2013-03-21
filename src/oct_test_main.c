@@ -240,12 +240,16 @@ int main(int argc, char** argv) {
 	//oct_String_destroyOwned(ctx, str);
 	//oct_Runtime_destroy(rt, &error);
 
-	StringTests();
+	//StringTests();
 	//NamespaceTests();
 	//defTest();
     //graphCopyOwnedTest();
 
 	//Sleep(10000);
+
+	char* err;
+	oct_Runtime* rt = oct_Runtime_create(&err);
+	oct_Runtime_destroy(rt, &err);
 
 #ifdef _DEBUG
 	oct_ExchangeHeap_report(NULL);

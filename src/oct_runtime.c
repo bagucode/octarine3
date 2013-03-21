@@ -304,6 +304,8 @@ oct_Bool oct_Runtime_destroy(oct_Runtime* rt, const char** out_error) {
 	dealloc_builtInProtocols(ctx);
 	dealloc_builtInVTables(rt);
 	dealloc_buintInTypes(ctx);
+	self.self = ctx->reader;
+	oct_Reader_dtor(ctx, self);
 	OCT_FREE(ctx->reader);
 	OCT_FREE(ctx);
 	OCT_FREE(rt);
