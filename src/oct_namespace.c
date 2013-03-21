@@ -63,9 +63,7 @@ oct_Bool oct_Namespace_create(struct oct_Context* ctx, oct_OString nsName, oct_B
 	oct_Any nsAny;
 	oct_BNamespace newNs;
 	oct_Bool result = oct_True;
-	
 	// TODO: lock namespace table
-
 	bstr.ptr = nsName.ptr;
 	CHECK(oct_Namespace_findNs(ctx, bstr, &existing));
 	if(existing.variant == OCT_NAMESPACEOPTION_NAMESPACE) {
@@ -73,22 +71,24 @@ oct_Bool oct_Namespace_create(struct oct_Context* ctx, oct_OString nsName, oct_B
 		CHECK(oct_String_destroyOwned(ctx, nsName));
 		goto end;
 	}
-
 	CHECK(OCT_ALLOCRAW(sizeof(oct_Namespace), (void**)&newNs.ptr, "oct_Namespace_create"));
 	bTable.ptr = &newNs.ptr->bindings;
 	CHECK(oct_Hashtable_ctor(ctx, bTable, 100));
+
+	// These two lines are a bit of a hack. The correct way would be to actually deep-copy the name string
+	// into the NS name string and then use the owned name string as an owned hash key instead of a borrowed one
 	newNs.ptr->name = (*nsName.ptr);
+	OCT_FREE(nsName.ptr);
 
 	CHECK(oct_Namespace_asObject(ctx, newNs, &nsAny.bobject));
 	nsAny.variant = OCT_ANY_OOBJECT;
-
 	bTable.ptr = &ctx->rt->namespaces;
 	nameKey.variant = OCT_HASHTABLEKEYOPTION_BORROWED;
+	bstr.ptr = &newNs.ptr->name;
 	CHECK(oct_String_asHashtableKeyBorrowed(ctx, bstr, &nameKey.borrowed));
 	CHECK(oct_Hashtable_put(ctx, bTable, nameKey, nsAny));
 
 	out_ns->ptr = newNs.ptr;
-
 	goto end;
 error:
 	result = oct_False;
