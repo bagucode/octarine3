@@ -42,7 +42,7 @@ oct_Bool _oct_Function_init(struct oct_Context* ctx) {
 }
 
 oct_Bool oct_ABFunction_createOwned(struct oct_Context* ctx, oct_Uword size, oct_OABFunction* out_result) {
-	return oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_BFunction) * size + sizeof(oct_Uword), (void**)&out_result->ptr);
+	return OCT_ALLOCRAW(sizeof(oct_BFunction) * size + sizeof(oct_Uword), (void**)&out_result->ptr, "oct_ABFunction_createOwned");
 	// TODO: set all the function pointers to point to a built in function so that they have a value. Perhaps the identity function?
 }
 

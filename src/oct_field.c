@@ -37,7 +37,7 @@ oct_Bool _oct_Field_init(struct oct_Context* ctx) {
 
 oct_Bool oct_AField_createOwned(struct oct_Context* ctx, oct_Uword size, oct_OAField* out_result) {
 	oct_Uword i;
-    if(!oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_AField) + (sizeof(oct_Field) * size), (void**)&out_result->ptr)) {
+    if(!OCT_ALLOCRAW(sizeof(oct_AField) + (sizeof(oct_Field) * size), (void**)&out_result->ptr, "oct_AField_createOwned")) {
         return oct_False;
     }
 
@@ -50,6 +50,6 @@ oct_Bool oct_AField_createOwned(struct oct_Context* ctx, oct_Uword size, oct_OAF
 }
 
 oct_Bool oct_AField_destroyOwned(struct oct_Context* ctx, oct_OAField oafield) {
-    oct_ExchangeHeap_freeRaw(ctx, oafield.ptr);
+    OCT_FREE(oafield.ptr);
 	return oct_True;
 }

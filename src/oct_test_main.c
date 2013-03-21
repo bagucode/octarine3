@@ -12,6 +12,7 @@ void LEAK_DETECT() {}
 #endif
 
 #include "octarine.h"
+#include "oct_exchangeheap.h"
 
 #include <stdio.h>
 #include <assert.h>
@@ -246,6 +247,9 @@ int main(int argc, char** argv) {
 
 	//Sleep(10000);
 
+#ifdef _DEBUG
+	oct_ExchangeHeap_report(NULL);
 	LEAK_DETECT();
+#endif
 	return 0;
 }

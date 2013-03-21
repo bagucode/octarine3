@@ -10,7 +10,7 @@
 
 oct_Bool _oct_Copyable_initProtocol(struct oct_Context* ctx) {
 	oct_BHashtable table;
-	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_ProtocolBinding), (void**)&ctx->rt->builtInProtocols.Copyable.ptr));
+	CHECK(OCT_ALLOCRAW(sizeof(oct_ProtocolBinding), (void**)&ctx->rt->builtInProtocols.Copyable.ptr, "_oct_Copyable_initProtocol"));
 	ctx->rt->builtInProtocols.Copyable.ptr->protocolType = ctx->rt->builtInTypes.Copyable;
 	table.ptr = &ctx->rt->builtInProtocols.Copyable.ptr->implementations;
 	return oct_Hashtable_ctor(ctx, table, 100);

@@ -77,14 +77,14 @@ oct_Bool oct_Stringstream_dtor(struct oct_Context* ctx, oct_Stringstream* stream
 }
 
 oct_Bool oct_OStringstream_create(struct oct_Context* ctx, oct_BString str, oct_OStringstream* out_stream) {
-    if(!oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_Stringstream), (void**)&out_stream->ptr)) {
+    if(!OCT_ALLOCRAW(sizeof(oct_Stringstream), (void**)&out_stream->ptr, "oct_OStringstream_create")) {
         return oct_False;
     }
 	return oct_Stringstream_ctor(ctx, out_stream->ptr, str);
 }
 
 oct_Bool oct_OStringstream_destroy(struct oct_Context* ctx, oct_OStringstream stream) {
-    return oct_ExchangeHeap_freeRaw(ctx, stream.ptr);
+    return OCT_FREE(stream.ptr);
 }
 
 oct_Bool oct_Stringstream_asCharStream(struct oct_Context* ctx, oct_BStringstream stream, oct_BCharstream* out_cs) {

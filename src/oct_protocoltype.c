@@ -11,7 +11,7 @@
 #define CHECK(X) if(!X) return oct_False;
 
 oct_Bool _oct_VTable_init(struct oct_Context* ctx) {
-	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_VTable), (void**)&ctx->rt->vtables.VTableAsObject.ptr));
+	CHECK(OCT_ALLOCRAW(sizeof(oct_VTable), (void**)&ctx->rt->vtables.VTableAsObject.ptr, "_oct_VTable_init"));
 	ctx->rt->vtables.VTableAsObject.ptr->objectType = ctx->rt->builtInTypes.VTable;
 	return oct_True;
 }
@@ -70,7 +70,7 @@ oct_Bool _oct_Protocol_init(struct oct_Context* ctx) {
 oct_Bool _oct_Protocol_addBuiltIn(struct oct_Context* ctx, oct_BProtocolBinding pb, oct_Uword fnCount, oct_BVTable* table, oct_BType type, ...) {
 	va_list fns;
 	oct_Uword i;
-	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_VTable) + (sizeof(void*) * fnCount), (void**)&table->ptr));
+	CHECK(OCT_ALLOCRAW(sizeof(oct_VTable) + (sizeof(void*) * fnCount), (void**)&table->ptr, "_oct_Protocol_addBuiltIn"));
 	table->ptr->objectType = type;
 	va_start(fns, type);
 	for(i = 0; i < fnCount; ++i) {

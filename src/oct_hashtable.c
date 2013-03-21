@@ -12,7 +12,7 @@
 
 oct_Bool _oct_Hashtable_initProtocol(struct oct_Context* ctx) {
 	oct_BHashtable table;
-	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_ProtocolBinding), (void**)&ctx->rt->builtInProtocols.HashtableKey.ptr));
+	CHECK(OCT_ALLOCRAW(sizeof(oct_ProtocolBinding), (void**)&ctx->rt->builtInProtocols.HashtableKey.ptr, "_oct_Hashtable_initProtocol"));
 	ctx->rt->builtInProtocols.HashtableKey.ptr->protocolType = ctx->rt->builtInTypes.HashtableKey;
 	table.ptr = &ctx->rt->builtInProtocols.HashtableKey.ptr->implementations;
 	return oct_Hashtable_ctor(ctx, table, 100);
@@ -110,7 +110,7 @@ static oct_Uword hash3(oct_Uword h) {
 
 oct_Bool oct_AHashtableEntry_createOwned(struct oct_Context* ctx, oct_Uword initialCap, oct_OAHashtableEntry* out_result) {
 	oct_Uword i;
-	CHECK(oct_ExchangeHeap_allocRaw(ctx, initialCap * sizeof(oct_HashtableEntry) + sizeof(oct_AHashtableEntry), (void**)&out_result->ptr));
+	CHECK(OCT_ALLOCRAW(initialCap * sizeof(oct_HashtableEntry) + sizeof(oct_AHashtableEntry), (void**)&out_result->ptr, "oct_AHashtableEntry_createOwned"));
 	out_result->ptr->size = initialCap;
 	for(i = 0; i < out_result->ptr->size; ++i) {
 		out_result->ptr->table[i].key.variant = OCT_HASHTABLEKEYOPTION_NOTHING;
@@ -141,7 +141,7 @@ oct_Bool oct_AHashtableEntry_destroyOwned(struct oct_Context* ctx, oct_OAHashtab
 	for(i = 0; i < self.ptr->size; ++i) {
 		destroyEntry(ctx, &self.ptr->table[i]);
 	}
-	return oct_ExchangeHeap_freeRaw(ctx, self.ptr);
+	return OCT_FREE(self.ptr);
 }
 
 oct_Bool oct_Hashtable_ctor(struct oct_Context* ctx, oct_BHashtable self, oct_Uword initialCap) {
@@ -254,14 +254,14 @@ static oct_Bool oct_Hashtable_grow(oct_Context* ctx, oct_BHashtable self) {
 			if(!didPut) {
 				cap = bBigger.ptr->table.ptr->size + 1;
 				// Just free the memory. If we run destructors here we will nuke part of the table
-				CHECK(oct_ExchangeHeap_freeRaw(ctx, bBigger.ptr->table.ptr));
+				CHECK(OCT_FREE(bBigger.ptr->table.ptr));
 				CHECK(oct_Hashtable_ctor(ctx, bBigger, cap));
 				i = 0;
 			}
 		}
 	}
 	// Just free the memory. If we run destructors here we will nuke the new table
-	CHECK(oct_ExchangeHeap_freeRaw(ctx, self.ptr->table.ptr));
+	CHECK(OCT_FREE(self.ptr->table.ptr));
 	(*self.ptr) = bigger;
 
 	return oct_True;

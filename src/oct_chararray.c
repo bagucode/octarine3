@@ -22,8 +22,8 @@ oct_Bool _oct_AChar_init(struct oct_Context* ctx) {
 // Public
 
 oct_Bool oct_AChar_createOwned(struct oct_Context* ctx, oct_Uword size, oct_OAChar* out_result) {
-	oct_BType bt = ctx->rt->builtInTypes.AChar;
-	if(!oct_ExchangeHeap_allocArray(ctx, bt, size, (void**)&out_result->ptr)) {
+	oct_Uword allocSize = sizeof(oct_AChar) + (sizeof(oct_Char) * size);
+	if(!OCT_ALLOCRAW(allocSize, (void**)&out_result->ptr, "oct_AChar_createOwned")) {
 		return oct_False;
 	}
 	out_result->ptr->size = size;

@@ -17,6 +17,7 @@
 #include "oct_charstream.h"
 #include "oct_stringstream.h"
 #include "oct_copyable.h"
+#include "oct_exchangeheap.h"
 
 #include <stdlib.h>
 
@@ -24,25 +25,28 @@ static void alloc_builtInTypes(oct_Runtime* rt) {
 	oct_Uword iters = sizeof(oct_BuiltInTypes) / sizeof(oct_BType);
 	oct_Uword i;
 	oct_BType* place;
+	oct_Context* ctx = NULL; // for the alloc macro
 
 	for(i = 0; i < iters; ++i) {
 		char* dummy = (char*)(&rt->builtInTypes);
 		dummy += sizeof(oct_BType) * i;
 		place = (oct_BType*)dummy;
-		place->ptr = (oct_Type*)malloc(sizeof(oct_Type));
+		OCT_ALLOCRAW(sizeof(oct_Type), (void**)&place->ptr, "alloc_builtInTypes");
 	}
 }
 
-static void dealloc_buintInTypes(oct_Runtime* rt) {
+static void dealloc_buintInTypes(oct_Context* ctx) {
 	oct_Uword iters = sizeof(oct_BuiltInTypes) / sizeof(oct_BType);
 	oct_Uword i;
 	oct_BType* place;
+	oct_Runtime* rt = ctx->rt;
 
 	for(i = 0; i < iters; ++i) {
 		char* dummy = (char*)(&rt->builtInTypes);
 		dummy += sizeof(oct_BType) * i;
 		place = (oct_BType*)dummy;
-		free(place->ptr);
+		oct_Type_dtor(ctx, place->ptr);
+		OCT_FREE(place->ptr);
 	}
 }
 
@@ -59,7 +63,7 @@ static void dealloc_builtInProtocols(oct_Context* ctx) {
 		place = (oct_BProtocolBinding*)dummy;
 		tbl.ptr = &place->ptr->implementations;
 		oct_Hashtable_dtor(ctx, tbl);
-		free(place->ptr);
+		OCT_FREE(place->ptr);
 	}
 }
 
@@ -67,12 +71,13 @@ static void dealloc_builtInVTables(oct_Runtime* rt) {
 	oct_Uword iters = sizeof(oct_BuiltInVTables) / sizeof(oct_BVTable);
 	oct_Uword i;
 	oct_BVTable* place;
+	oct_Context* ctx = NULL; // for the free macro
 
 	for(i = 0; i < iters; ++i) {
 		char* dummy = (char*)(&rt->vtables);
 		dummy += sizeof(oct_BVTable) * i;
 		place = (oct_BVTable*)dummy;
-		free(place->ptr);
+		OCT_FREE(place->ptr);
 	}
 }
 
@@ -90,61 +95,63 @@ static oct_Bool bind_type(oct_Context* ctx, oct_BNamespace ns, const char* name,
 	bSym.ptr = sym.ptr;
 	CHECK(oct_Symbol_asHashtableKey(ctx, bSym, &key.borrowed));
 	key.variant = OCT_HASHTABLEKEYOPTION_OWNED;
-    value.variant = OCT_ANY_BOBJECT;
+    value.variant = OCT_ANY_BOBJECT; // TODO: change this to OOBJECT and remove the explicit deallocation of builtins?
 	CHECK(oct_Type_asObject(ctx, type, &value.bobject));
 	return oct_Namespace_bind(ctx, ns, key, value);
 }
 
 struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	oct_Runtime* rt;
-	oct_Context* mainCtx;
+	oct_Context* ctx = NULL;
 	oct_OString str;
 	oct_BNamespace octarine;
 	oct_BHashtable namespaceTable;
 
 	oct_initJITTarget();
 
-	rt = (oct_Runtime*)calloc(1, sizeof(oct_Runtime));
+	OCT_ALLOCRAW(sizeof(oct_Runtime), (void**)&rt, "Runtime");
 	if(!rt) {
 		(*out_error) = "Out of memory";
 		return NULL;
 	}
+	memset(rt, 0, sizeof(oct_Runtime));
 
 	// *** 1. Create main thread context
 
-	mainCtx = (oct_Context*)calloc(1, sizeof(oct_Context));
-	if(!mainCtx) {
+	OCT_ALLOCRAW(sizeof(oct_Context), (void**)&ctx, "Main context");
+	if(!ctx) {
 		(*out_error) = "Out of memory";
 		return NULL;
 	}
-	mainCtx->rt = rt;
-	mainCtx->reader = (oct_Reader*)malloc(sizeof(oct_Reader));
+	memset(ctx, 0, sizeof(oct_Context));
+	ctx->rt = rt;
+	OCT_ALLOCRAW(sizeof(oct_Reader), (void**)&ctx->reader, "Main reader");
     oct_TLSInit(&rt->currentContext);
-	oct_TLSSet(rt->currentContext, mainCtx);
+	oct_TLSSet(rt->currentContext, ctx);
 
 	// Allocate memory for all built in types up front to resolve circular dependencies.
 	alloc_builtInTypes(rt);
 
 	// *** 1.5 Create the built in protocols so that type init functions may add themselves
 	
-	rt->vtables.NothingAsHashtableKey.ptr = (oct_VTable*)malloc(sizeof(oct_VTable) + (sizeof(void*) * 2));
+	OCT_ALLOCRAW(sizeof(oct_VTable) + (sizeof(void*) * 2), (void**)&rt->vtables.NothingAsHashtableKey.ptr, "NothingAsHashtableKey");
 	if(!rt->vtables.NothingAsHashtableKey.ptr) {
 		(*out_error) = "Out of memory";
 		return NULL;
 	}
 	rt->vtables.NothingAsHashtableKey.ptr->objectType = rt->builtInTypes.Nothing;
 
-	_oct_Object_initProtocol(mainCtx);
-	_oct_EqComparable_initProtocol(mainCtx);
-	_oct_Hashable_initProtocol(mainCtx);
-	_oct_Hashtable_initProtocol(mainCtx);
-	_oct_Charstream_initProtocol(mainCtx);
-	_oct_Copyable_initProtocol(mainCtx);
+	_oct_Object_initProtocol(ctx);
+	_oct_EqComparable_initProtocol(ctx);
+	_oct_Hashable_initProtocol(ctx);
+	_oct_Hashtable_initProtocol(ctx);
+	_oct_Charstream_initProtocol(ctx);
+	_oct_Copyable_initProtocol(ctx);
 
 	// *** 1.5.1 Manually fix up the dependencies for oct_Protocol_addImplementation
-	_oct_VTable_init(mainCtx);
-	_oct_Type_VTableInit(mainCtx);
-	_oct_Nothing_VTableInit(mainCtx);
+	_oct_VTable_init(ctx);
+	_oct_Type_VTableInit(ctx);
+	_oct_Nothing_VTableInit(ctx);
 
 	// *** 2. Initialize all the built in types
 	//        I.e. those needed by the reader and compiler and any dependencies
@@ -152,137 +159,137 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 
 	// Initialize all built in types
 
-	_oct_Primitives_init(mainCtx);
-	_oct_Hashtable_init(mainCtx);
-	_oct_Type_init(mainCtx);
-	_oct_Protocol_init(mainCtx);
-	_oct_Function_init(mainCtx);
-	_oct_Object_init(mainCtx);
-	_oct_String_init(mainCtx);
-	_oct_Array_init(mainCtx);
-	_oct_AChar_init(mainCtx);
-	_oct_AU8_init(mainCtx);
-	_oct_List_init(mainCtx);
-	_oct_Nothing_init(mainCtx);
-	_oct_PointerType_init(mainCtx);
-	_oct_StructType_init(mainCtx);
-	_oct_Field_init(mainCtx);
-	_oct_Symbol_init(mainCtx);
-	_oct_ProtoType_init(mainCtx);
-	_oct_VariadicType_init(mainCtx);
-	_oct_Error_init(mainCtx);
-	_oct_Any_init(mainCtx);
-	_oct_Namespace_init(mainCtx);
-	_oct_Charstream_init(mainCtx);
-	_oct_Stringstream_init(mainCtx);
-	_oct_Copyable_init(mainCtx);
+	_oct_Primitives_init(ctx);
+	_oct_Hashtable_init(ctx);
+	_oct_Type_init(ctx);
+	_oct_Protocol_init(ctx);
+	_oct_Function_init(ctx);
+	_oct_Object_init(ctx);
+	_oct_String_init(ctx);
+	_oct_Array_init(ctx);
+	_oct_AChar_init(ctx);
+	_oct_AU8_init(ctx);
+	_oct_List_init(ctx);
+	_oct_Nothing_init(ctx);
+	_oct_PointerType_init(ctx);
+	_oct_StructType_init(ctx);
+	_oct_Field_init(ctx);
+	_oct_Symbol_init(ctx);
+	_oct_ProtoType_init(ctx);
+	_oct_VariadicType_init(ctx);
+	_oct_Error_init(ctx);
+	_oct_Any_init(ctx);
+	_oct_Namespace_init(ctx);
+	_oct_Charstream_init(ctx);
+	_oct_Stringstream_init(ctx);
+	_oct_Copyable_init(ctx);
 
-	oct_Reader_ctor(mainCtx, mainCtx->reader); // This is a little weird
+	oct_Reader_ctor(ctx, ctx->reader); // This is a little weird
 
 	// *** 3. Create octarine namespace.
 
 	namespaceTable.ptr = &rt->namespaces;
-	oct_Hashtable_ctor(mainCtx, namespaceTable, 100);
-	oct_String_createOwnedFromCString(mainCtx, "octarine", &str);
-	oct_Namespace_create(mainCtx, str, &octarine);
-	mainCtx->ns = octarine.ptr;
+	oct_Hashtable_ctor(ctx, namespaceTable, 100);
+	oct_String_createOwnedFromCString(ctx, "octarine", &str);
+	oct_Namespace_create(ctx, str, &octarine);
+	ctx->ns = octarine.ptr;
 
 	// *** 4. Register all built in types and functions in octarine namespace.
 	// Primitives
-	bind_type(mainCtx, octarine, "U8", rt->builtInTypes.U8);
-	bind_type(mainCtx, octarine, "I8", rt->builtInTypes.I8);
-	bind_type(mainCtx, octarine, "U16", rt->builtInTypes.U16);
-	bind_type(mainCtx, octarine, "I16", rt->builtInTypes.I16);
-	bind_type(mainCtx, octarine, "U32", rt->builtInTypes.U32);
-	bind_type(mainCtx, octarine, "I32", rt->builtInTypes.I32);
-	bind_type(mainCtx, octarine, "U64", rt->builtInTypes.U64);
-	bind_type(mainCtx, octarine, "I64", rt->builtInTypes.I64);
-	bind_type(mainCtx, octarine, "F32", rt->builtInTypes.F32);
-	bind_type(mainCtx, octarine, "F64", rt->builtInTypes.F64);
-	bind_type(mainCtx, octarine, "Uword", rt->builtInTypes.Uword);
-	bind_type(mainCtx, octarine, "Word", rt->builtInTypes.Word);
-	bind_type(mainCtx, octarine, "Char", rt->builtInTypes.Char);
-	bind_type(mainCtx, octarine, "Bool", rt->builtInTypes.Bool);
+	bind_type(ctx, octarine, "U8", rt->builtInTypes.U8);
+	bind_type(ctx, octarine, "I8", rt->builtInTypes.I8);
+	bind_type(ctx, octarine, "U16", rt->builtInTypes.U16);
+	bind_type(ctx, octarine, "I16", rt->builtInTypes.I16);
+	bind_type(ctx, octarine, "U32", rt->builtInTypes.U32);
+	bind_type(ctx, octarine, "I32", rt->builtInTypes.I32);
+	bind_type(ctx, octarine, "U64", rt->builtInTypes.U64);
+	bind_type(ctx, octarine, "I64", rt->builtInTypes.I64);
+	bind_type(ctx, octarine, "F32", rt->builtInTypes.F32);
+	bind_type(ctx, octarine, "F64", rt->builtInTypes.F64);
+	bind_type(ctx, octarine, "Uword", rt->builtInTypes.Uword);
+	bind_type(ctx, octarine, "Word", rt->builtInTypes.Word);
+	bind_type(ctx, octarine, "Char", rt->builtInTypes.Char);
+	bind_type(ctx, octarine, "Bool", rt->builtInTypes.Bool);
 	// Hashtable
-	bind_type(mainCtx, octarine, "HashtableKey", rt->builtInTypes.HashtableKey);
-	bind_type(mainCtx, octarine, "~HashtableKey", rt->builtInTypes.OHashtableKey);
-	bind_type(mainCtx, octarine, "&HashtableKey", rt->builtInTypes.BHashtableKey);
-	bind_type(mainCtx, octarine, "HashtableEntry", rt->builtInTypes.HashtableEntry);
-	bind_type(mainCtx, octarine, "+HashtableEntry", rt->builtInTypes.AHashtableEntry);
-	bind_type(mainCtx, octarine, "~+HashtableEntry", rt->builtInTypes.OAHashtableEntry);
-	bind_type(mainCtx, octarine, "Hashtable", rt->builtInTypes.Hashtable);
-	bind_type(mainCtx, octarine, "&Hashtable", rt->builtInTypes.BHashtable);
+	bind_type(ctx, octarine, "HashtableKey", rt->builtInTypes.HashtableKey);
+	bind_type(ctx, octarine, "~HashtableKey", rt->builtInTypes.OHashtableKey);
+	bind_type(ctx, octarine, "&HashtableKey", rt->builtInTypes.BHashtableKey);
+	bind_type(ctx, octarine, "HashtableEntry", rt->builtInTypes.HashtableEntry);
+	bind_type(ctx, octarine, "+HashtableEntry", rt->builtInTypes.AHashtableEntry);
+	bind_type(ctx, octarine, "~+HashtableEntry", rt->builtInTypes.OAHashtableEntry);
+	bind_type(ctx, octarine, "Hashtable", rt->builtInTypes.Hashtable);
+	bind_type(ctx, octarine, "&Hashtable", rt->builtInTypes.BHashtable);
 	// Type
-	bind_type(mainCtx, octarine, "Type", rt->builtInTypes.Type);
-	bind_type(mainCtx, octarine, "&Type", rt->builtInTypes.BType);
-	bind_type(mainCtx, octarine, "+&Type", rt->builtInTypes.ABType);
-	bind_type(mainCtx, octarine, "~+&Type", rt->builtInTypes.OABType);
+	bind_type(ctx, octarine, "Type", rt->builtInTypes.Type);
+	bind_type(ctx, octarine, "&Type", rt->builtInTypes.BType);
+	bind_type(ctx, octarine, "+&Type", rt->builtInTypes.ABType);
+	bind_type(ctx, octarine, "~+&Type", rt->builtInTypes.OABType);
 	// Protocol
-	bind_type(mainCtx, octarine, "Protocol", rt->builtInTypes.Protocol);
-	bind_type(mainCtx, octarine, "VTable", rt->builtInTypes.VTable);
-	bind_type(mainCtx, octarine, "&VTable", rt->builtInTypes.BVTable);
-	bind_type(mainCtx, octarine, "ProtocolBinding", rt->builtInTypes.ProtocolBinding);
-	bind_type(mainCtx, octarine, "&ProtocolBinding", rt->builtInTypes.BProtocolBinding);
+	bind_type(ctx, octarine, "Protocol", rt->builtInTypes.Protocol);
+	bind_type(ctx, octarine, "VTable", rt->builtInTypes.VTable);
+	bind_type(ctx, octarine, "&VTable", rt->builtInTypes.BVTable);
+	bind_type(ctx, octarine, "ProtocolBinding", rt->builtInTypes.ProtocolBinding);
+	bind_type(ctx, octarine, "&ProtocolBinding", rt->builtInTypes.BProtocolBinding);
 	// Function
-	bind_type(mainCtx, octarine, "Function", rt->builtInTypes.Function);
-	bind_type(mainCtx, octarine, "&Function", rt->builtInTypes.BFunction);
-	bind_type(mainCtx, octarine, "+&Function", rt->builtInTypes.ABFunction);
-	bind_type(mainCtx, octarine, "~+&Function", rt->builtInTypes.OABFunction);
+	bind_type(ctx, octarine, "Function", rt->builtInTypes.Function);
+	bind_type(ctx, octarine, "&Function", rt->builtInTypes.BFunction);
+	bind_type(ctx, octarine, "+&Function", rt->builtInTypes.ABFunction);
+	bind_type(ctx, octarine, "~+&Function", rt->builtInTypes.OABFunction);
 	// Object
-	bind_type(mainCtx, octarine, "Object", rt->builtInTypes.Object);
-	bind_type(mainCtx, octarine, "~Object", rt->builtInTypes.OObject);
-	bind_type(mainCtx, octarine, "&Object", rt->builtInTypes.BObject);
-	bind_type(mainCtx, octarine, "ObjectOption~", rt->builtInTypes.OObjectOption);
-	bind_type(mainCtx, octarine, "ObjectOption&", rt->builtInTypes.BObjectOption);
+	bind_type(ctx, octarine, "Object", rt->builtInTypes.Object);
+	bind_type(ctx, octarine, "~Object", rt->builtInTypes.OObject);
+	bind_type(ctx, octarine, "&Object", rt->builtInTypes.BObject);
+	bind_type(ctx, octarine, "ObjectOption~", rt->builtInTypes.OObjectOption);
+	bind_type(ctx, octarine, "ObjectOption&", rt->builtInTypes.BObjectOption);
 	// String
-	bind_type(mainCtx, octarine, "String", rt->builtInTypes.String);
-	bind_type(mainCtx, octarine, "~String", rt->builtInTypes.OString);
-	bind_type(mainCtx, octarine, "&String", rt->builtInTypes.BString);
+	bind_type(ctx, octarine, "String", rt->builtInTypes.String);
+	bind_type(ctx, octarine, "~String", rt->builtInTypes.OString);
+	bind_type(ctx, octarine, "&String", rt->builtInTypes.BString);
 	// Array
-	bind_type(mainCtx, octarine, "Array", rt->builtInTypes.Array);
-	bind_type(mainCtx, octarine, "FixedSizeArray", rt->builtInTypes.FixedSizeArray);
+	bind_type(ctx, octarine, "Array", rt->builtInTypes.Array);
+	bind_type(ctx, octarine, "FixedSizeArray", rt->builtInTypes.FixedSizeArray);
 	// AChar
-	bind_type(mainCtx, octarine, "+Char", rt->builtInTypes.AChar);
-	bind_type(mainCtx, octarine, "~+Char", rt->builtInTypes.OAChar);
+	bind_type(ctx, octarine, "+Char", rt->builtInTypes.AChar);
+	bind_type(ctx, octarine, "~+Char", rt->builtInTypes.OAChar);
 	// AU8
-	bind_type(mainCtx, octarine, "+U8", rt->builtInTypes.AU8);
-	bind_type(mainCtx, octarine, "~+U8", rt->builtInTypes.OAU8);
+	bind_type(ctx, octarine, "+U8", rt->builtInTypes.AU8);
+	bind_type(ctx, octarine, "~+U8", rt->builtInTypes.OAU8);
 	// List
-	bind_type(mainCtx, octarine, "List", rt->builtInTypes.List);
-	bind_type(mainCtx, octarine, "~List", rt->builtInTypes.OList);
-	bind_type(mainCtx, octarine, "&List", rt->builtInTypes.BList);
-	bind_type(mainCtx, octarine, "ListOption~", rt->builtInTypes.OListOption);
-	bind_type(mainCtx, octarine, "ListOption&", rt->builtInTypes.BListOption);
+	bind_type(ctx, octarine, "List", rt->builtInTypes.List);
+	bind_type(ctx, octarine, "~List", rt->builtInTypes.OList);
+	bind_type(ctx, octarine, "&List", rt->builtInTypes.BList);
+	bind_type(ctx, octarine, "ListOption~", rt->builtInTypes.OListOption);
+	bind_type(ctx, octarine, "ListOption&", rt->builtInTypes.BListOption);
 	// Nothing
-	bind_type(mainCtx, octarine, "Nothing", rt->builtInTypes.Nothing);
-	bind_type(mainCtx, octarine, "&Nothing", rt->builtInTypes.BNothing);
+	bind_type(ctx, octarine, "Nothing", rt->builtInTypes.Nothing);
+	bind_type(ctx, octarine, "&Nothing", rt->builtInTypes.BNothing);
 	// Pointer
-	bind_type(mainCtx, octarine, "Pointer", rt->builtInTypes.Pointer);
+	bind_type(ctx, octarine, "Pointer", rt->builtInTypes.Pointer);
 	// Struct
-	bind_type(mainCtx, octarine, "Struct", rt->builtInTypes.Struct);
+	bind_type(ctx, octarine, "Struct", rt->builtInTypes.Struct);
 	// Field
-	bind_type(mainCtx, octarine, "Field", rt->builtInTypes.Field);
-	bind_type(mainCtx, octarine, "+Field", rt->builtInTypes.AField);
-	bind_type(mainCtx, octarine, "~+Field", rt->builtInTypes.OAField);
+	bind_type(ctx, octarine, "Field", rt->builtInTypes.Field);
+	bind_type(ctx, octarine, "+Field", rt->builtInTypes.AField);
+	bind_type(ctx, octarine, "~+Field", rt->builtInTypes.OAField);
 	// Symbol
-	bind_type(mainCtx, octarine, "Symbol", rt->builtInTypes.Symbol);
-	bind_type(mainCtx, octarine, "~Symbol", rt->builtInTypes.OSymbol);
-	bind_type(mainCtx, octarine, "&Symbol", rt->builtInTypes.BSymbol);
-	bind_type(mainCtx, octarine, "SymbolOption~", rt->builtInTypes.OSymbolOption);
+	bind_type(ctx, octarine, "Symbol", rt->builtInTypes.Symbol);
+	bind_type(ctx, octarine, "~Symbol", rt->builtInTypes.OSymbol);
+	bind_type(ctx, octarine, "&Symbol", rt->builtInTypes.BSymbol);
+	bind_type(ctx, octarine, "SymbolOption~", rt->builtInTypes.OSymbolOption);
 	// Prototype
-	bind_type(mainCtx, octarine, "Prototype", rt->builtInTypes.Prototype);
+	bind_type(ctx, octarine, "Prototype", rt->builtInTypes.Prototype);
 	// Variadic
-	bind_type(mainCtx, octarine, "Variadic", rt->builtInTypes.Variadic);
+	bind_type(ctx, octarine, "Variadic", rt->builtInTypes.Variadic);
 	// Error
-	bind_type(mainCtx, octarine, "Error", rt->builtInTypes.Error);
-	bind_type(mainCtx, octarine, "~Error", rt->builtInTypes.OError);
-	bind_type(mainCtx, octarine, "ErrorOption~", rt->builtInTypes.OErrorOption);
+	bind_type(ctx, octarine, "Error", rt->builtInTypes.Error);
+	bind_type(ctx, octarine, "~Error", rt->builtInTypes.OError);
+	bind_type(ctx, octarine, "ErrorOption~", rt->builtInTypes.OErrorOption);
 	// Any
-	bind_type(mainCtx, octarine, "Any", rt->builtInTypes.Any);
+	bind_type(ctx, octarine, "Any", rt->builtInTypes.Any);
 	// Namespace
-	bind_type(mainCtx, octarine, "Namespace", rt->builtInTypes.Namespace);
-	bind_type(mainCtx, octarine, "&Namespace", rt->builtInTypes.BNamespace);
-	bind_type(mainCtx, octarine, "NamespaceOption", rt->builtInTypes.NamespaceOption);
+	bind_type(ctx, octarine, "Namespace", rt->builtInTypes.Namespace);
+	bind_type(ctx, octarine, "&Namespace", rt->builtInTypes.BNamespace);
+	bind_type(ctx, octarine, "NamespaceOption", rt->builtInTypes.NamespaceOption);
 
 	// *** 5. Profit?
 	
@@ -296,7 +303,10 @@ oct_Bool oct_Runtime_destroy(oct_Runtime* rt, const char** out_error) {
 	oct_Hashtable_dtor(ctx, tbl);
 	dealloc_builtInProtocols(ctx);
 	dealloc_builtInVTables(rt);
-	dealloc_buintInTypes(rt);
+	dealloc_buintInTypes(ctx);
+	OCT_FREE(ctx->reader);
+	OCT_FREE(ctx);
+	OCT_FREE(rt);
 	return oct_True;
 }
 

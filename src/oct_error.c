@@ -37,13 +37,13 @@ oct_Bool _oct_Error_init(struct oct_Context* ctx) {
 }
 
 oct_Bool oct_Error_createOwned(struct oct_Context* ctx, oct_OString message, oct_OError* out_err) {
-	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_Error), (void**)&out_err->ptr));
+	CHECK(OCT_ALLOCRAW(sizeof(oct_Error), (void**)&out_err->ptr, "oct_Error_createOwned"));
 	out_err->ptr->message.ptr = message.ptr;
 	return oct_True;
 }
 
 oct_Bool oct_Error_destroyOwned(struct oct_Context* ctx, oct_OError err) {
 	oct_String_destroyOwned(ctx, err.ptr->message);
-	return oct_ExchangeHeap_freeRaw(ctx, err.ptr);
+	return OCT_FREE(err.ptr);
 }
 

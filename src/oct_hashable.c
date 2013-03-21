@@ -11,7 +11,7 @@
 
 oct_Bool _oct_Hashable_initProtocol(struct oct_Context* ctx) {
 	oct_BHashtable table;
-	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_ProtocolBinding), (void**)&ctx->rt->builtInProtocols.Hashable.ptr));
+	CHECK(OCT_ALLOCRAW(sizeof(oct_ProtocolBinding), (void**)&ctx->rt->builtInProtocols.Hashable.ptr, "_oct_Hashable_initProtocol"));
 	ctx->rt->builtInProtocols.Hashable.ptr->protocolType = ctx->rt->builtInTypes.Hashable;
 	table.ptr = &ctx->rt->builtInProtocols.Hashable.ptr->implementations;
 	return oct_Hashtable_ctor(ctx, table, 100);

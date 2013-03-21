@@ -74,13 +74,13 @@ oct_Bool oct_Namespace_create(struct oct_Context* ctx, oct_OString nsName, oct_B
 		goto end;
 	}
 
-	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_Namespace), (void**)&newNs.ptr));
+	CHECK(OCT_ALLOCRAW(sizeof(oct_Namespace), (void**)&newNs.ptr, "oct_Namespace_create"));
 	bTable.ptr = &newNs.ptr->bindings;
 	CHECK(oct_Hashtable_ctor(ctx, bTable, 100));
 	newNs.ptr->name = (*nsName.ptr);
 
 	CHECK(oct_Namespace_asObject(ctx, newNs, &nsAny.bobject));
-	nsAny.variant = OCT_ANY_BOBJECT;
+	nsAny.variant = OCT_ANY_OOBJECT;
 
 	bTable.ptr = &ctx->rt->namespaces;
 	nameKey.variant = OCT_HASHTABLEKEYOPTION_OWNED;

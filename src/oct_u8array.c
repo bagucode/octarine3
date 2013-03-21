@@ -30,7 +30,8 @@ oct_Bool _oct_AU8_init(struct oct_Context* ctx) {
 // Public
 
 oct_Bool oct_AU8_createOwned(struct oct_Context* ctx, oct_Uword size, oct_OAU8* out_result) {
-    if(!oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_AU8) + (sizeof(oct_U8) * size), (void**)&out_result->ptr)) {
+	oct_Uword allocSize = sizeof(oct_AU8) + (sizeof(oct_U8) * size);
+    if(!OCT_ALLOCRAW(allocSize, (void**)&out_result->ptr, "oct_AU8_createOwned")) {
         return oct_False;
     }
 	out_result->ptr->size = size;

@@ -9,7 +9,7 @@
 
 oct_Bool _oct_Charstream_initProtocol(struct oct_Context* ctx) {
 	oct_BHashtable table;
-	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_ProtocolBinding), (void**)&ctx->rt->builtInProtocols.Charstream.ptr));
+	CHECK(OCT_ALLOCRAW(sizeof(oct_ProtocolBinding), (void**)&ctx->rt->builtInProtocols.Charstream.ptr, "_oct_Charstream_initProtocol"));
 	ctx->rt->builtInProtocols.Charstream.ptr->protocolType = ctx->rt->builtInTypes.Charstream;
 	table.ptr = &ctx->rt->builtInProtocols.Charstream.ptr->implementations;
 	return oct_Hashtable_ctor(ctx, table, 100);

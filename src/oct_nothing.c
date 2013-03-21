@@ -11,16 +11,16 @@
 
 oct_Bool _oct_Nothing_VTableInit(struct oct_Context* ctx) {
 	// Object
-	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_VTable), (void**)&ctx->rt->vtables.NothingAsObject.ptr));
+	CHECK(OCT_ALLOCRAW(sizeof(oct_VTable), (void**)&ctx->rt->vtables.NothingAsObject.ptr, "_oct_Nothing_VTableInit, Object"));
 	ctx->rt->vtables.NothingAsObject.ptr->objectType = ctx->rt->builtInTypes.Nothing;
 
 	// EqComparable
-	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_VTable) + (sizeof(void*) * 1), (void**)&ctx->rt->vtables.NothingAsEqComparable.ptr));
+	CHECK(OCT_ALLOCRAW(sizeof(oct_VTable) + (sizeof(void*) * 1), (void**)&ctx->rt->vtables.NothingAsEqComparable.ptr, "_oct_Nothing_VTableInit, EqComparable"));
 	ctx->rt->vtables.NothingAsEqComparable.ptr->functions[0] = oct_Nothing_equals;
 	ctx->rt->vtables.NothingAsEqComparable.ptr->objectType = ctx->rt->builtInTypes.Nothing;
 	
 	// Hashable
-	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_VTable) + (sizeof(void*) * 1), (void**)&ctx->rt->vtables.NothingAsHashable.ptr));
+	CHECK(OCT_ALLOCRAW(sizeof(oct_VTable) + (sizeof(void*) * 1), (void**)&ctx->rt->vtables.NothingAsHashable.ptr, "_oct_Nothing_VTableInit, Hashable"));
 	ctx->rt->vtables.NothingAsHashable.ptr->functions[0] = oct_Nothing_hash;
 	ctx->rt->vtables.NothingAsHashable.ptr->objectType = ctx->rt->builtInTypes.Nothing;
 	

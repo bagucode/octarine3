@@ -36,6 +36,8 @@ struct oct_Context;
 oct_Bool _oct_Type_VTableInit(struct oct_Context* ctx);
 oct_Bool _oct_Type_init(struct oct_Context* ctx);
 
+oct_Bool oct_Type_dtor(struct oct_Context* ctx, oct_Type* self);
+
 // Public
 
 // Does a deep copy of an object graph and returns an owned copy

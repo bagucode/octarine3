@@ -11,7 +11,7 @@
 
 oct_Bool _oct_EqComparable_initProtocol(struct oct_Context* ctx) {
 	oct_BHashtable table;
-	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_ProtocolBinding), (void**)&ctx->rt->builtInProtocols.EqComparable.ptr));
+	CHECK(OCT_ALLOCRAW(sizeof(oct_ProtocolBinding), (void**)&ctx->rt->builtInProtocols.EqComparable.ptr, "_oct_EqComparable_initProtocol"));
 	ctx->rt->builtInProtocols.EqComparable.ptr->protocolType = ctx->rt->builtInTypes.EqComparable;
 	table.ptr = &ctx->rt->builtInProtocols.EqComparable.ptr->implementations;
 	return oct_Hashtable_ctor(ctx, table, 100);

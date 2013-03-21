@@ -42,7 +42,7 @@ static oct_Bool reader_pushChar(oct_Context* ctx, oct_BReader reader, oct_Char c
 		}
 		memcpy(tmp.ptr->data, reader.ptr->readBuffer.ptr->data, reader.ptr->nchars * sizeof(oct_Char));
         // TODO: remove this free when OAChar has a proper destructor
-		free(reader.ptr->readBuffer.ptr);
+		OCT_FREE(reader.ptr->readBuffer.ptr);
 		reader.ptr->readBuffer = tmp;
 	}
 	reader.ptr->readBuffer.ptr->data[reader.ptr->nchars++] = c;
@@ -226,7 +226,7 @@ static oct_Bool readI32(struct oct_Context* ctx, oct_BReader reader, oct_BCharst
 	}
 	// OK
 	out_result->variant = OCT_READRESULT_OK;
-	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_I32), (void**)&instance.ptr));
+	CHECK(OCT_ALLOCRAW(sizeof(oct_I32), (void**)&instance.ptr, "I32 instance"));
 	*instance.ptr = (oct_I32)l;
 	
 	out_result->result.variant = OCT_OOBJECTOPTION_OBJECT;
@@ -282,7 +282,7 @@ static oct_Bool readF32(struct oct_Context* ctx, oct_BReader reader, oct_BCharst
 	}
 	// OK
 	out_result->variant = OCT_READRESULT_OK;
-	CHECK(oct_ExchangeHeap_allocRaw(ctx, sizeof(oct_F32), (void**)&instance.ptr));
+	CHECK(OCT_ALLOCRAW(sizeof(oct_F32), (void**)&instance.ptr, "F32 instance"));
 	*instance.ptr = (oct_F32)d;
 
 	out_result->result.variant = OCT_OOBJECTOPTION_OBJECT;
