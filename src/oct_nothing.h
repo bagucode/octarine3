@@ -2,6 +2,7 @@
 #define oct_nothing_private
 
 #include "oct_primitives.h"
+#include "oct_self.h"
 
 typedef struct oct_Nothing {
 	oct_Uword dummy;
@@ -15,5 +16,7 @@ struct oct_Context;
 
 oct_Bool _oct_Nothing_VTableInit(struct oct_Context* ctx);
 oct_Bool _oct_Nothing_init(struct oct_Context* ctx);
+
+oct_Bool oct_Nothing_dtor(struct oct_Context* ctx, oct_BSelf self);
 
 #endif

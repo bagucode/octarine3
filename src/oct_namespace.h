@@ -7,6 +7,7 @@
 #include "oct_string.h"
 #include "oct_symbol.h"
 #include "oct_nothing.h"
+#include "oct_self.h"
 
 struct oct_Context;
 struct oct_Namespace;
@@ -34,5 +35,6 @@ oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_Hash
 oct_Bool oct_Namespace_bindInCurrent(struct oct_Context* ctx, oct_HashtableKeyOption key, oct_Any value);
 oct_Bool oct_Namespace_lookup(struct oct_Context* ctx, oct_BNamespace ns, oct_BHashtableKey key, oct_Any* out_value);
 oct_Bool oct_Namespace_asObject(struct oct_Context* ctx, oct_BNamespace ns, oct_BObject* out_obj);
+oct_Bool oct_Namespace_dtor(struct oct_Context* ctx, oct_BSelf self);
 
 #endif

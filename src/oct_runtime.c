@@ -54,15 +54,15 @@ static void dealloc_builtInProtocols(oct_Context* ctx) {
 	oct_Uword iters = sizeof(oct_BuiltInProtocols) / sizeof(oct_BProtocolBinding);
 	oct_Uword i;
 	oct_BProtocolBinding* place;
-	oct_BHashtable tbl;
 	oct_Runtime* rt = ctx->rt;
+	oct_BSelf self;
 
 	for(i = 0; i < iters; ++i) {
 		char* dummy = (char*)(&rt->builtInProtocols);
 		dummy += sizeof(oct_BProtocolBinding) * i;
 		place = (oct_BProtocolBinding*)dummy;
-		tbl.ptr = &place->ptr->implementations;
-		oct_Hashtable_dtor(ctx, tbl);
+		self.self = &place->ptr->implementations;
+		oct_Hashtable_dtor(ctx, self);
 		OCT_FREE(place->ptr);
 	}
 }
@@ -298,9 +298,9 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 
 oct_Bool oct_Runtime_destroy(oct_Runtime* rt, const char** out_error) {
 	oct_Context* ctx = oct_Runtime_currentContext(rt);
-	oct_BHashtable tbl;
-	tbl.ptr = &rt->namespaces;
-	oct_Hashtable_dtor(ctx, tbl);
+	oct_BSelf self;
+	self.self = &rt->namespaces;
+	oct_Hashtable_dtor(ctx, self);
 	dealloc_builtInProtocols(ctx);
 	dealloc_builtInVTables(rt);
 	dealloc_buintInTypes(ctx);

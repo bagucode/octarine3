@@ -21,8 +21,8 @@ oct_Bool _oct_Symbol_init(oct_Context* ctx) {
 	t.ptr->structType.fields.ptr->data[0].offset = offsetof(oct_Symbol, name);
 	t.ptr->structType.fields.ptr->data[0].type = ctx->rt->builtInTypes.OString;
 
-	// Symbol VTable for Object {}
-	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Object, 0, &ctx->rt->vtables.SymbolAsObject, t));
+	// Symbol VTable for Object {dtor}
+	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Object, 1, &ctx->rt->vtables.SymbolAsObject, t, oct_Symbol_dtor));
 
 	// Symbol VTable for EqComparable {eq}
 	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.EqComparable, 1, &ctx->rt->vtables.SymbolAsEqComparable, t, oct_Symbol_equals));
@@ -66,7 +66,10 @@ oct_Bool oct_Symbol_createOwned(struct oct_Context* ctx, oct_OString name, oct_O
 }
 
 oct_Bool oct_Symbol_destroyOwned(struct oct_Context* ctx, oct_OSymbol sym) {
-	oct_Bool result = oct_String_destroyOwned(ctx, sym.ptr->name);
+	oct_BSelf self;
+	oct_Bool result;
+	self.self = sym.ptr;
+	result = oct_Symbol_dtor(ctx, self);
 	return OCT_FREE(sym.ptr) && result;
 }
 
@@ -96,4 +99,12 @@ oct_Bool oct_Symbol_hash(struct oct_Context* ctx, oct_BSymbol self, oct_Uword* o
 	CHECK(oct_String_hash(ctx, x, out_hash));
 	(*out_hash) *= 131;
 	return oct_True;
+}
+
+oct_Bool oct_Symbol_dtor(struct oct_Context* ctx, oct_BSelf self) {
+	oct_Symbol* s = (oct_Symbol*)self.self;
+	oct_Bool result;
+	self.self = s->name.ptr;
+	result = oct_String_dtor(ctx, self);
+	return OCT_FREE(s->name.ptr) && result;
 }

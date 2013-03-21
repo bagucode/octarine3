@@ -16,7 +16,8 @@
 // For Type, the vtables need to be added manually because of a circular dependency with protocols
 oct_Bool _oct_Type_VTableInit(struct oct_Context* ctx) {
 	// Object
-	CHECK(OCT_ALLOCRAW(sizeof(oct_VTable), (void**)&ctx->rt->vtables.TypeAsObject.ptr, "_oct_Type_VTableInit, Object"));
+	CHECK(OCT_ALLOCRAW(sizeof(oct_VTable) + (sizeof(void*) * 1), (void**)&ctx->rt->vtables.TypeAsObject.ptr, "_oct_Type_VTableInit, Object"));
+	ctx->rt->vtables.TypeAsObject.ptr->functions[0] = oct_Type_dtor;
 	ctx->rt->vtables.TypeAsObject.ptr->objectType = ctx->rt->builtInTypes.Type;
 
 	// EqComparable

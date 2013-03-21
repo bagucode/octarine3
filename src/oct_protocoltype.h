@@ -19,7 +19,7 @@ typedef struct oct_ProtocolType {
 
 typedef struct oct_VTable {
 	oct_BType objectType;
-	void* functions[]; /* zero or more function pointers */
+	void* functions[]; /* one or more function pointers */
 } oct_VTable;
 
 typedef struct oct_BVTable {
@@ -40,5 +40,7 @@ oct_Bool _oct_Protocol_init(struct oct_Context* ctx);
 oct_Bool _oct_Protocol_addBuiltIn(struct oct_Context* ctx, oct_BProtocolBinding pb, oct_Uword fnCount, oct_BVTable* table, oct_BType type, ...);
 
 oct_Bool oct_Protocol_addImplementation(struct oct_Context* ctx, oct_BProtocolBinding protocol, oct_BType type, oct_BVTable vtable);
+
+oct_Bool oct_ProtocolBinding_dtor(struct oct_Context* ctx, oct_BSelf self);
 
 #endif

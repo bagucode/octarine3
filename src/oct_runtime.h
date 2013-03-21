@@ -193,6 +193,7 @@ typedef struct oct_BuiltInFunctions {
 	oct_BFunction readChar; // TODO
 	oct_BFunction peekChar; // TODO
 	oct_BFunction copyOwned; // TODO
+	oct_BFunction dtor; // TODO
 } oct_BuiltInFunctions;
 
 typedef struct oct_Runtime {

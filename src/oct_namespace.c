@@ -31,8 +31,8 @@ oct_Bool _oct_Namespace_init(struct oct_Context* ctx) {
 	t.ptr->structType.fields.ptr->data[1].offset = offsetof(oct_Namespace, bindings);
 	t.ptr->structType.fields.ptr->data[1].type = ctx->rt->builtInTypes.Hashtable;
 
-	// Type VTable for Namespace {}
-	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Object, 0, &ctx->rt->vtables.NamespaceAsObject, t));
+	// VTable for Object {dtor}
+	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Object, 1, &ctx->rt->vtables.NamespaceAsObject, t, oct_Namespace_dtor));
 
 	// BNamespace
 	t = ctx->rt->builtInTypes.BNamespace;
@@ -83,8 +83,8 @@ oct_Bool oct_Namespace_create(struct oct_Context* ctx, oct_OString nsName, oct_B
 	nsAny.variant = OCT_ANY_OOBJECT;
 
 	bTable.ptr = &ctx->rt->namespaces;
-	nameKey.variant = OCT_HASHTABLEKEYOPTION_OWNED;
-	CHECK(oct_String_asHashtableKeyOwned(ctx, nsName, &nameKey.owned));
+	nameKey.variant = OCT_HASHTABLEKEYOPTION_BORROWED;
+	CHECK(oct_String_asHashtableKeyBorrowed(ctx, bstr, &nameKey.borrowed));
 	CHECK(oct_Hashtable_put(ctx, bTable, nameKey, nsAny));
 
 	out_ns->ptr = newNs.ptr;
@@ -178,5 +178,14 @@ oct_Bool oct_Namespace_asObject(struct oct_Context* ctx, oct_BNamespace ns, oct_
 	out_obj->self.self = ns.ptr;
 	out_obj->vtable = (oct_ObjectVTable*)ctx->rt->vtables.NamespaceAsObject.ptr;
 	return oct_True;
+}
+
+oct_Bool oct_Namespace_dtor(struct oct_Context* ctx, oct_BSelf self) {
+	oct_Namespace* ns = (oct_Namespace*)self.self;
+	oct_Bool result;
+	self.self = &ns->name;
+	result = oct_String_dtor(ctx, self);
+	self.self = &ns->bindings;
+	return oct_Hashtable_dtor(ctx, self) && result;
 }
 

@@ -25,8 +25,8 @@ oct_Bool _oct_String_init(struct oct_Context* ctx) {
 	t.ptr->structType.fields.ptr->data[1].offset = offsetof(oct_String, utf8Data);
 	t.ptr->structType.fields.ptr->data[1].type = ctx->rt->builtInTypes.OAU8;
 
-	// String VTable for Object {}
-	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Object, 0, &ctx->rt->vtables.StringAsObject, t));
+	// String VTable for Object {dtor}
+	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Object, 1, &ctx->rt->vtables.StringAsObject, t, oct_String_dtor));
 
 	// String VTable for EqComparable {eq}
 	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.EqComparable, 1, &ctx->rt->vtables.StringAsEqComparable, t, oct_BString_equals));
@@ -108,7 +108,10 @@ oct_Bool oct_String_createOwnedFromCStringLen(struct oct_Context* ctx, const cha
 }
 
 oct_Bool oct_String_destroyOwned(struct oct_Context* ctx, oct_OString str) {
-	oct_Bool result = oct_String_dtor(ctx, str.ptr);
+	oct_BSelf self;
+	oct_Bool result;
+	self.self = str.ptr;
+	result = oct_String_dtor(ctx, self);
     return OCT_FREE(str.ptr) && result;
 }
 
@@ -129,9 +132,9 @@ oct_Bool oct_String_ctor(struct oct_Context* ctx, oct_String* str, oct_OAU8 utf8
 	return oct_True;
 }
 
-oct_Bool oct_String_dtor(struct oct_Context* ctx, oct_String* str) {
+oct_Bool oct_String_dtor(struct oct_Context* ctx, oct_BSelf str) {
     // TODO: proper free/dtor here
-	OCT_FREE(str->utf8Data.ptr);
+	OCT_FREE(((oct_String*)str.self)->utf8Data.ptr);
 	return oct_True;
 }
 

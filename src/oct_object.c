@@ -83,7 +83,11 @@ static oct_Bool destroyObject(oct_Context* ctx, oct_OSelf obj, oct_BType type, o
 }
 
 oct_Bool oct_Object_destroyOwned(oct_Context* ctx, oct_OObject obj) {
-	return oct_Object_preWalk(ctx, obj.self, obj.vtable->type, destroyObject);
+	oct_BSelf bself;
+	oct_Bool result;
+	bself.self = obj.self.self;
+	result = obj.vtable->functions.dtor(ctx, bself);
+	return OCT_FREE(obj.self.self) && result;
 }
 
 // Object graph walk support code

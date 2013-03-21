@@ -10,9 +10,15 @@
 
 #define CHECK(X) if(!X) return oct_False;
 
+static oct_Bool oct_Bool_VTableDtor(struct oct_Context* ctx, oct_BSelf vtable) {
+	oct_VTable* vt = (oct_VTable*)vtable.self;
+	return OCT_FREE(vt->functions);
+}
+
 oct_Bool _oct_VTable_init(struct oct_Context* ctx) {
-	CHECK(OCT_ALLOCRAW(sizeof(oct_VTable), (void**)&ctx->rt->vtables.VTableAsObject.ptr, "_oct_VTable_init"));
+	CHECK(OCT_ALLOCRAW(sizeof(oct_ObjectVTable), (void**)&ctx->rt->vtables.VTableAsObject.ptr, "_oct_VTable_init"));
 	ctx->rt->vtables.VTableAsObject.ptr->objectType = ctx->rt->builtInTypes.VTable;
+	ctx->rt->vtables.VTableAsObject.ptr->functions[0] = oct_Bool_VTableDtor;
 	return oct_True;
 }
 
@@ -56,7 +62,7 @@ oct_Bool _oct_Protocol_init(struct oct_Context* ctx) {
 	t.ptr->structType.fields.ptr->data[1].offset = offsetof(oct_ProtocolBinding, implementations);
 	t.ptr->structType.fields.ptr->data[1].type = ctx->rt->builtInTypes.Hashtable;
 
-	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Object, 0, &ctx->rt->vtables.ProtocolBindingAsObject, t))
+	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Object, 1, &ctx->rt->vtables.ProtocolBindingAsObject, t, oct_ProtocolBinding_dtor));
 
 	// BProtocolBinding
 	t = ctx->rt->builtInTypes.BProtocolBinding;
@@ -65,6 +71,12 @@ oct_Bool _oct_Protocol_init(struct oct_Context* ctx) {
 	t.ptr->pointerType.type = ctx->rt->builtInTypes.ProtocolBinding;
 
 	return oct_True;
+}
+
+oct_Bool oct_ProtocolBinding_dtor(struct oct_Context* ctx, oct_BSelf self) {
+	oct_ProtocolBinding* pb = (oct_ProtocolBinding*)self.self;
+	self.self = &pb->implementations;
+	return oct_Hashtable_dtor(ctx, self);
 }
 
 oct_Bool _oct_Protocol_addBuiltIn(struct oct_Context* ctx, oct_BProtocolBinding pb, oct_Uword fnCount, oct_BVTable* table, oct_BType type, ...) {

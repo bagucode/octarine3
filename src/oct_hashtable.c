@@ -120,15 +120,16 @@ oct_Bool oct_AHashtableEntry_createOwned(struct oct_Context* ctx, oct_Uword init
 
 static oct_Bool destroyEntry(oct_Context* ctx, oct_HashtableEntry* entry) {
 	oct_OObject obj;
+	oct_BSelf self;
 	if(entry->key.variant != OCT_HASHTABLEKEYOPTION_NOTHING) {
 		if(entry->key.variant == OCT_HASHTABLEKEYOPTION_OWNED) {
-			obj.self.self = entry->key.owned.self.self;
-			obj.vtable = (oct_ObjectVTable*)entry->key.owned.vtable;
+			self.self = entry->key.borrowed.self.self;
+			CHECK(oct_Object_as(ctx, self, entry->key.borrowed.vtable->type, ctx->rt->builtInProtocols.Object, (oct_BObject*)&obj));
 			oct_Object_destroyOwned(ctx, obj);
 		}
 		if(entry->val.variant == OCT_ANY_OOBJECT) {
 			obj.self.self = entry->val.oobject.self.self;
-			obj.vtable = (oct_ObjectVTable*)entry->val.oobject.vtable;
+			obj.vtable = entry->val.oobject.vtable;
 			oct_Object_destroyOwned(ctx, obj);
 		}
 		entry->key.variant = OCT_HASHTABLEKEYOPTION_NOTHING;
@@ -148,8 +149,8 @@ oct_Bool oct_Hashtable_ctor(struct oct_Context* ctx, oct_BHashtable self, oct_Uw
 	return oct_AHashtableEntry_createOwned(ctx, nextp2(initialCap), &self.ptr->table);
 }
 
-oct_Bool oct_Hashtable_dtor(struct oct_Context* ctx, oct_BHashtable self) {
-	return oct_AHashtableEntry_destroyOwned(ctx, self.ptr->table);
+oct_Bool oct_Hashtable_dtor(struct oct_Context* ctx, oct_BSelf self) {
+	return oct_AHashtableEntry_destroyOwned(ctx, ((oct_Hashtable*)self.self)->table);
 }
 
 static oct_Bool keyHash(oct_Context* ctx, oct_BHashtableKey key, oct_Uword* result) {

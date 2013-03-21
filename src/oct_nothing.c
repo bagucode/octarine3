@@ -11,7 +11,8 @@
 
 oct_Bool _oct_Nothing_VTableInit(struct oct_Context* ctx) {
 	// Object
-	CHECK(OCT_ALLOCRAW(sizeof(oct_VTable), (void**)&ctx->rt->vtables.NothingAsObject.ptr, "_oct_Nothing_VTableInit, Object"));
+	CHECK(OCT_ALLOCRAW(sizeof(oct_VTable) + (sizeof(void*) * 1), (void**)&ctx->rt->vtables.NothingAsObject.ptr, "_oct_Nothing_VTableInit, Object"));
+	ctx->rt->vtables.NothingAsObject.ptr->functions[0] = oct_Nothing_dtor;
 	ctx->rt->vtables.NothingAsObject.ptr->objectType = ctx->rt->builtInTypes.Nothing;
 
 	// EqComparable
@@ -73,5 +74,9 @@ oct_Bool oct_Nothing_asObject(struct oct_Context* ctx, oct_BNothing nothing, oct
 oct_Bool oct_Nothing_asHashtableKey(struct oct_Context* ctx, oct_BNothing nothing, oct_BHashtableKey* out_key) {
 	out_key->self.self = nothing.ptr;
 	out_key->vtable = (oct_HashtableKeyVTable*)ctx->rt->vtables.NothingAsHashtableKey.ptr;
+	return oct_True;
+}
+
+oct_Bool oct_Nothing_dtor(struct oct_Context* ctx, oct_BSelf self) {
 	return oct_True;
 }

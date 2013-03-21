@@ -23,8 +23,8 @@ oct_Bool _oct_List_init(struct oct_Context* ctx) {
 	t.ptr->structType.fields.ptr->data[1].offset = offsetof(oct_List, next);
 	t.ptr->structType.fields.ptr->data[1].type = ctx->rt->builtInTypes.OListOption;
 
-	// Object protocol
-	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Object, 0, &ctx->rt->vtables.ListAsObject, t));
+	// Object protocol {dtor}
+	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Object, 1, &ctx->rt->vtables.ListAsObject, t, oct_List_dtor));
 
 	// OList
 	t = ctx->rt->builtInTypes.OList;
@@ -69,26 +69,27 @@ oct_Bool oct_List_ctor(struct oct_Context* ctx, oct_List* self) {
     return oct_True;
 }
 
-oct_Bool oct_List_dtor(struct oct_Context* ctx, oct_List* self) {
+oct_Bool oct_List_dtor(struct oct_Context* ctx, oct_BSelf self) {
     oct_Bool result = oct_True;
     oct_List* prev;
+	oct_List* lst = (oct_List*)self.self;
 
 	// Don't free first node, could be on stack or managed heap
-	if(self->data.variant == OCT_OOBJECTOPTION_OBJECT) {
-		result = oct_Object_destroyOwned(ctx, self->data.object);
-		self->data.variant = OCT_OOBJECTOPTION_NOTHING;
+	if(lst->data.variant == OCT_OOBJECTOPTION_OBJECT) {
+		result = oct_Object_destroyOwned(ctx, lst->data.object);
+		lst->data.variant = OCT_OOBJECTOPTION_NOTHING;
 	}
-	if(self->next.variant == OCT_LISTOPTION_LIST) {
-		self = self->next.list.ptr;
+	if(lst->next.variant == OCT_LISTOPTION_LIST) {
+		lst = lst->next.list.ptr;
 		while(oct_True) {
-			if(self->data.variant == OCT_OOBJECTOPTION_OBJECT) {
-				result = oct_Object_destroyOwned(ctx, self->data.object) && result;
+			if(lst->data.variant == OCT_OOBJECTOPTION_OBJECT) {
+				result = oct_Object_destroyOwned(ctx, lst->data.object) && result;
 			}
-			if(self->next.variant == OCT_LISTOPTION_NOTHING) {
+			if(lst->next.variant == OCT_LISTOPTION_NOTHING) {
 				break;
 			}
-			prev = self;
-			self = self->next.list.ptr;
+			prev = lst;
+			lst = lst->next.list.ptr;
 			OCT_FREE(prev);
 		}
 	}
@@ -103,7 +104,10 @@ oct_Bool oct_List_createOwned(struct oct_Context* ctx, oct_OList* out_result) {
 }
 
 oct_Bool oct_List_destroyOwned(struct oct_Context* ctx, oct_OList lst) {
-	oct_Bool result = oct_List_dtor(ctx, lst.ptr);
+	oct_BSelf self;
+	oct_Bool result;
+	self.self = lst.ptr;
+	result = oct_List_dtor(ctx, self);
 	return OCT_FREE(lst.ptr) && result;
 }
 

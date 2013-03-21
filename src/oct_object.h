@@ -7,8 +7,15 @@
 #include "oct_nothing.h"
 #include "oct_protocolbindingpointers.h"
 
+struct oct_Context;
+
+typedef struct oct_ObjectFunctions {
+	oct_Bool(*dtor)(struct oct_Context* ctx, oct_BSelf self);
+} oct_ObjectFunctions;
+
 typedef struct oct_ObjectVTable {
 	oct_BType type;
+	oct_ObjectFunctions functions;
 } oct_ObjectVTable;
 
 typedef struct oct_BObject {
@@ -42,8 +49,6 @@ typedef struct oct_BObjectOption {
 		oct_BObject object;
 	};
 } oct_BObjectOption;
-
-struct oct_Context;
 
 oct_Bool _oct_Object_initProtocol(struct oct_Context* ctx);
 oct_Bool _oct_Object_init(struct oct_Context* ctx);

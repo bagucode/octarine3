@@ -7,12 +7,16 @@
 
 #define CHECK(X) if(!X) return oct_False;
 
+static oct_Bool noopDtor(struct oct_Context* ctx, oct_BSelf self) {
+	return oct_True;
+}
+
 static oct_Bool createPrimitiveType(oct_Context* ctx, oct_BType* t, oct_BVTable* objVtable, oct_Uword size, oct_Uword alignment) {
 	t->ptr->variant = OCT_TYPE_STRUCT;
 	t->ptr->structType.size = size;
 	t->ptr->structType.alignment = alignment;
 	CHECK(oct_AField_createOwned(ctx, 0, &t->ptr->structType.fields));
-	return _oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Object, 0, objVtable, *t);
+	return _oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Object, 1, objVtable, *t, noopDtor);
 }
 
 oct_Bool _oct_Primitives_init(struct oct_Context* ctx) {
