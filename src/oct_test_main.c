@@ -89,6 +89,9 @@ static void NamespaceTests() {
 	oct_OString name;
 	oct_OString valStr;
 	oct_HashtableKeyOption key;
+	oct_BString eq1;
+	oct_BString eq2;
+	oct_Bool eq;
 	const char* error;
 
 	rt = oct_Runtime_create(&error);
@@ -113,7 +116,14 @@ static void NamespaceTests() {
 	// Lookup
 	TEST(oct_Namespace_lookup(ctx, ns, key.borrowed, &lookedUp));
 	TEST(lookedUp.variant == val.variant);
-	TEST((lookedUp.oobject.self.self == (void*)valStr.ptr));
+	TEST(oct_String_createOwnedFromCString(ctx, "theValue", &valStr));
+	eq1.ptr = valStr.ptr;
+	eq2.ptr = (oct_String*)lookedUp.oobject.self.self;
+	TEST(oct_BString_equals(ctx, eq1, eq2, &eq));
+	TEST(eq);
+	TEST(oct_String_destroyOwned(ctx, valStr));
+	TEST(oct_Object_destroyOwned(ctx, lookedUp.oobject));
+
 	// End Lookup
 
 	TEST(oct_Runtime_destroy(rt, &error));
@@ -159,22 +169,27 @@ static void defTest() {
 	reader.ptr = ctx->reader;
 	TEST(oct_Reader_read(ctx, reader, stream, &readResult));
 	TEST(oct_OStringstream_destroy(ctx, ss));
+	TEST(oct_String_destroyOwned(ctx, str));
+	//TEST(oct_Object_destroyOwned(ctx, readResult.result.object));
 	TEST(oct_Compiler_eval(ctx, readResult.result.object, &evalResult));
 	if(evalResult.variant == OCT_ANY_OOBJECT) {
 		TEST(oct_Object_destroyOwned(ctx, evalResult.oobject));
 	}
 
 	// Lookup
-	TEST(oct_String_createOwnedFromCString(ctx, "hello", &str));
-	TEST(oct_Symbol_createOwned(ctx, str, &osym));
-	bsym.ptr = osym.ptr;
-	TEST(oct_Symbol_asHashtableKey(ctx, bsym, &key));
-	TEST(oct_Namespace_lookup(ctx, ns, key, &lookedUp));
-	TEST(oct_String_createOwnedFromCString(ctx, "Hello", &str));
-	bs1.ptr = str.ptr;
-	bs2.ptr = (oct_String*)lookedUp.oobject.self.self;
-	TEST(oct_BString_equals(ctx, bs1, bs2, &result));
-	TEST(result);
+	//TEST(oct_String_createOwnedFromCString(ctx, "hello", &str));
+	//TEST(oct_Symbol_createOwned(ctx, str, &osym));
+	//bsym.ptr = osym.ptr;
+	//TEST(oct_Symbol_asHashtableKey(ctx, bsym, &key));
+	//TEST(oct_Namespace_lookup(ctx, ns, key, &lookedUp));
+	//TEST(oct_Symbol_destroyOwned(ctx, osym));
+	//TEST(oct_String_createOwnedFromCString(ctx, "Hello", &str));
+	//bs1.ptr = str.ptr;
+	//bs2.ptr = (oct_String*)lookedUp.oobject.self.self;
+	//TEST(oct_BString_equals(ctx, bs1, bs2, &result));
+	//TEST(result);
+	//TEST(oct_String_destroyOwned(ctx, str));
+	//TEST(oct_Object_destroyOwned(ctx, lookedUp.oobject));
 
 	TEST(oct_Runtime_destroy(rt, &error));
 }

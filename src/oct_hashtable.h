@@ -86,5 +86,7 @@ oct_Bool oct_Hashtable_take(struct oct_Context* ctx, oct_BHashtable self, oct_BH
 // Get a value from the table. If the value is borrowed, return a reference to it. If the value is owned, return
 // a borrowed reference to it. In both cases the value remains in the table.
 oct_Bool oct_Hashtable_borrow(struct oct_Context* ctx, oct_BHashtable self, oct_BHashtableKey key, oct_Any* out_value);
+// Get a value from the table. If the value is owned, a copy is returned. If the value is borrowed, a reference is returned.
+oct_Bool oct_Hashtable_copyOrBorrow(struct oct_Context* ctx, oct_BHashtable self, oct_BHashtableKey key, oct_Any* out_value);
 
 #endif

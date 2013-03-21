@@ -147,24 +147,11 @@ oct_Bool oct_Namespace_bind(struct oct_Context* ctx, oct_BNamespace ns, oct_Hash
 
 oct_Bool oct_Namespace_lookup(struct oct_Context* ctx, oct_BNamespace ns, oct_BHashtableKey key, oct_Any* out_value) {
 	oct_BHashtable bindingsTable;
-	oct_Any tmpValue;
-	oct_BCopyable copyable;
 	oct_Bool result = oct_True;
 
 	bindingsTable.ptr = &ns.ptr->bindings;
 	// TODO: lock bindings table
-	CHECK(oct_Hashtable_borrow(ctx, bindingsTable, key, &tmpValue));
-	if(tmpValue.variant == OCT_ANY_OOBJECT) {
-		// Always copy owned objects out of namespace to avoid thread conflicts
-		CHECK(oct_Object_as(ctx, tmpValue.bobject.self, tmpValue.bobject.vtable->type, ctx->rt->builtInProtocols.Copyable, (oct_BObject*)&copyable));
-		CHECK(oct_Copyable_copyOwned(ctx, copyable, &out_value->oobject));
-		out_value->variant = OCT_ANY_OOBJECT;
-	}
-	else {
-		// Borrowed objects are assumed to be permanent and immutable because when binding
-		// any value that is not of a permanent type it must be supplied as an owned value
-		(*out_value) = tmpValue;
-	}
+	CHECK(oct_Hashtable_copyOrBorrow(ctx, bindingsTable, key, out_value));
 
 	goto end;
 error:

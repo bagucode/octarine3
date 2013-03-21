@@ -5,6 +5,7 @@
 #include "oct_context.h"
 #include "oct_runtime.h"
 #include "oct_exchangeheap.h"
+#include "oct_copyable.h"
 
 #include <stddef.h>
 
@@ -289,11 +290,17 @@ oct_Bool oct_Hashtable_put(struct oct_Context* ctx, oct_BHashtable self, oct_Has
 #undef CHECK
 #define CHECK(X) if(!X) goto error;
 
-static oct_Bool oct_Hashtable_get(struct oct_Context* ctx, oct_BHashtable self, oct_BHashtableKey key, oct_Bool isTake, oct_Any* out_value) {
+#define GETMODE_BORROW 0
+#define GETMODE_TAKE 1
+#define GETMODE_COPY 2
+
+static oct_Bool oct_Hashtable_get(struct oct_Context* ctx, oct_BHashtable self, oct_BHashtableKey key, oct_Uword getMode, oct_Any* out_value) {
 	oct_Uword i, mask, hash;
 	oct_Bool eq;
 	oct_Bool result = oct_True;
 	oct_HashtableKeyOption tmpKey;
+	oct_BCopyable bcopyable;
+	oct_BSelf bself;
 
 	tmpKey.variant = OCT_HASHTABLEKEYOPTION_BORROWED;
 	tmpKey.borrowed.self.self = key.self.self;
@@ -327,12 +334,17 @@ static oct_Bool oct_Hashtable_get(struct oct_Context* ctx, oct_BHashtable self, 
 match:
 	*out_value = self.ptr->table.ptr->table[i].val;
 	if((*out_value).variant == OCT_ANY_OOBJECT) {
-		if(isTake) {
+		if(getMode == GETMODE_TAKE) {
 			self.ptr->table.ptr->table[i].val.variant = OCT_ANY_NOTHING;
 			destroyEntry(ctx, &self.ptr->table.ptr->table[i]);
 		}
-		else { // borrow
+		else if(getMode == GETMODE_BORROW) { // borrow
 			(*out_value).variant = OCT_ANY_BOBJECT;
+		}
+		else { // copy
+			bself.self = out_value->oobject.self.self;
+			CHECK(oct_Object_as(ctx, bself, out_value->oobject.vtable->type, ctx->rt->builtInProtocols.Copyable, (oct_BObject*)&bcopyable));
+			CHECK(oct_Copyable_copyOwned(ctx, bcopyable, &out_value->oobject));
 		}
 	}
 	goto end;
@@ -345,11 +357,15 @@ end:
 // Get a value from the table. If the value is owned, it will be removed from the hash table and returned. If the value
 // is borrowed, a reference to it will be returned and it will remain in the hash table.
 oct_Bool oct_Hashtable_take(struct oct_Context* ctx, oct_BHashtable self, oct_BHashtableKey key, oct_Any* out_value) {
-	return oct_Hashtable_get(ctx, self, key, oct_True, out_value);
+	return oct_Hashtable_get(ctx, self, key, GETMODE_TAKE, out_value);
 }
 
 // Get a value from the table. If the value is borrowed, return a reference to it. If the value is owned, return
 // a borrowed reference to it. In both cases the value remains in the table.
 oct_Bool oct_Hashtable_borrow(struct oct_Context* ctx, oct_BHashtable self, oct_BHashtableKey key, oct_Any* out_value) {
-	return oct_Hashtable_get(ctx, self, key, oct_False, out_value);
+	return oct_Hashtable_get(ctx, self, key, GETMODE_BORROW, out_value);
+}
+
+oct_Bool oct_Hashtable_copyOrBorrow(struct oct_Context* ctx, oct_BHashtable self, oct_BHashtableKey key, oct_Any* out_value) {
+	return oct_Hashtable_get(ctx, self, key, GETMODE_COPY, out_value);
 }

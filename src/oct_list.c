@@ -86,6 +86,7 @@ oct_Bool oct_List_dtor(struct oct_Context* ctx, oct_BSelf self) {
 				result = oct_Object_destroyOwned(ctx, lst->data.object) && result;
 			}
 			if(lst->next.variant == OCT_LISTOPTION_NOTHING) {
+				OCT_FREE(lst);
 				break;
 			}
 			prev = lst;
