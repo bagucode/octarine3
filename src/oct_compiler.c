@@ -94,6 +94,7 @@ static oct_Bool eval_def(struct oct_Context* ctx, oct_OObject form, oct_Any* out
 	}
     // Drop "def"
     CHECK(oct_List_rest(ctx, blist, &listOpt));
+	CHECK(oct_List_destroyOwned(ctx, olist)); // destroy head
     olist.ptr = listOpt.list.ptr;
     CHECK(oct_List_first(ctx, olist, &tmp, &olist));
 	if(tmp.object.vtable->type.ptr != ctx->rt->builtInTypes.Symbol.ptr) {

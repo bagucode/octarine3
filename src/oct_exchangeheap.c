@@ -49,11 +49,12 @@ oct_Bool oct_ExchangeHeap_free(struct oct_Context* ctx, void* box) {
 #include <memory.h>
 #include <stdio.h>
 #include <assert.h>
+#include <string.h>
 
 typedef struct allocInfo {
 	void* addr;
 	oct_Uword size;
-	const char* desc;
+	char* desc;
 	const char* file;
 	int line;
 } allocInfo;
@@ -227,7 +228,8 @@ oct_Bool oct_ExchangeHeap_debugAlloc(struct oct_Context* ctx, oct_Uword size, vo
 	result = oct_ExchangeHeap_alloc(ctx, size, out_box);
 	if(result) {
 		ai.addr = *out_box;
-		ai.desc = description;
+		ai.desc = (char*)malloc(strlen(description) + 1);
+		strcpy(ai.desc, description);
 		ai.file = file;
 		ai.line = line;
 		ai.size = size;
@@ -242,6 +244,7 @@ oct_Bool oct_ExchangeHeap_debugFree(struct oct_Context* ctx, void* box) {
 	out.addr = NULL;
 	allocInfoSet_Get(&allocInfos, box, &out);
 	if(out.addr) {
+		free(out.desc);
 		return oct_ExchangeHeap_free(ctx, box);
 	}
 	else {
