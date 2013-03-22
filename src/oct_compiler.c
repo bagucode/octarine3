@@ -175,11 +175,16 @@ static oct_Bool eval_list(oct_Context* ctx, oct_OObject form, oct_Any* out_resul
 		}
 	}
 
+	// TODO: Finish implementing this function :)
+	// Just return nothing here for now
+	out_result->variant = OCT_ANY_NOTHING;
+	out_result->nothing.dummy = 0;
+
 	goto end;
 error:
 	result = oct_False;
 end:
-	return oct_List_destroyOwned(ctx, olist) && result; // TODO: Finish implementing this function :)
+	return oct_List_destroyOwned(ctx, olist) && result;
 }
 
 static oct_Bool eval_string(oct_Context* ctx, oct_OObject form, oct_Any* out_result) {
@@ -208,5 +213,9 @@ oct_Bool oct_Compiler_eval(struct oct_Context* ctx, oct_OObject form, oct_Any* o
 		return eval_string(ctx, form, out_result);
 	}
 
-	return oct_True;
+	// TODO: finish implementing this function :)
+	// Just return nothing here for now
+	out_result->nothing.dummy = 0;
+	out_result->variant = OCT_ANY_NOTHING;
+	return oct_Object_destroyOwned(ctx, form);
 }

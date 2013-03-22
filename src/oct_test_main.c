@@ -195,54 +195,50 @@ static void defTest() {
 }
 
 int main(int argc, char** argv) {
-	//const char* error;
-	//oct_BCharstream stream;
-	//oct_ReadResult rr;
-	//oct_BReader reader;
-	//oct_Runtime* rt = oct_Runtime_create(&error);
-	//oct_Context* ctx = oct_Runtime_currentContext(rt);
-	//oct_OString str;
-	//oct_BString bstr;
-	//oct_OStringstream ss;
-	//oct_BStringstream bss;
-	//oct_Any evalResult;
-	//reader.ptr = ctx->reader;
+	const char* error;
+	oct_BCharstream stream;
+	oct_ReadResult rr;
+	oct_BReader reader;
+	oct_Runtime* rt = oct_Runtime_create(&error);
+	oct_Context* ctx = oct_Runtime_currentContext(rt);
+	oct_OString str;
+	oct_BString bstr;
+	oct_OStringstream ss;
+	oct_BStringstream bss;
+	oct_Any evalResult;
+	reader.ptr = ctx->reader;
 
-	//oct_String_createOwnedFromCString(ctx, "- . ! ? 1 2 3 -37 1.5 0.34 .34 1e16 -0.8 -.8 -.main .main -main { [ hello \"hej\" \"hell o workdl\" (this is a (nested) \"list\" of 8 readables ) ()", &str);
+	oct_String_createOwnedFromCString(ctx, "- . ! ? 1 2 3 -37 1.5 0.34 .34 1e16 -0.8 -.8 -.main .main -main { [ hello \"hej\" \"hell o workdl\" (this is a (nested) \"list\" of 8 readables ) ()", &str);
 
-	//// Borrow string pointer
-	//bstr.ptr = str.ptr;
+	// Borrow string pointer
+	bstr.ptr = str.ptr;
 
-	//oct_OStringstream_create(ctx, bstr, &ss);
+	oct_OStringstream_create(ctx, bstr, &ss);
 
-	//bss.ptr = ss.ptr;
-	//oct_Stringstream_asCharStream(ctx, bss, &stream);
+	bss.ptr = ss.ptr;
+	oct_Stringstream_asCharStream(ctx, bss, &stream);
 
-	//while(oct_True) {
-	//	oct_Reader_read(ctx, reader, stream, &rr);
-	//	if(rr.variant == OCT_READRESULT_ERROR) {
-	//		break;
-	//	}
-	//	if(rr.result.variant == OCT_OOBJECTOPTION_OBJECT) {
-	//		oct_Compiler_eval(ctx, rr.result.object, &evalResult);
-	//		oct_ReadResult_dtor(ctx, &rr);
-	//		if(evalResult.variant == OCT_OOBJECTOPTION_OBJECT) {
-	//			oct_Object_destroyOwned(ctx, evalResult.oobject);
-	//		}
-	//	}
-	//};
+	while(oct_True) {
+		oct_Reader_read(ctx, reader, stream, &rr);
+		if(rr.variant == OCT_READRESULT_ERROR) {
+			break;
+		}
+		if(rr.result.variant == OCT_OOBJECTOPTION_OBJECT) {
+			oct_Compiler_eval(ctx, rr.result.object, &evalResult);
+			if(evalResult.variant == OCT_OOBJECTOPTION_OBJECT) {
+				oct_Object_destroyOwned(ctx, evalResult.oobject);
+			}
+		}
+	};
 
-	//// End of scope, destroy in reverse order.
-	//oct_OStringstream_destroy(ctx, ss);
-	//oct_String_destroyOwned(ctx, str);
-	//oct_Runtime_destroy(rt, &error);
+	// End of scope, destroy in reverse order.
+	oct_OStringstream_destroy(ctx, ss);
+	oct_String_destroyOwned(ctx, str);
+	oct_Runtime_destroy(rt, &error);
 
 	StringTests();
 	NamespaceTests();
 	defTest();
-    //graphCopyOwnedTest();
-
-	//Sleep(10000);
 
 #ifdef _DEBUG
 	oct_ExchangeHeap_report(NULL);
