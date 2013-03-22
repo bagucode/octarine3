@@ -12,8 +12,6 @@ void LEAK_DETECT() {}
 #endif
 
 #include "octarine.h"
-#include "oct_any.h"
-#include "oct_exchangeheap.h"
 
 #include <stdio.h>
 #include <assert.h>
@@ -53,26 +51,28 @@ static void StringTests() {
 	// END Equals
 
 	// Reading
-	//TEST(oct_String_createOwnedFromCString(ctx, "\"Hello\"", &s1));
-	//bs1.ptr = s1.ptr; // borrow s1
-	//TEST(oct_OStringstream_create(ctx, bs1, &ss));
-	//bss.ptr = ss.ptr;
-	//TEST(oct_Stringstream_asCharStream(ctx, bss, &charStream));
-	//reader.ptr = ctx->reader; // TODO: method for this
-	//TEST(oct_Reader_read(ctx, reader, charStream, &readResult));
-	//TEST(readResult.variant == OCT_READRESULT_OK);
-	//TEST((readResult.result.object.vtable->type.ptr == ctx->rt->builtInTypes.String.ptr));
-	//bs2.ptr = (oct_String*)readResult.result.object.self.self;
-	//TEST(oct_OStringstream_destroy(ctx, ss));
+	TEST(oct_String_createOwnedFromCString(ctx, "\"Hello\"", &s1));
+	bs1.ptr = s1.ptr; // borrow s1
+	TEST(oct_OStringstream_create(ctx, bs1, &ss));
+	bss.ptr = ss.ptr;
+	TEST(oct_Stringstream_asCharStream(ctx, bss, &charStream));
+	reader.ptr = ctx->reader; // TODO: method for this
 
-	//TEST(oct_String_destroyOwned(ctx, s1));
-	//TEST(oct_String_createOwnedFromCString(ctx, "Hello", &s1));
-	//bs1.ptr = s1.ptr; // borrow s1
+	TEST(oct_Reader_read(ctx, reader, charStream, &readResult));
+	TEST(oct_OStringstream_destroy(ctx, ss));
+	TEST(oct_String_destroyOwned(ctx, s1));
 
-	//TEST(oct_BString_equals(ctx, bs1, bs2, &result));
-	//TEST(result);
-	//TEST(oct_String_destroyOwned(ctx, s1));
-	//TEST(oct_ReadResult_dtor(ctx, &readResult));
+	TEST(readResult.variant == OCT_READRESULT_OK);
+	TEST((readResult.result.object.vtable->type.ptr == ctx->rt->builtInTypes.String.ptr));
+	bs2.ptr = (oct_String*)readResult.result.object.self.self;
+
+	TEST(oct_String_createOwnedFromCString(ctx, "Hello", &s1));
+	bs1.ptr = s1.ptr; // borrow s1
+
+	TEST(oct_BString_equals(ctx, bs1, bs2, &result));
+	TEST(result);
+	TEST(oct_String_destroyOwned(ctx, s1));
+	TEST(oct_Object_destroyOwned(ctx, readResult.result.object));
 	// END Reading
 
 	TEST(oct_Runtime_destroy(rt, &error));
@@ -177,45 +177,22 @@ static void defTest() {
 	}
 
 	// Lookup
-	//TEST(oct_String_createOwnedFromCString(ctx, "hello", &str));
-	//TEST(oct_Symbol_createOwned(ctx, str, &osym));
-	//bsym.ptr = osym.ptr;
-	//TEST(oct_Symbol_asHashtableKey(ctx, bsym, &key));
-	//TEST(oct_Namespace_lookup(ctx, ns, key, &lookedUp));
-	//TEST(oct_Symbol_destroyOwned(ctx, osym));
-	//TEST(oct_String_createOwnedFromCString(ctx, "Hello", &str));
-	//bs1.ptr = str.ptr;
-	//bs2.ptr = (oct_String*)lookedUp.oobject.self.self;
-	//TEST(oct_BString_equals(ctx, bs1, bs2, &result));
-	//TEST(result);
-	//TEST(oct_String_destroyOwned(ctx, str));
-	//TEST(oct_Object_destroyOwned(ctx, lookedUp.oobject));
+	TEST(oct_String_createOwnedFromCString(ctx, "hello", &str));
+	TEST(oct_Symbol_createOwned(ctx, str, &osym));
+	bsym.ptr = osym.ptr;
+	TEST(oct_Symbol_asHashtableKey(ctx, bsym, &key));
+	TEST(oct_Namespace_lookup(ctx, ns, key, &lookedUp));
+	TEST(oct_Symbol_destroyOwned(ctx, osym));
+	TEST(oct_String_createOwnedFromCString(ctx, "Hello", &str));
+	bs1.ptr = str.ptr;
+	bs2.ptr = (oct_String*)lookedUp.oobject.self.self;
+	TEST(oct_BString_equals(ctx, bs1, bs2, &result));
+	TEST(result);
+	TEST(oct_String_destroyOwned(ctx, str));
+	TEST(oct_Object_destroyOwned(ctx, lookedUp.oobject));
 
 	TEST(oct_Runtime_destroy(rt, &error));
 }
-
-//static void graphCopyOwnedTest() {
-//	oct_Runtime* rt;
-//	oct_Context* ctx;
-//	oct_ReadResult readResult;
-//	oct_BReader reader;
-//	const char* error;
-//    oct_OObject copy;
-//	oct_BObject bob;
-//    
-//	rt = oct_Runtime_create(&error);
-//	assert(rt);
-//	ctx = oct_Runtime_currentContext(rt);
-//	assert(ctx);
-//
-//    reader.ptr = ctx->reader;
-//    TEST(oct_Reader_readFromCString(ctx, reader, "(a list of symbols)", &readResult));
-//	bob.self.self = readResult.result.object.self.self;
-//	oct_Object_cop
-//    TEST(oct_Type_deepCopyGraphOwned(ctx, bob, &copy));
-//    
-//	TEST(oct_Runtime_destroy(rt, &error));
-//}
 
 int main(int argc, char** argv) {
 	//const char* error;

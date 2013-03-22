@@ -14,5 +14,7 @@
 #include "oct_compiler.h"
 #include "oct_object.h"
 #include "oct_object_vtable.h"
+#include "oct_any.h"
+#include "oct_exchangeheap.h"
 
 #endif
