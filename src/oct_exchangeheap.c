@@ -44,7 +44,7 @@ oct_Bool oct_ExchangeHeap_free(struct oct_Context* ctx, void* box) {
 //	return OCT_FREE(box);
 //}
 
-#ifdef _DEBUG
+#ifdef OCT_DEBUG
 
 #include <memory.h>
 #include <stdio.h>

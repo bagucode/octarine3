@@ -1,5 +1,5 @@
 #ifdef _MSC_VER
-#ifdef _DEBUG
+#ifdef OCT_DEBUG
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>
@@ -240,7 +240,7 @@ int main(int argc, char** argv) {
 	NamespaceTests();
 	defTest();
 
-#ifdef _DEBUG
+#ifdef OCT_DEBUG
 	oct_ExchangeHeap_report(NULL);
 	LEAK_DETECT();
 #endif

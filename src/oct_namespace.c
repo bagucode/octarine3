@@ -125,7 +125,7 @@ error:
 	result = oct_False;
 end:
 	// TODO: unlock namespace table (if not locked in create)
-	return oct_True;
+	return result;
 }
 
 oct_Bool oct_Namespace_bindInCurrent(struct oct_Context* ctx, oct_HashtableKeyOption key, oct_Any value) {

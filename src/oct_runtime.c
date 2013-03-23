@@ -20,6 +20,7 @@
 #include "oct_exchangeheap.h"
 
 #include <stdlib.h>
+#include <memory.h>
 
 static void alloc_builtInTypes(oct_Runtime* rt) {
 	oct_Uword iters = sizeof(oct_BuiltInTypes) / sizeof(oct_BType);

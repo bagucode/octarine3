@@ -209,7 +209,6 @@ oct_Bool oct_String_asCopyable(struct oct_Context* ctx, oct_BString str, oct_BCo
 }
 
 oct_Bool oct_String_copyOwned(struct oct_Context* ctx, oct_BSelf orig, oct_OSelf* out_cpy) {
-	oct_Bool result;
 	oct_String* org;
 	oct_String* cpy;
     if(!OCT_ALLOCRAW(sizeof(oct_String), &out_cpy->self, "oct_String_copyOwned")) {

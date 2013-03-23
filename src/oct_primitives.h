@@ -30,6 +30,10 @@ typedef oct_I32 oct_Word;
 typedef oct_U32 oct_Uword;
 #endif
 
+#ifdef _DEBUG
+#define OCT_DEBUG
+#endif
+
 #elif defined (__APPLE__)
 
 #include <inttypes.h>
@@ -59,6 +63,10 @@ typedef oct_U64 oct_Uword;
 #define OCT32
 typedef oct_I32 oct_Word;
 typedef oct_U32 oct_Uword;
+#endif
+
+#ifndef NDEBUG
+#define OCT_DEBUG
 #endif
 
 #else

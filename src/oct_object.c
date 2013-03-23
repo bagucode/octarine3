@@ -76,12 +76,6 @@ oct_Bool oct_Object_as(oct_Context* ctx, oct_BSelf object, oct_BType selfType, o
 	return oct_True;
 }
 
-static oct_Bool destroyObject(oct_Context* ctx, oct_OSelf obj, oct_BType type, oct_OSelf* out) {
-	CHECK(OCT_FREE(obj.self));
-	out->self = NULL;
-	return oct_True;
-}
-
 oct_Bool oct_Object_destroyOwned(oct_Context* ctx, oct_OObject obj) {
 	oct_BSelf bself;
 	oct_Bool result;
