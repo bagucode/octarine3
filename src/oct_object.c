@@ -20,10 +20,11 @@ oct_Bool _oct_Object_initProtocol(struct oct_Context* ctx) {
 
 oct_Bool _oct_Object_init(struct oct_Context* ctx) {
 
-	// Object protocol. No functions.
+	// Object protocol.
 	oct_BType t = ctx->rt->builtInTypes.Object;
 	t.ptr->variant = OCT_TYPE_PROTOCOL;
-	CHECK(oct_ABFunction_createOwned(ctx, 0, &t.ptr->protocolType.functions));
+	CHECK(oct_ABFunction_createOwned(ctx, 1, &t.ptr->protocolType.functions));
+	t.ptr->protocolType.functions.ptr->data[0] = ctx->rt->functions.dtor;
 
 	// OObject
 	t = ctx->rt->builtInTypes.OObject;

@@ -18,10 +18,16 @@ oct_Bool _oct_Hashable_initProtocol(struct oct_Context* ctx) {
 }
 
 oct_Bool _oct_Hashable_init(struct oct_Context* ctx) {
+	oct_BFunction fn;
+
 	oct_BType t = ctx->rt->builtInTypes.Hashable;
 	t.ptr->variant = OCT_TYPE_PROTOCOL;
 	CHECK(oct_ABFunction_createOwned(ctx, 1, &t.ptr->protocolType.functions));
 	t.ptr->protocolType.functions.ptr->data[0] = ctx->rt->functions.hash;
+
+	// hash function signature
+	fn = ctx->rt->functions.hash;
+	
 
 	return oct_True;
 }

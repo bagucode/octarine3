@@ -16,9 +16,9 @@ oct_Bool _oct_Function_init(struct oct_Context* ctx) {
 	t.ptr->structType.size = sizeof(oct_Function);
 	t.ptr->structType.alignment = 0;
 	CHECK(oct_AField_createOwned(ctx, 2, &t.ptr->structType.fields));
-	t.ptr->structType.fields.ptr->data[0].offset = offsetof(oct_Function, returnType);
-	t.ptr->structType.fields.ptr->data[0].type = ctx->rt->builtInTypes.BType;
-	t.ptr->structType.fields.ptr->data[1].offset = offsetof(oct_Function, paramTypes);
+	t.ptr->structType.fields.ptr->data[0].offset = offsetof(oct_Function, paramTypes);
+	t.ptr->structType.fields.ptr->data[0].type = ctx->rt->builtInTypes.OABType;
+	t.ptr->structType.fields.ptr->data[1].offset = offsetof(oct_Function, returnTypes);
 	t.ptr->structType.fields.ptr->data[1].type = ctx->rt->builtInTypes.OABType;
 
 	// BFunction
@@ -42,7 +42,9 @@ oct_Bool _oct_Function_init(struct oct_Context* ctx) {
 }
 
 oct_Bool oct_ABFunction_createOwned(struct oct_Context* ctx, oct_Uword size, oct_OABFunction* out_result) {
-	return OCT_ALLOCRAW(sizeof(oct_BFunction) * size + sizeof(oct_Uword), (void**)&out_result->ptr, "oct_ABFunction_createOwned");
+	oct_Bool result = OCT_ALLOCRAW(sizeof(oct_BFunction) * size + sizeof(oct_Uword), (void**)&out_result->ptr, "oct_ABFunction_createOwned");
 	// TODO: set all the function pointers to point to a built in function so that they have a value. Perhaps the identity function?
+	out_result->ptr->size = size;
+	return result;
 }
 

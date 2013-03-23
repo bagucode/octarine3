@@ -4,8 +4,8 @@
 #include "oct_type_pointers.h"
 
 typedef struct oct_Function {
-	oct_BType returnType;
 	oct_OABType paramTypes;
+	oct_OABType returnTypes;
 } oct_Function;
 
 typedef struct oct_BFunction {
