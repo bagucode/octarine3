@@ -16,6 +16,7 @@ oct_Bool _oct_Charstream_initProtocol(struct oct_Context* ctx) {
 }
 
 oct_Bool _oct_Charstream_init(struct oct_Context* ctx) {
+	oct_BFunction fn;
 
 	// Charstream protocol
 	oct_BType t = ctx->rt->builtInTypes.Charstream;
@@ -35,6 +36,22 @@ oct_Bool _oct_Charstream_init(struct oct_Context* ctx) {
 	t.ptr->variant = OCT_TYPE_POINTER;
 	t.ptr->pointerType.kind = OCT_POINTER_BORROWED_PROTOCOL;
 	t.ptr->pointerType.type = ctx->rt->builtInTypes.Charstream;
+
+	// readChar function signature
+	CHECK(OCT_ALLOCRAW(sizeof(oct_Function), (void**)&ctx->rt->functions.readChar.ptr, "functions.readChar"));
+	fn = ctx->rt->functions.readChar;
+	CHECK(oct_ABType_createOwned(ctx, 1, &fn.ptr->paramTypes));
+	CHECK(oct_ABType_createOwned(ctx, 1, &fn.ptr->returnTypes));
+	fn.ptr->paramTypes.ptr->data[0] = ctx->rt->builtInTypes.BSelf;
+	fn.ptr->returnTypes.ptr->data[0] = ctx->rt->builtInTypes.Char;
+
+	// peekChar function signature
+	CHECK(OCT_ALLOCRAW(sizeof(oct_Function), (void**)&ctx->rt->functions.peekChar.ptr, "functions.peekChar"));
+	fn = ctx->rt->functions.peekChar;
+	CHECK(oct_ABType_createOwned(ctx, 1, &fn.ptr->paramTypes));
+	CHECK(oct_ABType_createOwned(ctx, 1, &fn.ptr->returnTypes));
+	fn.ptr->paramTypes.ptr->data[0] = ctx->rt->builtInTypes.BSelf;
+	fn.ptr->returnTypes.ptr->data[0] = ctx->rt->builtInTypes.Char;
 
 	return oct_True;
 }

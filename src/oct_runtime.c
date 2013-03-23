@@ -179,6 +179,7 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 
 	_oct_Primitives_init(ctx);
 	_oct_Hashable_init(ctx);
+	_oct_EqComparable_init(ctx);
 	_oct_Hashtable_init(ctx);
 	_oct_Type_init(ctx);
 	_oct_Protocol_init(ctx);

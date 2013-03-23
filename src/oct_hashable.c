@@ -26,8 +26,8 @@ oct_Bool _oct_Hashable_init(struct oct_Context* ctx) {
 	t.ptr->protocolType.functions.ptr->data[0] = ctx->rt->functions.hash;
 
 	// hash function signature
+	CHECK(OCT_ALLOCRAW(sizeof(oct_Function), (void**)&ctx->rt->functions.hash.ptr, "functions.hash"));
 	fn = ctx->rt->functions.hash;
-	CHECK(OCT_ALLOCRAW(sizeof(oct_Function), (void**)&fn.ptr, "functions.hash"));
 	CHECK(oct_ABType_createOwned(ctx, 1, &fn.ptr->paramTypes));
 	CHECK(oct_ABType_createOwned(ctx, 1, &fn.ptr->returnTypes));
 	fn.ptr->paramTypes.ptr->data[0] = ctx->rt->builtInTypes.BSelf;

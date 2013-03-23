@@ -19,6 +19,7 @@ oct_Bool _oct_Object_initProtocol(struct oct_Context* ctx) {
 }
 
 oct_Bool _oct_Object_init(struct oct_Context* ctx) {
+	oct_BFunction fn;
 
 	// Object protocol.
 	oct_BType t = ctx->rt->builtInTypes.Object;
@@ -55,6 +56,13 @@ oct_Bool _oct_Object_init(struct oct_Context* ctx) {
 	CHECK(oct_ABType_createOwned(ctx, 2, &t.ptr->variadicType.types));
 	t.ptr->variadicType.types.ptr->data[0] = ctx->rt->builtInTypes.Nothing;
 	t.ptr->variadicType.types.ptr->data[1] = ctx->rt->builtInTypes.BObject;
+
+	// dtor function signature
+	CHECK(OCT_ALLOCRAW(sizeof(oct_Function), (void**)&ctx->rt->functions.dtor.ptr, "functions.dtor"));
+	fn = ctx->rt->functions.dtor;
+	CHECK(oct_ABType_createOwned(ctx, 1, &fn.ptr->paramTypes));
+	CHECK(oct_ABType_createOwned(ctx, 0, &fn.ptr->returnTypes));
+	fn.ptr->paramTypes.ptr->data[0] = ctx->rt->builtInTypes.BSelf;
 
 	return oct_True;
 }
