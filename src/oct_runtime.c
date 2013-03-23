@@ -68,6 +68,23 @@ static void dealloc_builtInProtocols(oct_Context* ctx) {
 	}
 }
 
+static void dealloc_builtInFunctions(oct_Context* ctx) {
+	oct_Uword iters = sizeof(oct_BuiltInFunctions) / sizeof(oct_BFunction);
+	oct_Uword i;
+	oct_BFunction* place;
+	oct_Runtime* rt = ctx->rt;
+	oct_BSelf self;
+
+	for(i = 0; i < iters; ++i) {
+		char* dummy = (char*)(&rt->functions);
+		dummy += sizeof(oct_BFunction) * i;
+		place = (oct_BFunction*)dummy;
+		self.self = place->ptr;
+		oct_Function_dtor(ctx, self);
+		OCT_FREE(place->ptr);
+	}
+}
+
 static void dealloc_builtInVTables(oct_Runtime* rt) {
 	oct_Uword iters = sizeof(oct_BuiltInVTables) / sizeof(oct_BVTable);
 	oct_Uword i;
@@ -161,6 +178,7 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	// Initialize all built in types
 
 	_oct_Primitives_init(ctx);
+	_oct_Hashable_init(ctx);
 	_oct_Hashtable_init(ctx);
 	_oct_Type_init(ctx);
 	_oct_Protocol_init(ctx);
@@ -302,6 +320,7 @@ oct_Bool oct_Runtime_destroy(oct_Runtime* rt, const char** out_error) {
 	oct_BSelf self;
 	self.self = &rt->namespaces;
 	oct_Hashtable_dtor(ctx, self);
+	dealloc_builtInFunctions(ctx);
 	dealloc_builtInProtocols(ctx);
 	dealloc_builtInVTables(rt);
 	dealloc_buintInTypes(ctx);

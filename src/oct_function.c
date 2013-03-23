@@ -48,3 +48,10 @@ oct_Bool oct_ABFunction_createOwned(struct oct_Context* ctx, oct_Uword size, oct
 	return result;
 }
 
+oct_Bool oct_Function_dtor(struct oct_Context* ctx, oct_BSelf self) {
+	oct_BFunction fn;
+	oct_Bool result;
+	fn.ptr = (oct_Function*)self.self;
+	result = OCT_FREE(fn.ptr->paramTypes.ptr);
+	return OCT_FREE(fn.ptr->returnTypes.ptr) && result;
+}

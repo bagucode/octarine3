@@ -18,6 +18,7 @@ typedef struct oct_ContextList {
 struct oct_Type;
 
 typedef struct oct_BuiltInTypes {
+	// Primitives
 	oct_BType U8;
 	oct_BType I8;
 	oct_BType U16;
@@ -32,6 +33,10 @@ typedef struct oct_BuiltInTypes {
 	oct_BType Word;
 	oct_BType Char;
 	oct_BType Bool;
+	// Self, This is a special type, it is just a marker
+	oct_BType BSelf;
+	oct_BType OSelf;
+	oct_BType MSelf;
 	// Hashtable
 	oct_BType HashtableKey;
 	oct_BType OHashtableKey;
@@ -189,7 +194,7 @@ typedef struct oct_BuiltInProtocols {
 } oct_BuiltInProtocols;
 
 typedef struct oct_BuiltInFunctions {
-	oct_BFunction hash; // TODO
+	oct_BFunction hash;
 	oct_BFunction eq; // TODO
 	oct_BFunction readChar; // TODO
 	oct_BFunction peekChar; // TODO
