@@ -1,18 +1,4 @@
-#ifdef _MSC_VER
-#ifdef OCT_DEBUG
-#define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <crtdbg.h>
-void LEAK_DETECT() {
-	_CrtDumpMemoryLeaks();
-}
-#endif
-#else
-void LEAK_DETECT() {}
-#endif
-
 #include "octarine.h"
-
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
@@ -242,7 +228,6 @@ int main(int argc, char** argv) {
 
 #ifdef OCT_DEBUG
 	oct_ExchangeHeap_report(NULL);
-	LEAK_DETECT();
 #endif
 	return 0;
 }
