@@ -16,5 +16,6 @@
 #include "oct_object_vtable.h"
 #include "oct_any.h"
 #include "oct_exchangeheap.h"
+#include "oct_printable.h"
 
 #endif
