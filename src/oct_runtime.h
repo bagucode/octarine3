@@ -134,6 +134,10 @@ typedef struct oct_BuiltInTypes {
 	oct_BType Hashable;
 	// Copyable
 	oct_BType Copyable;
+	// Printable
+	oct_BType Printable;
+	oct_BType OPrintable;
+	oct_BType BPrintable;
 } oct_BuiltInTypes;
 
 typedef struct oct_BuiltInVTables {
@@ -192,6 +196,7 @@ typedef struct oct_BuiltInProtocols {
 	oct_BProtocolBinding HashtableKey;
 	oct_BProtocolBinding Copyable;
 	oct_BProtocolBinding Charstream;
+	oct_BProtocolBinding Printable;
 } oct_BuiltInProtocols;
 
 typedef struct oct_BuiltInFunctions {
@@ -201,6 +206,7 @@ typedef struct oct_BuiltInFunctions {
 	oct_BFunction peekChar;
 	oct_BFunction copyOwned;
 	oct_BFunction dtor;
+	oct_BFunction print;
 } oct_BuiltInFunctions;
 
 typedef struct oct_BuiltInErrors {
