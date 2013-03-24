@@ -204,7 +204,13 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	_oct_Stringstream_init(ctx);
 	_oct_Copyable_init(ctx);
 
-	oct_Reader_ctor(ctx, ctx->reader); // This is a little weird
+	// Init built in errors
+
+	_oct_Error_initBuiltInErrors(ctx);
+
+	// Construct main reader
+
+	oct_Reader_ctor(ctx, ctx->reader);
 
 	// *** 3. Create octarine namespace.
 
@@ -319,6 +325,7 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 oct_Bool oct_Runtime_destroy(oct_Runtime* rt, const char** out_error) {
 	oct_Context* ctx = oct_Runtime_currentContext(rt);
 	oct_BSelf self;
+	_oct_Error_destroyBuiltInErrors(ctx);
 	self.self = &rt->namespaces;
 	oct_Hashtable_dtor(ctx, self);
 	dealloc_builtInFunctions(ctx);

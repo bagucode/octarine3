@@ -12,22 +12,30 @@ typedef struct oct_OError {
 	oct_Error* ptr;
 } oct_OError;
 
-#define OCT_ERROROPTION_NOTHING 0
-#define OCT_ERROROPTION_ERROR 1
+typedef struct oct_BError {
+	oct_Error* ptr;
+} oct_BError;
 
-typedef struct oct_OErrorOption {
+#define OCT_ERROROPTION_NOTHING 0
+#define OCT_ERROROPTION_OERROR 1
+#define OCT_ERROROPTION_BERROR 2
+
+typedef struct oct_ErrorOption {
 	oct_Uword variant;
 	union {
 		oct_Nothing nothing;
-		oct_OError error;
+		oct_OError oerror;
+		oct_BError berror;
 	};
-} oct_OErrorOption;
+} oct_ErrorOption;
 
 // Private
 
 struct oct_Context;
 
 oct_Bool _oct_Error_init(struct oct_Context* ctx);
+oct_Bool _oct_Error_initBuiltInErrors(struct oct_Context* ctx);
+oct_Bool _oct_Error_destroyBuiltInErrors(struct oct_Context* ctx);
 
 // Public
 
