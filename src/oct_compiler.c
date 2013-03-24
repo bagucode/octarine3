@@ -145,6 +145,38 @@ end:
 	return result;
 }
 
+
+static oct_Bool eval_quote(oct_Context* ctx, oct_OObject form, oct_Any* out_result) {
+    oct_OList olist;
+    oct_BList blist;
+    oct_OListOption olistOpt;
+    oct_Bool result = oct_True;
+    
+    printf("eval_quote\n");
+    
+    // Just drop the first object in the list (the quote symbol) and we are done!
+    blist.ptr = form.self.self;
+    CHECK(oct_List_rest(ctx, blist, &olistOpt)); // detach ...
+    olist.ptr = form.self.self;
+    CHECK(oct_List_destroyOwned(ctx, olist)); // ... and drop head
+    if(olistOpt.variant == OCT_LISTOPTION_LIST) {
+        CHECK(oct_List_asObject(ctx, olistOpt.list, &out_result->oobject));
+        out_result->variant = OCT_ANY_OOBJECT;
+    }
+    else if(olistOpt.variant == OCT_LISTOPTION_NOTHING) {
+        // This should not happen, but might as well put the code here for completeness
+        out_result->variant = OCT_ANY_NOTHING;
+    }
+    
+    goto end;
+error:
+    result = oct_False;
+end:
+    
+    return result;
+}
+
+
 static oct_Bool eval_list(oct_Context* ctx, oct_OObject form, oct_Any* out_result) {
 	oct_Bool eq;
 	oct_OList olist;
@@ -172,6 +204,10 @@ static oct_Bool eval_list(oct_Context* ctx, oct_OObject form, oct_Any* out_resul
 			if(eq) {
 				return eval_def(ctx, form, out_result);
 			}
+            CHECK(oct_BStringCString_equals(ctx, bstr, "quote", &eq));
+            if(eq) {
+                return eval_quote(ctx, form, out_result);
+            }
 		}
 	}
 
