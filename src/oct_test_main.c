@@ -17,7 +17,7 @@ void LEAK_DETECT() {}
 #include <assert.h>
 #include <stdlib.h>
 
-#define TEST(X) if(!X) { printf("%s\n", &ctx->err.error.ptr->message.ptr->utf8Data.ptr->data[0]); abort(); }
+#define TEST(X) if(!X) { printf("%s\n", &ctx->err.berror.ptr->message.ptr->utf8Data.ptr->data[0]); abort(); }
 
 static void StringTests() {
 	oct_Runtime* rt;

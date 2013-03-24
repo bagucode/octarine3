@@ -7,6 +7,7 @@
 #include "oct_tls.h"
 #include "oct_type_pointers.h"
 #include "oct_protocoltype.h"
+#include "oct_error.h"
 
 struct oct_Context;
 
@@ -202,6 +203,10 @@ typedef struct oct_BuiltInFunctions {
 	oct_BFunction dtor;
 } oct_BuiltInFunctions;
 
+typedef struct oct_BuiltInErrors {
+	oct_BError oom;
+} oct_BuiltInErrors;
+
 typedef struct oct_Runtime {
 	oct_TLS currentContext;
 	// TODO: lock for context collection
@@ -212,6 +217,7 @@ typedef struct oct_Runtime {
 	oct_BuiltInProtocols builtInProtocols;
 	oct_BuiltInVTables vtables;
 	oct_BuiltInFunctions functions;
+	oct_BuiltInErrors errors;
 } oct_Runtime;
 
 struct oct_Context;

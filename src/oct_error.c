@@ -28,10 +28,30 @@ oct_Bool _oct_Error_init(struct oct_Context* ctx) {
 	t = ctx->rt->builtInTypes.OErrorOption;
 	t.ptr->variant = OCT_TYPE_VARIADIC;
 	t.ptr->variadicType.alignment = 0;
-	t.ptr->variadicType.size = sizeof(oct_OErrorOption);
+	t.ptr->variadicType.size = sizeof(oct_ErrorOption);
 	CHECK(oct_ABType_createOwned(ctx, 2, &t.ptr->variadicType.types));
 	t.ptr->variadicType.types.ptr->data[0] = ctx->rt->builtInTypes.Nothing;
 	t.ptr->variadicType.types.ptr->data[1] = ctx->rt->builtInTypes.OError;
+
+	return oct_True;
+}
+
+oct_Bool _oct_Error_initBuiltInErrors(struct oct_Context* ctx) {
+	oct_OString msg;
+
+	// OOM
+	CHECK(oct_String_createOwnedFromCString(ctx, "Out of memory", &msg));
+	CHECK(oct_Error_createOwned(ctx, msg, (oct_OError*)&ctx->rt->errors.oom));
+
+	return oct_True;
+}
+
+oct_Bool _oct_Error_destroyBuiltInErrors(struct oct_Context* ctx) {
+	oct_OError owned;
+	
+	// OOM
+	owned.ptr = ctx->rt->errors.oom.ptr;
+	oct_Error_destroyOwned(ctx, owned);
 
 	return oct_True;
 }
