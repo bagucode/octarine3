@@ -175,9 +175,11 @@ typedef struct oct_BuiltInVTables {
     oct_BVTable I16AsObject;
     oct_BVTable U32AsObject;
     oct_BVTable I32AsObject;
+    oct_BVTable I32AsPrintable;
     oct_BVTable U64AsObject;
     oct_BVTable I64AsObject;
     oct_BVTable F32AsObject;
+    oct_BVTable F32AsPrintable;
     oct_BVTable F64AsObject;
     oct_BVTable BoolAsObject;
     oct_BVTable CharAsObject;

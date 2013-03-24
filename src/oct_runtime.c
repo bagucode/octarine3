@@ -19,6 +19,7 @@
 #include "oct_copyable.h"
 #include "oct_exchangeheap.h"
 #include "oct_printable.h"
+#include "oct_primitives_functions.h"
 
 #include <stdlib.h>
 #include <memory.h>
@@ -180,6 +181,7 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	// Initialize all built in types
 
 	_oct_Primitives_init(ctx);
+    _oct_Primitives_initProtocols(ctx);
 	_oct_Hashable_init(ctx);
 	_oct_EqComparable_init(ctx);
 	_oct_Hashtable_init(ctx);
