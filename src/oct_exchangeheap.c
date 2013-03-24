@@ -86,6 +86,10 @@ static oct_Bool allocInfoSet_Create(oct_Context* ctx, oct_Uword initialCap, allo
 	table->capacity = nextp2(initialCap);
 	byteSize = table->capacity * sizeof(allocInfoSetEntry);
 	table->table = (allocInfoSetEntry*)malloc(byteSize);
+	if(table->table == NULL) {
+		oct_Context_setErrorOOM(ctx);
+		return oct_False;
+	}
 	memset(table->table, 0, byteSize);
     
 	return oct_True;
@@ -222,7 +226,9 @@ oct_Bool oct_ExchangeHeap_debugAlloc(struct oct_Context* ctx, oct_Uword size, vo
 	allocInfo ai;
 	oct_Bool result;
 	if(!didInit) {
-		allocInfoSet_Create(ctx, 1000000, &allocInfos);
+		if(!allocInfoSet_Create(ctx, 1000000, &allocInfos)) {
+			return oct_False;
+		}
 		didInit = oct_True;
 	}
 	result = oct_ExchangeHeap_alloc(ctx, size, out_box);
@@ -233,7 +239,9 @@ oct_Bool oct_ExchangeHeap_debugAlloc(struct oct_Context* ctx, oct_Uword size, vo
 		ai.file = file;
 		ai.line = line;
 		ai.size = size;
-		allocInfoSet_Put(ctx, &allocInfos, ai);
+		if(!allocInfoSet_Put(ctx, &allocInfos, ai)) {
+			return oct_False;
+		}
 	}
 	return result;
 }
