@@ -474,35 +474,9 @@ end:
     if(ss.ptr) {
         oct_OStringstream_destroy(ctx, ss);
     }
-    else if(str.ptr) {
+    if(str.ptr) {
         oct_String_destroyOwned(ctx, str);
     }
     return result;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
