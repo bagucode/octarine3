@@ -219,6 +219,7 @@ int main(int argc, char** argv) {
                 }
                 else {
                     oct_Printable_print(ctx, prn);
+					printf("\n");
                 }
                 if(evalResult.variant == OCT_ANY_OOBJECT) {
                     oct_Object_destroyOwned(ctx, evalResult.oobject);

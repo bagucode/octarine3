@@ -19,12 +19,12 @@ typedef struct oct_PrintableVTable {
 
 typedef struct oct_BPrintable {
 	oct_BSelf self;
-	oct_PrintableVTable vtable;
+	oct_PrintableVTable* vtable;
 } oct_BPrintable;
 
 typedef struct oct_OPrintable {
 	oct_OSelf self;
-	oct_PrintableVTable vtable;
+	oct_PrintableVTable* vtable;
 } oct_OPrintable;
 
 oct_Bool _oct_Printable_initProtocol(struct oct_Context* ctx);

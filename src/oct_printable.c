@@ -49,5 +49,5 @@ oct_Bool _oct_Printable_init(struct oct_Context* ctx) {
 // Helper
 
 oct_Bool oct_Printable_print(struct oct_Context* ctx, oct_BPrintable obj) {
-	return obj.vtable.functions.print(ctx, obj.self);
+	return obj.vtable->functions.print(ctx, obj.self);
 }

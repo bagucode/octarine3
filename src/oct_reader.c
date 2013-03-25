@@ -237,8 +237,6 @@ static oct_Bool readI32(struct oct_Context* ctx, oct_BReader reader, oct_BCharst
 	out_result->result.variant = OCT_OOBJECTOPTION_OBJECT;
 	CHECK(oct_I32_asObject(ctx, instance, &out_result->result.object));
 
-	printf("Read an I32: %d\n", *instance.ptr);
-
 	goto end;
 error:
 	result = oct_False;
@@ -292,8 +290,6 @@ static oct_Bool readF32(struct oct_Context* ctx, oct_BReader reader, oct_BCharst
 
 	out_result->result.variant = OCT_OOBJECTOPTION_OBJECT;
 	CHECK(oct_F32_asObject(ctx, instance, &out_result->result.object));
-
-	printf("Read an F32: %f\n", *instance.ptr);
 
 	goto end;
 error:

@@ -223,11 +223,62 @@ end:
 	return oct_List_destroyOwned(ctx, olist) && result;
 }
 
-static oct_Bool eval_string(oct_Context* ctx, oct_OObject form, oct_Any* out_result) {
-	oct_OString ostr;
-	ostr.ptr = form.self.self;
+static oct_Bool is_atom(oct_Context* ctx, oct_BType t) {
+	// TODO: should this return true for any opaque type?
+	oct_Bool result = oct_False;
+	if(t.ptr == ctx->rt->builtInTypes.String.ptr) {
+		result = oct_True;
+	}
+    else if(t.ptr == ctx->rt->builtInTypes.U8.ptr) {
+        result = oct_True;
+    }
+    else if(t.ptr == ctx->rt->builtInTypes.I8.ptr) {
+        result = oct_True;
+    }
+    else if(t.ptr == ctx->rt->builtInTypes.U16.ptr) {
+        result = oct_True;
+    }
+    else if(t.ptr == ctx->rt->builtInTypes.I16.ptr) {
+        result = oct_True;
+    }
+    else if(t.ptr == ctx->rt->builtInTypes.U32.ptr) {
+        result = oct_True;
+    }
+    else if(t.ptr == ctx->rt->builtInTypes.I32.ptr) {
+        result = oct_True;
+    }
+    else if(t.ptr == ctx->rt->builtInTypes.U64.ptr) {
+        result = oct_True;
+    }
+    else if(t.ptr == ctx->rt->builtInTypes.I64.ptr) {
+        result = oct_True;
+    }
+    else if(t.ptr == ctx->rt->builtInTypes.F32.ptr) {
+        result = oct_True;
+    }
+    else if(t.ptr == ctx->rt->builtInTypes.F64.ptr) {
+        result = oct_True;
+    }
+    else if(t.ptr == ctx->rt->builtInTypes.Uword.ptr) {
+        result = oct_True;
+    }
+    else if(t.ptr == ctx->rt->builtInTypes.Word.ptr) {
+        result = oct_True;
+    }
+    else if(t.ptr == ctx->rt->builtInTypes.Char.ptr) {
+        result = oct_True;
+    }
+    else if(t.ptr == ctx->rt->builtInTypes.Bool.ptr) {
+        result = oct_True;
+    }
+	return result;
+}
+
+static oct_Bool eval_atom(oct_Context* ctx, oct_OObject form, oct_Any* out_result) {
+	// Just return it as-is. The vtable should already be for Object.
 	out_result->variant = OCT_ANY_OOBJECT;
-	return oct_String_asObjectOwned(ctx, ostr, &out_result->oobject);
+	out_result->oobject = form;
+	return oct_True;
 }
 
 typedef struct VTable {
@@ -245,8 +296,8 @@ oct_Bool oct_Compiler_eval(struct oct_Context* ctx, oct_OObject form, oct_Any* o
 	else if(is_list(ctx, t)) {
 		return eval_list(ctx, form, out_result);
 	}
-	else if(is_string(ctx, t)) {
-		return eval_string(ctx, form, out_result);
+	else if(is_atom(ctx, t)) {
+		return eval_atom(ctx, form, out_result);
 	}
 
 	// TODO: finish implementing this function :)
