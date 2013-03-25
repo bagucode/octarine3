@@ -10,7 +10,7 @@
 
 oct_Bool _oct_Copyable_initProtocol(struct oct_Context* ctx) {
 	oct_BHashtable table;
-	CHECK(OCT_ALLOCRAW(sizeof(oct_ProtocolBinding), (void**)&ctx->rt->builtInProtocols.Copyable.ptr, "_oct_Copyable_initProtocol"));
+	CHECK(OCT_ALLOCOWNED(sizeof(oct_ProtocolBinding), (void**)&ctx->rt->builtInProtocols.Copyable.ptr, "_oct_Copyable_initProtocol"));
 	ctx->rt->builtInProtocols.Copyable.ptr->protocolType = ctx->rt->builtInTypes.Copyable;
 	table.ptr = &ctx->rt->builtInProtocols.Copyable.ptr->implementations;
 	return oct_Hashtable_ctor(ctx, table, 100);
@@ -25,7 +25,7 @@ oct_Bool _oct_Copyable_init(struct oct_Context* ctx) {
 	t.ptr->protocolType.functions.ptr->data[0] = ctx->rt->functions.copyOwned;
 
 	// copyOwned function signature
-	CHECK(OCT_ALLOCRAW(sizeof(oct_Function), (void**)&ctx->rt->functions.copyOwned.ptr, "functions.copyOwned"));
+	CHECK(OCT_ALLOCOWNED(sizeof(oct_Function), (void**)&ctx->rt->functions.copyOwned.ptr, "functions.copyOwned"));
 	fn = ctx->rt->functions.copyOwned;
 	CHECK(oct_ABType_createOwned(ctx, 1, &fn.ptr->paramTypes));
 	CHECK(oct_ABType_createOwned(ctx, 1, &fn.ptr->returnTypes));

@@ -11,7 +11,7 @@
 
 oct_Bool _oct_Hashable_initProtocol(struct oct_Context* ctx) {
 	oct_BHashtable table;
-	CHECK(OCT_ALLOCRAW(sizeof(oct_ProtocolBinding), (void**)&ctx->rt->builtInProtocols.Hashable.ptr, "_oct_Hashable_initProtocol"));
+	CHECK(OCT_ALLOCOWNED(sizeof(oct_ProtocolBinding), (void**)&ctx->rt->builtInProtocols.Hashable.ptr, "_oct_Hashable_initProtocol"));
 	ctx->rt->builtInProtocols.Hashable.ptr->protocolType = ctx->rt->builtInTypes.Hashable;
 	table.ptr = &ctx->rt->builtInProtocols.Hashable.ptr->implementations;
 	return oct_Hashtable_ctor(ctx, table, 100);
@@ -26,7 +26,7 @@ oct_Bool _oct_Hashable_init(struct oct_Context* ctx) {
 	t.ptr->protocolType.functions.ptr->data[0] = ctx->rt->functions.hash;
 
 	// hash function signature
-	CHECK(OCT_ALLOCRAW(sizeof(oct_Function), (void**)&ctx->rt->functions.hash.ptr, "functions.hash"));
+	CHECK(OCT_ALLOCOWNED(sizeof(oct_Function), (void**)&ctx->rt->functions.hash.ptr, "functions.hash"));
 	fn = ctx->rt->functions.hash;
 	CHECK(oct_ABType_createOwned(ctx, 1, &fn.ptr->paramTypes));
 	CHECK(oct_ABType_createOwned(ctx, 1, &fn.ptr->returnTypes));

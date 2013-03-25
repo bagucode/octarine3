@@ -34,7 +34,7 @@ static void alloc_builtInTypes(oct_Runtime* rt) {
 		char* dummy = (char*)(&rt->builtInTypes);
 		dummy += sizeof(oct_BType) * i;
 		place = (oct_BType*)dummy;
-		OCT_ALLOCRAW(sizeof(oct_Type), (void**)&place->ptr, "alloc_builtInTypes");
+		OCT_ALLOCOWNED(sizeof(oct_Type), (void**)&place->ptr, "alloc_builtInTypes");
 	}
 }
 
@@ -49,7 +49,7 @@ static void dealloc_buintInTypes(oct_Context* ctx) {
 		dummy += sizeof(oct_BType) * i;
 		place = (oct_BType*)dummy;
 		oct_Type_dtor(ctx, place->ptr);
-		OCT_FREE(place->ptr);
+		OCT_FREEOWNED(place->ptr);
 	}
 }
 
@@ -66,7 +66,7 @@ static void dealloc_builtInProtocols(oct_Context* ctx) {
 		place = (oct_BProtocolBinding*)dummy;
 		self.self = &place->ptr->implementations;
 		oct_Hashtable_dtor(ctx, self);
-		OCT_FREE(place->ptr);
+		OCT_FREEOWNED(place->ptr);
 	}
 }
 
@@ -83,7 +83,7 @@ static void dealloc_builtInFunctions(oct_Context* ctx) {
 		place = (oct_BFunction*)dummy;
 		self.self = place->ptr;
 		oct_Function_dtor(ctx, self);
-		OCT_FREE(place->ptr);
+		OCT_FREEOWNED(place->ptr);
 	}
 }
 
@@ -97,7 +97,7 @@ static void dealloc_builtInVTables(oct_Runtime* rt) {
 		char* dummy = (char*)(&rt->vtables);
 		dummy += sizeof(oct_BVTable) * i;
 		place = (oct_BVTable*)dummy;
-		OCT_FREE(place->ptr);
+		OCT_FREEOWNED(place->ptr);
 	}
 }
 
@@ -129,7 +129,7 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 
 	oct_initJITTarget();
 
-	OCT_ALLOCRAW(sizeof(oct_Runtime), (void**)&rt, "Runtime");
+	OCT_ALLOCOWNED(sizeof(oct_Runtime), (void**)&rt, "Runtime");
 	if(!rt) {
 		(*out_error) = "Out of memory";
 		return NULL;
@@ -138,14 +138,14 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 
 	// *** 1. Create main thread context
 
-	OCT_ALLOCRAW(sizeof(oct_Context), (void**)&ctx, "Main context");
+	OCT_ALLOCOWNED(sizeof(oct_Context), (void**)&ctx, "Main context");
 	if(!ctx) {
 		(*out_error) = "Out of memory";
 		return NULL;
 	}
 	memset(ctx, 0, sizeof(oct_Context));
 	ctx->rt = rt;
-	OCT_ALLOCRAW(sizeof(oct_Reader), (void**)&ctx->reader, "Main reader");
+	OCT_ALLOCOWNED(sizeof(oct_Reader), (void**)&ctx->reader, "Main reader");
     oct_TLSInit(&rt->currentContext);
 	oct_TLSSet(rt->currentContext, ctx);
 
@@ -154,7 +154,7 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 
 	// *** 1.5 Create the built in protocols so that type init functions may add themselves
 	
-	OCT_ALLOCRAW(sizeof(oct_VTable) + (sizeof(void*) * 2), (void**)&rt->vtables.NothingAsHashtableKey.ptr, "NothingAsHashtableKey");
+	OCT_ALLOCOWNED(sizeof(oct_VTable) + (sizeof(void*) * 2), (void**)&rt->vtables.NothingAsHashtableKey.ptr, "NothingAsHashtableKey");
 	if(!rt->vtables.NothingAsHashtableKey.ptr) {
 		(*out_error) = "Out of memory";
 		return NULL;
@@ -339,9 +339,9 @@ oct_Bool oct_Runtime_destroy(oct_Runtime* rt, const char** out_error) {
 	dealloc_buintInTypes(ctx);
 	self.self = ctx->reader;
 	oct_Reader_dtor(ctx, self);
-	OCT_FREE(ctx->reader);
-	OCT_FREE(ctx);
-	OCT_FREE(rt);
+	OCT_FREEOWNED(ctx->reader);
+	OCT_FREEOWNED(ctx);
+	OCT_FREEOWNED(rt);
 	return oct_True;
 }
 

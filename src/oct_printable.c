@@ -9,7 +9,7 @@
 
 oct_Bool _oct_Printable_initProtocol(struct oct_Context* ctx) {
 	oct_BHashtable table;
-	CHECK(OCT_ALLOCRAW(sizeof(oct_ProtocolBinding), (void**)&ctx->rt->builtInProtocols.Printable.ptr, "_oct_Printable_initProtocol"));
+	CHECK(OCT_ALLOCOWNED(sizeof(oct_ProtocolBinding), (void**)&ctx->rt->builtInProtocols.Printable.ptr, "_oct_Printable_initProtocol"));
 	ctx->rt->builtInProtocols.Printable.ptr->protocolType = ctx->rt->builtInTypes.Printable;
 	table.ptr = &ctx->rt->builtInProtocols.Printable.ptr->implementations;
 	return oct_Hashtable_ctor(ctx, table, 100);
@@ -37,7 +37,7 @@ oct_Bool _oct_Printable_init(struct oct_Context* ctx) {
 	t.ptr->pointerType.type = ctx->rt->builtInTypes.Printable;
 
 	// print function signature
-	CHECK(OCT_ALLOCRAW(sizeof(oct_Function), (void**)&ctx->rt->functions.print.ptr, "functions.print"));
+	CHECK(OCT_ALLOCOWNED(sizeof(oct_Function), (void**)&ctx->rt->functions.print.ptr, "functions.print"));
 	fn = ctx->rt->functions.print;
 	CHECK(oct_ABType_createOwned(ctx, 1, &fn.ptr->paramTypes));
 	CHECK(oct_ABType_createOwned(ctx, 0, &fn.ptr->returnTypes));

@@ -57,13 +57,13 @@ oct_Bool _oct_Error_destroyBuiltInErrors(struct oct_Context* ctx) {
 }
 
 oct_Bool oct_Error_createOwned(struct oct_Context* ctx, oct_OString message, oct_OError* out_err) {
-	CHECK(OCT_ALLOCRAW(sizeof(oct_Error), (void**)&out_err->ptr, "oct_Error_createOwned"));
+	CHECK(OCT_ALLOCOWNED(sizeof(oct_Error), (void**)&out_err->ptr, "oct_Error_createOwned"));
 	out_err->ptr->message.ptr = message.ptr;
 	return oct_True;
 }
 
 oct_Bool oct_Error_destroyOwned(struct oct_Context* ctx, oct_OError err) {
 	oct_String_destroyOwned(ctx, err.ptr->message);
-	return OCT_FREE(err.ptr);
+	return OCT_FREEOWNED(err.ptr);
 }
 

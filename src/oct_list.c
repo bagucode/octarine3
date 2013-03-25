@@ -90,19 +90,19 @@ oct_Bool oct_List_dtor(struct oct_Context* ctx, oct_BSelf self) {
 				result = oct_Object_destroyOwned(ctx, lst->data.object) && result;
 			}
 			if(lst->next.variant == OCT_LISTOPTION_NOTHING) {
-				OCT_FREE(lst);
+				OCT_FREEOWNED(lst);
 				break;
 			}
 			prev = lst;
 			lst = lst->next.list.ptr;
-			OCT_FREE(prev);
+			OCT_FREEOWNED(prev);
 		}
 	}
     return result;
 }
 
 oct_Bool oct_List_createOwned(struct oct_Context* ctx, oct_OList* out_result) {
-    if(!OCT_ALLOCRAW(sizeof(oct_List), (void**)&out_result->ptr, "oct_List_createOwned")) {
+    if(!OCT_ALLOCOWNED(sizeof(oct_List), (void**)&out_result->ptr, "oct_List_createOwned")) {
         return oct_False;
     }
     return oct_List_ctor(ctx, out_result->ptr);
@@ -113,7 +113,7 @@ oct_Bool oct_List_destroyOwned(struct oct_Context* ctx, oct_OList lst) {
 	oct_Bool result;
 	self.self = lst.ptr;
 	result = oct_List_dtor(ctx, self);
-	return OCT_FREE(lst.ptr) && result;
+	return OCT_FREEOWNED(lst.ptr) && result;
 }
 
 // Operations

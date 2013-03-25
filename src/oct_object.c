@@ -12,7 +12,7 @@
 
 oct_Bool _oct_Object_initProtocol(struct oct_Context* ctx) {
 	oct_BHashtable table;
-	CHECK(OCT_ALLOCRAW(sizeof(oct_ProtocolBinding), (void**)&ctx->rt->builtInProtocols.Object.ptr, "_oct_Object_initProtocol"));
+	CHECK(OCT_ALLOCOWNED(sizeof(oct_ProtocolBinding), (void**)&ctx->rt->builtInProtocols.Object.ptr, "_oct_Object_initProtocol"));
 	ctx->rt->builtInProtocols.Object.ptr->protocolType = ctx->rt->builtInTypes.Object;
 	table.ptr = &ctx->rt->builtInProtocols.Object.ptr->implementations;
 	return oct_Hashtable_ctor(ctx, table, 100);
@@ -58,7 +58,7 @@ oct_Bool _oct_Object_init(struct oct_Context* ctx) {
 	t.ptr->variadicType.types.ptr->data[1] = ctx->rt->builtInTypes.BObject;
 
 	// dtor function signature
-	CHECK(OCT_ALLOCRAW(sizeof(oct_Function), (void**)&ctx->rt->functions.dtor.ptr, "functions.dtor"));
+	CHECK(OCT_ALLOCOWNED(sizeof(oct_Function), (void**)&ctx->rt->functions.dtor.ptr, "functions.dtor"));
 	fn = ctx->rt->functions.dtor;
 	CHECK(oct_ABType_createOwned(ctx, 1, &fn.ptr->paramTypes));
 	CHECK(oct_ABType_createOwned(ctx, 0, &fn.ptr->returnTypes));
@@ -90,7 +90,7 @@ oct_Bool oct_Object_destroyOwned(oct_Context* ctx, oct_OObject obj) {
 	oct_Bool result;
 	bself.self = obj.self.self;
 	result = obj.vtable->functions.dtor(ctx, bself);
-	return OCT_FREE(obj.self.self) && result;
+	return OCT_FREEOWNED(obj.self.self) && result;
 }
 
 // Object graph walk support code
@@ -123,14 +123,14 @@ static oct_Bool PointerTranslationTable_Create(oct_Context* ctx, oct_Uword initi
     
 	table->capacity = nextp2(initialCap);
 	byteSize = table->capacity * sizeof(PointerTranslationTableEntry);
-	CHECK(OCT_ALLOCRAW(byteSize, (void**)&table->table, "PointerTranslationTable_Create"));
+	CHECK(OCT_ALLOCOWNED(byteSize, (void**)&table->table, "PointerTranslationTable_Create"));
 	memset(table->table, 0, byteSize);
     
 	return oct_True;
 }
 
 static oct_Bool PointerTranslationTable_Destroy(oct_Context* ctx, PointerTranslationTable* table) {
-	CHECK(OCT_FREE(table->table));
+	CHECK(OCT_FREEOWNED(table->table));
 	table->capacity = 0;
 	table->table = NULL;
 	return oct_True;
@@ -267,7 +267,7 @@ typedef struct FieldPointerArray {
 } FieldPointerArray;
 
 static oct_Bool FieldPointerArray_Create(oct_Context* ctx, FieldPointerArray* fpa, oct_Uword initialCap) {
-	CHECK(OCT_ALLOCRAW(sizeof(FieldPointer) * initialCap, (void**)&fpa->data, "FieldPointerArray_Create"));
+	CHECK(OCT_ALLOCOWNED(sizeof(FieldPointer) * initialCap, (void**)&fpa->data, "FieldPointerArray_Create"));
 	if(!fpa->data) {
 		oct_Context_setErrorOOM(ctx);
 		return oct_False;
@@ -278,7 +278,7 @@ static oct_Bool FieldPointerArray_Create(oct_Context* ctx, FieldPointerArray* fp
 }
 
 static oct_Bool FieldPointerArray_Destroy(oct_Context* ctx, FieldPointerArray* fpa) {
-	CHECK(OCT_FREE(fpa->data));
+	CHECK(OCT_FREEOWNED(fpa->data));
 	fpa->capacity = 0;
 	fpa->data = NULL;
 	fpa->size = 0;
@@ -291,13 +291,13 @@ static oct_Bool FieldPointerArray_Add(oct_Context* ctx, FieldPointerArray* fpa, 
 
 	if(fpa->size == fpa->capacity) {
 		newCap = fpa->capacity * 2;
-		CHECK(OCT_ALLOCRAW(sizeof(FieldPointer) * newCap, (void**)&newArray, "FieldPointerArray_Add"));
+		CHECK(OCT_ALLOCOWNED(sizeof(FieldPointer) * newCap, (void**)&newArray, "FieldPointerArray_Add"));
 		if(!newArray) {
 			oct_Context_setErrorOOM(ctx);
 			return oct_False;
 		}
 		memcpy(newArray, fpa->data, fpa->capacity);
-		CHECK(OCT_FREE(fpa->data));
+		CHECK(OCT_FREEOWNED(fpa->data));
 		fpa->capacity = newCap;
 		fpa->data = newArray;
 	}
@@ -397,7 +397,7 @@ typedef struct FrameStack {
 static oct_Bool FrameStack_Create(oct_Context* ctx, FrameStack* stack, oct_Uword initialCap) {
     stack->capacity = initialCap;
     stack->top = 0;
-	CHECK(OCT_ALLOCRAW(sizeof(FrameStackEntry) * initialCap, (void**)&stack->stack, "FrameStack_Create"));
+	CHECK(OCT_ALLOCOWNED(sizeof(FrameStackEntry) * initialCap, (void**)&stack->stack, "FrameStack_Create"));
 	if(!stack->stack) {
 		oct_Context_setErrorOOM(ctx);
 		return oct_False;
@@ -412,7 +412,7 @@ static oct_Bool FrameStack_Destroy(oct_Context* ctx, FrameStack* stack) {
 	for(i = 0; i < stack->top; ++i) {
         result = FieldPointerArray_Destroy(ctx, &stack->stack[i].fieldPointers) && result;
 	}
-    result = OCT_FREE(stack->stack) && result;
+    result = OCT_FREEOWNED(stack->stack) && result;
 	stack->capacity = 0;
 	stack->top = 0;
 	stack->stack = NULL;
@@ -425,7 +425,7 @@ static oct_Bool FrameStack_Push(oct_Context* ctx, FrameStack* stack, FrameStackE
     if(stack->capacity == stack->top) {
 		bigger = (*stack);
 		bigger.capacity *= 2;
-		CHECK(OCT_ALLOCRAW(sizeof(FrameStackEntry) * bigger.capacity, (void**)&bigger.stack, "FrameStack_Push"));
+		CHECK(OCT_ALLOCOWNED(sizeof(FrameStackEntry) * bigger.capacity, (void**)&bigger.stack, "FrameStack_Push"));
 		if(!bigger.stack) {
 			oct_Context_setErrorOOM(ctx);
 			return oct_False;
@@ -485,7 +485,7 @@ static oct_Bool FrameStack_Pop(FrameStack* stack, FrameStackEntry* out) {
 //		return oct_False;
 //	}
 //	else {
-//		if(!OCT_ALLOCRAW(size, copy)) {
+//		if(!OCT_ALLOCOWNED(size, copy)) {
 //			return oct_False;
 //		}
 //		memcpy(*copy, object, size);

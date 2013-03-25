@@ -31,7 +31,7 @@ oct_Bool _oct_AU8_init(struct oct_Context* ctx) {
 
 oct_Bool oct_AU8_createOwned(struct oct_Context* ctx, oct_Uword size, oct_OAU8* out_result) {
 	oct_Uword allocSize = sizeof(oct_AU8) + (sizeof(oct_U8) * size);
-    if(!OCT_ALLOCRAW(allocSize, (void**)&out_result->ptr, "oct_AU8_createOwned")) {
+    if(!OCT_ALLOCOWNED(allocSize, (void**)&out_result->ptr, "oct_AU8_createOwned")) {
         return oct_False;
     }
 	out_result->ptr->size = size;
@@ -71,7 +71,7 @@ oct_Bool oct_AU8_copyOwned(struct oct_Context* ctx, oct_BSelf orig, oct_OSelf* o
 	oct_Uword allocSize;
 	bau8.ptr = (oct_AU8*)orig.self;
 	allocSize = sizeof(oct_AU8) + (sizeof(oct_U8) * bau8.ptr->size);
-    if(!OCT_ALLOCRAW(allocSize, (void**)&out_copy->self, "oct_AU8_copyOwned")) {
+    if(!OCT_ALLOCOWNED(allocSize, (void**)&out_copy->self, "oct_AU8_copyOwned")) {
         return oct_False;
     }
 	memcpy(out_copy->self, orig.self, allocSize);

@@ -9,7 +9,7 @@
 
 oct_Bool _oct_Charstream_initProtocol(struct oct_Context* ctx) {
 	oct_BHashtable table;
-	CHECK(OCT_ALLOCRAW(sizeof(oct_ProtocolBinding), (void**)&ctx->rt->builtInProtocols.Charstream.ptr, "_oct_Charstream_initProtocol"));
+	CHECK(OCT_ALLOCOWNED(sizeof(oct_ProtocolBinding), (void**)&ctx->rt->builtInProtocols.Charstream.ptr, "_oct_Charstream_initProtocol"));
 	ctx->rt->builtInProtocols.Charstream.ptr->protocolType = ctx->rt->builtInTypes.Charstream;
 	table.ptr = &ctx->rt->builtInProtocols.Charstream.ptr->implementations;
 	return oct_Hashtable_ctor(ctx, table, 100);
@@ -38,7 +38,7 @@ oct_Bool _oct_Charstream_init(struct oct_Context* ctx) {
 	t.ptr->pointerType.type = ctx->rt->builtInTypes.Charstream;
 
 	// readChar function signature
-	CHECK(OCT_ALLOCRAW(sizeof(oct_Function), (void**)&ctx->rt->functions.readChar.ptr, "functions.readChar"));
+	CHECK(OCT_ALLOCOWNED(sizeof(oct_Function), (void**)&ctx->rt->functions.readChar.ptr, "functions.readChar"));
 	fn = ctx->rt->functions.readChar;
 	CHECK(oct_ABType_createOwned(ctx, 1, &fn.ptr->paramTypes));
 	CHECK(oct_ABType_createOwned(ctx, 1, &fn.ptr->returnTypes));
@@ -46,7 +46,7 @@ oct_Bool _oct_Charstream_init(struct oct_Context* ctx) {
 	fn.ptr->returnTypes.ptr->data[0] = ctx->rt->builtInTypes.Char;
 
 	// peekChar function signature
-	CHECK(OCT_ALLOCRAW(sizeof(oct_Function), (void**)&ctx->rt->functions.peekChar.ptr, "functions.peekChar"));
+	CHECK(OCT_ALLOCOWNED(sizeof(oct_Function), (void**)&ctx->rt->functions.peekChar.ptr, "functions.peekChar"));
 	fn = ctx->rt->functions.peekChar;
 	CHECK(oct_ABType_createOwned(ctx, 1, &fn.ptr->paramTypes));
 	CHECK(oct_ABType_createOwned(ctx, 1, &fn.ptr->returnTypes));

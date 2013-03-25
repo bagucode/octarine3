@@ -12,11 +12,11 @@
 
 static oct_Bool oct_Bool_VTableDtor(struct oct_Context* ctx, oct_BSelf vtable) {
 	oct_VTable* vt = (oct_VTable*)vtable.self;
-	return OCT_FREE(vt->functions);
+	return OCT_FREEOWNED(vt->functions);
 }
 
 oct_Bool _oct_VTable_init(struct oct_Context* ctx) {
-	CHECK(OCT_ALLOCRAW(sizeof(oct_ObjectVTable), (void**)&ctx->rt->vtables.VTableAsObject.ptr, "_oct_VTable_init"));
+	CHECK(OCT_ALLOCOWNED(sizeof(oct_ObjectVTable), (void**)&ctx->rt->vtables.VTableAsObject.ptr, "_oct_VTable_init"));
 	ctx->rt->vtables.VTableAsObject.ptr->objectType = ctx->rt->builtInTypes.VTable;
 	ctx->rt->vtables.VTableAsObject.ptr->functions[0] = oct_Bool_VTableDtor;
 	return oct_True;
@@ -82,7 +82,7 @@ oct_Bool oct_ProtocolBinding_dtor(struct oct_Context* ctx, oct_BSelf self) {
 oct_Bool _oct_Protocol_addBuiltIn(struct oct_Context* ctx, oct_BProtocolBinding pb, oct_Uword fnCount, oct_BVTable* table, oct_BType type, ...) {
 	va_list fns;
 	oct_Uword i;
-	CHECK(OCT_ALLOCRAW(sizeof(oct_VTable) + (sizeof(void*) * fnCount), (void**)&table->ptr, "_oct_Protocol_addBuiltIn"));
+	CHECK(OCT_ALLOCOWNED(sizeof(oct_VTable) + (sizeof(void*) * fnCount), (void**)&table->ptr, "_oct_Protocol_addBuiltIn"));
 	table->ptr->objectType = type;
 	va_start(fns, type);
 	for(i = 0; i < fnCount; ++i) {

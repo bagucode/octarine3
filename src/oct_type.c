@@ -16,22 +16,22 @@
 // For Type, the vtables need to be added manually because of a circular dependency with protocols
 oct_Bool _oct_Type_VTableInit(struct oct_Context* ctx) {
 	// Object
-	CHECK(OCT_ALLOCRAW(sizeof(oct_VTable) + (sizeof(void*) * 1), (void**)&ctx->rt->vtables.TypeAsObject.ptr, "_oct_Type_VTableInit, Object"));
+	CHECK(OCT_ALLOCOWNED(sizeof(oct_VTable) + (sizeof(void*) * 1), (void**)&ctx->rt->vtables.TypeAsObject.ptr, "_oct_Type_VTableInit, Object"));
 	ctx->rt->vtables.TypeAsObject.ptr->functions[0] = oct_Type_dtor;
 	ctx->rt->vtables.TypeAsObject.ptr->objectType = ctx->rt->builtInTypes.Type;
 
 	// EqComparable
-	CHECK(OCT_ALLOCRAW(sizeof(oct_VTable) + (sizeof(void*) * 1), (void**)&ctx->rt->vtables.TypeAsEqComparable.ptr, "_oct_Type_VTableInit, EqComparable"));
+	CHECK(OCT_ALLOCOWNED(sizeof(oct_VTable) + (sizeof(void*) * 1), (void**)&ctx->rt->vtables.TypeAsEqComparable.ptr, "_oct_Type_VTableInit, EqComparable"));
 	ctx->rt->vtables.TypeAsEqComparable.ptr->functions[0] = oct_Type_equals;
 	ctx->rt->vtables.TypeAsEqComparable.ptr->objectType = ctx->rt->builtInTypes.Type;
 	
 	// Hashable
-	CHECK(OCT_ALLOCRAW(sizeof(oct_VTable) + (sizeof(void*) * 1), (void**)&ctx->rt->vtables.TypeAsHashable.ptr, "_oct_Type_VTableInit, Hashable"));
+	CHECK(OCT_ALLOCOWNED(sizeof(oct_VTable) + (sizeof(void*) * 1), (void**)&ctx->rt->vtables.TypeAsHashable.ptr, "_oct_Type_VTableInit, Hashable"));
 	ctx->rt->vtables.TypeAsHashable.ptr->functions[0] = oct_Type_hash;
 	ctx->rt->vtables.TypeAsHashable.ptr->objectType = ctx->rt->builtInTypes.Type;
 	
 	// HashtableKey
-	CHECK(OCT_ALLOCRAW(sizeof(oct_VTable) + (sizeof(void*) * 2), (void**)&ctx->rt->vtables.TypeAsHashtableKey.ptr, "_oct_Type_VTableInit, HashtableKey"));
+	CHECK(OCT_ALLOCOWNED(sizeof(oct_VTable) + (sizeof(void*) * 2), (void**)&ctx->rt->vtables.TypeAsHashtableKey.ptr, "_oct_Type_VTableInit, HashtableKey"));
 	ctx->rt->vtables.TypeAsHashtableKey.ptr->functions[0] = oct_Type_hash;
 	ctx->rt->vtables.TypeAsHashtableKey.ptr->functions[1] = oct_Type_equals;
 	ctx->rt->vtables.TypeAsHashtableKey.ptr->objectType = ctx->rt->builtInTypes.Type;
@@ -81,7 +81,7 @@ oct_Bool _oct_Type_init(oct_Context* ctx) {
 
 oct_Bool oct_ABType_createOwned(struct oct_Context* ctx, oct_Uword size, oct_OABType* out_result) {
 	oct_Uword i;
-    if(!OCT_ALLOCRAW(sizeof(oct_ABType) + (sizeof(oct_BType) * size), (void**)&out_result->ptr, "oct_ABType_createOwned")) {
+    if(!OCT_ALLOCOWNED(sizeof(oct_ABType) + (sizeof(oct_BType) * size), (void**)&out_result->ptr, "oct_ABType_createOwned")) {
         return oct_False;
     }
 	out_result->ptr->size = size;
@@ -148,10 +148,10 @@ oct_Bool oct_Type_dtor(struct oct_Context* ctx, oct_Type* self) {
 	case OCT_TYPE_PROTOTYPE:
 		break;
 	case OCT_TYPE_VARIADIC:
-		OCT_FREE(self->variadicType.types.ptr);
+		OCT_FREEOWNED(self->variadicType.types.ptr);
 		break;
 	case OCT_TYPE_STRUCT:
-		OCT_FREE(self->structType.fields.ptr);
+		OCT_FREEOWNED(self->structType.fields.ptr);
 		break;
 	case OCT_TYPE_ARRAY:
 		break;
@@ -160,7 +160,7 @@ oct_Bool oct_Type_dtor(struct oct_Context* ctx, oct_Type* self) {
 	case OCT_TYPE_POINTER:
 		break;
 	case OCT_TYPE_PROTOCOL:
-		OCT_FREE(self->protocolType.functions.ptr);
+		OCT_FREEOWNED(self->protocolType.functions.ptr);
 		break;
 	}
 	return oct_True;

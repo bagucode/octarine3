@@ -196,7 +196,7 @@ int main(int argc, char** argv) {
 	oct_BSelf bself;
 	reader.ptr = ctx->reader;
 
-	oct_String_createOwnedFromCString(ctx, "- . ! ? 1 2 3 -37 1.5 0.34 .34 1e16 -0.8 -.8 -.main .main -main { [ hello \"hej\" \"hell o workdl\" (quote (this is a (nested) \"list\" of 8 readables )) () (quote a)", &str);
+	oct_String_createOwnedFromCString(ctx, "- . ! ? 1 2 3 -37 1.5 0.34 .34 1e16 -0.8 -.8 -.main .main -main { [ hello \"hej\" \"hell o workdl\" (quote (this is a (nested) \"list\" of 8 readables )) (def hello \"Hello!\") () (quote a) hello hello", &str);
 
 	// Borrow string pointer
 	bstr.ptr = str.ptr;

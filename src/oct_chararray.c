@@ -23,7 +23,7 @@ oct_Bool _oct_AChar_init(struct oct_Context* ctx) {
 
 oct_Bool oct_AChar_createOwned(struct oct_Context* ctx, oct_Uword size, oct_OAChar* out_result) {
 	oct_Uword allocSize = sizeof(oct_AChar) + (sizeof(oct_Char) * size);
-	if(!OCT_ALLOCRAW(allocSize, (void**)&out_result->ptr, "oct_AChar_createOwned")) {
+	if(!OCT_ALLOCOWNED(allocSize, (void**)&out_result->ptr, "oct_AChar_createOwned")) {
 		return oct_False;
 	}
 	out_result->ptr->size = size;

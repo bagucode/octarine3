@@ -62,7 +62,7 @@ oct_Bool _oct_Symbol_init(oct_Context* ctx) {
 // Public
 
 oct_Bool oct_Symbol_createOwned(struct oct_Context* ctx, oct_OString name, oct_OSymbol* out_result) {
-    if(!OCT_ALLOCRAW(sizeof(oct_Symbol), (void**)&out_result->ptr, "oct_Symbol_createOwned")) {
+    if(!OCT_ALLOCOWNED(sizeof(oct_Symbol), (void**)&out_result->ptr, "oct_Symbol_createOwned")) {
         return oct_False;
     }
 	out_result->ptr->name = name;
@@ -74,7 +74,7 @@ oct_Bool oct_Symbol_destroyOwned(struct oct_Context* ctx, oct_OSymbol sym) {
 	oct_Bool result;
 	self.self = sym.ptr;
 	result = oct_Symbol_dtor(ctx, self);
-	return OCT_FREE(sym.ptr) && result;
+	return OCT_FREEOWNED(sym.ptr) && result;
 }
 
 oct_Bool oct_Symbol_asObject(struct oct_Context* ctx, oct_BSymbol sym, oct_BObject* out_obj) {
@@ -110,7 +110,7 @@ oct_Bool oct_Symbol_dtor(struct oct_Context* ctx, oct_BSelf self) {
 	oct_Bool result;
 	self.self = s->name.ptr;
 	result = oct_String_dtor(ctx, self);
-	return OCT_FREE(s->name.ptr) && result;
+	return OCT_FREEOWNED(s->name.ptr) && result;
 }
 
 oct_Bool oct_Symbol_print(struct oct_Context* ctx, oct_BSymbol self) {

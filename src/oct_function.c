@@ -42,7 +42,7 @@ oct_Bool _oct_Function_init(struct oct_Context* ctx) {
 }
 
 oct_Bool oct_ABFunction_createOwned(struct oct_Context* ctx, oct_Uword size, oct_OABFunction* out_result) {
-	oct_Bool result = OCT_ALLOCRAW(sizeof(oct_BFunction) * size + sizeof(oct_Uword), (void**)&out_result->ptr, "oct_ABFunction_createOwned");
+	oct_Bool result = OCT_ALLOCOWNED(sizeof(oct_BFunction) * size + sizeof(oct_Uword), (void**)&out_result->ptr, "oct_ABFunction_createOwned");
 	// TODO: set all the function pointers to point to a built in function so that they have a value. Perhaps the identity function?
 	out_result->ptr->size = size;
 	return result;
@@ -52,6 +52,6 @@ oct_Bool oct_Function_dtor(struct oct_Context* ctx, oct_BSelf self) {
 	oct_BFunction fn;
 	oct_Bool result;
 	fn.ptr = (oct_Function*)self.self;
-	result = OCT_FREE(fn.ptr->paramTypes.ptr);
-	return OCT_FREE(fn.ptr->returnTypes.ptr) && result;
+	result = OCT_FREEOWNED(fn.ptr->paramTypes.ptr);
+	return OCT_FREEOWNED(fn.ptr->returnTypes.ptr) && result;
 }
