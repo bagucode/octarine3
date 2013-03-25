@@ -20,6 +20,7 @@
 #include "oct_exchangeheap.h"
 #include "oct_printable.h"
 #include "oct_primitives_functions.h"
+#include "oct_vector.h"
 
 #include <stdlib.h>
 #include <memory.h>
@@ -207,6 +208,7 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	_oct_Stringstream_init(ctx);
 	_oct_Copyable_init(ctx);
 	_oct_Printable_init(ctx);
+	_oct_Vector_init(ctx);
     _oct_Primitives_initProtocols(ctx);
 
 	// Init built in errors

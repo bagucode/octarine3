@@ -141,6 +141,10 @@ typedef struct oct_BuiltInTypes {
 	oct_BType Printable;
 	oct_BType OPrintable;
 	oct_BType BPrintable;
+	// Vector
+	oct_BType Vector;
+	oct_BType BVector;
+	oct_BType OVector;
 } oct_BuiltInTypes;
 
 typedef struct oct_BuiltInVTables {
@@ -197,6 +201,9 @@ typedef struct oct_BuiltInVTables {
 	oct_BVTable VTableAsObject;
 	// AOObjectOption
 	oct_BVTable AOObjectOptionAsObject;
+	// Vector
+	oct_BVTable VectorAsObject;
+	oct_BVTable VectorAsPrintable;
 } oct_BuiltInVTables;
 
 typedef struct oct_BuiltInProtocols {
