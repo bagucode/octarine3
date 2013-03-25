@@ -70,6 +70,9 @@ typedef struct oct_BuiltInTypes {
 	oct_BType BObject;
 	oct_BType OObjectOption;
 	oct_BType BObjectOption;
+	oct_BType AOObjectOption;
+	oct_BType OAOObjectOption;
+	oct_BType BAOObjectOption;
 	// String
 	oct_BType String;
 	oct_BType OString;
@@ -192,6 +195,8 @@ typedef struct oct_BuiltInVTables {
 	oct_BVTable NamespaceAsObject;
 	// VTable
 	oct_BVTable VTableAsObject;
+	// AOObjectOption
+	oct_BVTable AOObjectOptionAsObject;
 } oct_BuiltInVTables;
 
 typedef struct oct_BuiltInProtocols {

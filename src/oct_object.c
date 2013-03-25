@@ -64,7 +64,49 @@ oct_Bool _oct_Object_init(struct oct_Context* ctx) {
 	CHECK(oct_ABType_createOwned(ctx, 0, &fn.ptr->returnTypes));
 	fn.ptr->paramTypes.ptr->data[0] = ctx->rt->builtInTypes.BSelf;
 
+	// AOObjectOption
+	t = ctx->rt->builtInTypes.AOObjectOption;
+	t.ptr->variant = OCT_TYPE_ARRAY;
+	t.ptr->arrayType.elementType = ctx->rt->builtInTypes.OObjectOption;
+
+	// Object protocol {dtor}
+	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Object, 1, &ctx->rt->vtables.AOObjectOptionAsObject, t, oct_AOObjectOption_dtor));
+
+	// OAOObjectOption
+	t = ctx->rt->builtInTypes.OAOObjectOption;
+	t.ptr->variant = OCT_TYPE_POINTER;
+	t.ptr->pointerType.kind = OCT_POINTER_OWNED;
+	t.ptr->pointerType.type = ctx->rt->builtInTypes.AOObjectOption;
+
+	// BAOObjectOption
+	t = ctx->rt->builtInTypes.BAOObjectOption;
+	t.ptr->variant = OCT_TYPE_POINTER;
+	t.ptr->pointerType.kind = OCT_POINTER_BORROWED;
+	t.ptr->pointerType.type = ctx->rt->builtInTypes.AOObjectOption;
+
 	return oct_True;
+}
+
+oct_Bool oct_AOObjectOption_createOwned(struct oct_Context* ctx, oct_Uword size, oct_OAOObjectOption* out_arr) {
+	oct_Uword i;
+	CHECK(OCT_ALLOCOWNED(sizeof(oct_AOObjectOption) + sizeof(oct_OObjectOption) * size, (void**)&out_arr->ptr, "oct_AOObjectOption_createOwned"));
+	out_arr->ptr->size = size;
+	for(i = 0; i < size; ++i) {
+		out_arr->ptr->data[i].variant = OCT_OOBJECTOPTION_NOTHING;
+	}
+	return oct_True;
+}
+
+oct_Bool oct_AOObjectOption_dtor(struct oct_Context* ctx, oct_BAOObjectOption self) {
+	oct_Uword i;
+	oct_Bool result = oct_True;
+	for(i = 0; i < self.ptr->size; ++i) {
+		if(self.ptr->data[i].variant == OCT_OOBJECTOPTION_OBJECT) {
+			result = oct_Object_destroyOwned(ctx, self.ptr->data[i].object) && result;
+		}
+	}
+	result = OCT_FREEOWNED(self.ptr) && result;
+	return result;
 }
 
 // The output is BObject because C does not have templates but the output should be safe to manually cast to the given protocol
