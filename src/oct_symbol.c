@@ -5,6 +5,7 @@
 #include "oct_exchangeheap.h"
 
 #include <stddef.h>
+#include <stdio.h>
 
 // Private
 
@@ -32,6 +33,9 @@ oct_Bool _oct_Symbol_init(oct_Context* ctx) {
 
 	// Symbol VTable for HashtableKey {hash, eq}
 	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.HashtableKey, 2, &ctx->rt->vtables.SymbolAsHashtableKey, t, oct_Symbol_hash, oct_Symbol_equals));
+
+	// Symbol VTable for Printable {print}
+	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Printable, 1, &ctx->rt->vtables.SymbolAsPrintable, t, oct_Symbol_print));
 
 	// OSymbol
 	ctx->rt->builtInTypes.OSymbol.ptr->variant = OCT_TYPE_POINTER;
@@ -107,4 +111,15 @@ oct_Bool oct_Symbol_dtor(struct oct_Context* ctx, oct_BSelf self) {
 	self.self = s->name.ptr;
 	result = oct_String_dtor(ctx, self);
 	return OCT_FREE(s->name.ptr) && result;
+}
+
+oct_Bool oct_Symbol_print(struct oct_Context* ctx, oct_BSymbol self) {
+	printf("%s", self.ptr->name.ptr->utf8Data.ptr->data);
+	return oct_True;
+}
+
+oct_Bool oct_Symbol_asPrintable(struct oct_Context* ctx, oct_BSymbol self, oct_BPrintable* out_prn) {
+	out_prn->self.self = self.ptr;
+	out_prn->vtable = (oct_PrintableVTable*)ctx->rt->vtables.SymbolAsPrintable.ptr;
+	return oct_True;
 }
