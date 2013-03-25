@@ -34,13 +34,13 @@ oct_Bool _oct_Vector_init(struct oct_Context* ctx) {
 
 	// BVector
 	t = ctx->rt->builtInTypes.BVector;
-	t.ptr->variant == OCT_TYPE_POINTER;
+	t.ptr->variant = OCT_TYPE_POINTER;
 	t.ptr->pointerType.kind = OCT_POINTER_BORROWED;
 	t.ptr->pointerType.type = ctx->rt->builtInTypes.Vector;
 
 	// OVector
 	t = ctx->rt->builtInTypes.OVector;
-	t.ptr->variant == OCT_TYPE_POINTER;
+	t.ptr->variant = OCT_TYPE_POINTER;
 	t.ptr->pointerType.kind = OCT_POINTER_OWNED;
 	t.ptr->pointerType.type = ctx->rt->builtInTypes.Vector;
 
