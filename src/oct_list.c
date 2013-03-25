@@ -8,6 +8,7 @@
 
 #include <stddef.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #define CHECK(X) if(!X) return oct_False;
 
@@ -25,6 +26,9 @@ oct_Bool _oct_List_init(struct oct_Context* ctx) {
 
 	// Object protocol {dtor}
 	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Object, 1, &ctx->rt->vtables.ListAsObject, t, oct_List_dtor));
+
+	// Printable protocol {print}
+	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Printable, 1, &ctx->rt->vtables.ListAsPrintable, t, oct_List_print));
 
 	// OList
 	t = ctx->rt->builtInTypes.OList;
@@ -258,4 +262,44 @@ oct_Bool oct_List_asObject(struct oct_Context* ctx, oct_OList lst, oct_OObject* 
 	return oct_True;
 }
 
+oct_Bool oct_List_print(struct oct_Context* ctx, oct_BList lst) {
+	oct_BSelf bself;
+	oct_BPrintable prn;
+	oct_List* current = lst.ptr;
+
+	putc('(', stdout);
+
+	while(oct_True) {
+		if(current->data.variant == OCT_OOBJECTOPTION_OBJECT) {
+			// TODO: global print function for unprintables?
+			bself.self = current->data.object.self.self;
+			if(!oct_Object_as(ctx, bself, current->data.object.vtable->type, ctx->rt->builtInProtocols.Printable, (oct_BObject*)&prn)) {
+				printf("#<UNPRINTABLE %p>", current->data.object.self.self);
+				oct_Context_clearError(ctx);
+			}
+			else {
+				CHECK(oct_Printable_print(ctx, prn));
+			}
+		}
+		if(current->next.variant == OCT_LISTOPTION_LIST) {
+			current = current->next.list.ptr;
+			if(current->data.variant == OCT_OOBJECTOPTION_OBJECT) {
+				putc(' ', stdout);
+			}
+		}
+		else {
+			break;
+		}
+	}
+
+	putc(')', stdout);
+
+	return oct_True;
+}
+
+oct_Bool oct_List_asPrintable(struct oct_Context* ctx, oct_BList lst, oct_BPrintable* out_prn) {
+	out_prn->self.self = lst.ptr;
+	out_prn->vtable = (oct_PrintableVTable*)ctx->rt->vtables.ListAsPrintable.ptr;
+	return oct_True;
+}
 

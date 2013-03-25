@@ -163,6 +163,7 @@ typedef struct oct_BuiltInVTables {
 	oct_BVTable NothingAsHashtableKey;
 	// List
 	oct_BVTable ListAsObject;
+	oct_BVTable ListAsPrintable;
 	// Stringstream
 	oct_BVTable StringstreamAsCharstream;
 	// Type

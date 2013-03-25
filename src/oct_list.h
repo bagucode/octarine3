@@ -3,6 +3,7 @@
 
 #include "oct_object.h"
 #include "oct_nothing.h"
+#include "oct_printable.h"
 
 struct oct_List;
 
@@ -65,8 +66,10 @@ oct_Bool oct_List_nth(struct oct_Context* ctx, oct_OList lst, oct_Uword idx, oct
 oct_Bool oct_List_borrowFirst(struct oct_Context* ctx, oct_BList lst, oct_BObjectOption* out_value);
 oct_Bool oct_List_emptyp(struct oct_Context* ctx, oct_BList lst, oct_Bool* out_result);
 oct_Bool oct_List_count(struct oct_Context* ctx, oct_BList lst, oct_Uword* out_count);
+oct_Bool oct_List_print(struct oct_Context* ctx, oct_BList lst);
 
 // Protocol casts
 oct_Bool oct_List_asObject(struct oct_Context* ctx, oct_OList lst, oct_OObject* out_object);
+oct_Bool oct_List_asPrintable(struct oct_Context* ctx, oct_BList lst, oct_BPrintable* out_prn);
 
 #endif

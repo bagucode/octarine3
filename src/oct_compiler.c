@@ -8,10 +8,6 @@
 #include "oct_object.h"
 #include "oct_copyable.h"
 
-// DEBUG
-#include <stdio.h>
-// END DEBUG
-
 // Built in forms:
 // def    -> establish binding in current namespace
 // let    -> establish binding in current frame
@@ -52,8 +48,6 @@ static oct_Bool eval_sym(struct oct_Context* ctx, oct_OObject form, oct_Any* out
 	oct_BHashtableKey key;
 	oct_Bool result = oct_True;
 
-	printf("eval_sym\n");
-
 	ns.ptr = ctx->ns;
 	osym.ptr = form.self.self;
 	bsym.ptr = form.self.self;
@@ -83,8 +77,6 @@ static oct_Bool eval_def(struct oct_Context* ctx, oct_OObject form, oct_Any* out
 	oct_BSelf bself;
 	oct_Bool result = oct_True;
 
-	printf("eval_def\n");
-    
     olist.ptr = form.self.self;
 	blist.ptr = form.self.self;
     CHECK(oct_List_count(ctx, blist, &count));
@@ -154,8 +146,6 @@ static oct_Bool eval_quote(oct_Context* ctx, oct_OObject form, oct_Any* out_resu
     oct_Bool result = oct_True;
     out_result->variant = OCT_ANY_NOTHING;
     
-    printf("eval_quote\n");
-	
 	// Drop quote symbol
     blist.ptr = (oct_List*)form.self.self;
     CHECK(oct_List_rest(ctx, blist, &olistOpt)); // detach ...

@@ -193,6 +193,7 @@ int main(int argc, char** argv) {
 	oct_BStringstream bss;
 	oct_Any evalResult;
     oct_BPrintable prn;
+	oct_BSelf bself;
 	reader.ptr = ctx->reader;
 
 	oct_String_createOwnedFromCString(ctx, "- . ! ? 1 2 3 -37 1.5 0.34 .34 1e16 -0.8 -.8 -.main .main -main { [ hello \"hej\" \"hell o workdl\" (this is a (nested) \"list\" of 8 readables ) () (quote a)", &str);
@@ -211,13 +212,27 @@ int main(int argc, char** argv) {
 			break;
 		}
 		if(rr.result.variant == OCT_OOBJECTOPTION_OBJECT) {
+			bself.self = rr.result.object.self.self;
+            if(!oct_Object_as(ctx, bself, rr.result.object.vtable->type, rt->builtInProtocols.Printable, (oct_BObject*)&prn)) {
+		        printf("#<UNPRINTABLE: %p>", bself.self);
+                oct_Context_clearError(ctx);
+            }
+            else {
+                oct_Printable_print(ctx, prn);
+            }
+
 			oct_Compiler_eval(ctx, rr.result.object, &evalResult);
-            if(evalResult.variant != OCT_ANY_NOTHING) {
+			
+			if(evalResult.variant == OCT_ANY_NOTHING) {
+				printf(" => Nothing\n");
+			}
+			else {
                 if(!oct_Object_as(ctx, evalResult.bobject.self, evalResult.bobject.vtable->type, rt->builtInProtocols.Printable, (oct_BObject*)&prn)) {
                     printf("%s\n", &ctx->err.berror.ptr->message.ptr->utf8Data.ptr->data[0]);
                     oct_Context_clearError(ctx);
                 }
                 else {
+					printf(" => ");
                     oct_Printable_print(ctx, prn);
 					printf("\n");
                 }

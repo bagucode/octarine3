@@ -359,8 +359,6 @@ static oct_Bool readSymbol(struct oct_Context* ctx, oct_BReader reader, oct_BCha
 	bsym.ptr = instance.ptr;
 	CHECK(oct_Symbol_asObject(ctx, bsym, (oct_BObject*)&out_result->result.object));
 
-	printf("Read a Symbol: %s\n", &instance.ptr->name.ptr->utf8Data.ptr->data[0]);
-
 	goto end;
 error:
 	result = oct_False;
@@ -382,15 +380,11 @@ static oct_Bool readList(struct oct_Context* ctx, oct_BReader reader, oct_BChars
 	oct_OList olist;
 	oct_BList blist;
 
-	oct_Uword DEBUG_I;
-
 	CHECK(oct_List_createOwned(ctx, &olist));
 	blist.ptr = olist.ptr;
 
 	// Drop leading (
 	reader_clearChars(reader);
-
-	printf("LIST START (\n");
 
 	// Call read for each token inside the list
 	while(oct_True) {
@@ -418,9 +412,6 @@ static oct_Bool readList(struct oct_Context* ctx, oct_BReader reader, oct_BChars
 	out_result->variant = OCT_READRESULT_OK;
 	out_result->result.variant = OCT_OOBJECTOPTION_OBJECT;
 	CHECK(oct_List_asObject(ctx, olist, &out_result->result.object));
-
-	oct_List_count(ctx, blist, &DEBUG_I);
-	printf("LIST END: %d ELEMENTS )\n", DEBUG_I);
 
 	goto end;
 error:
