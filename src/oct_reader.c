@@ -330,8 +330,6 @@ static oct_Bool readString(struct oct_Context* ctx, oct_BReader reader, oct_BCha
 	out_result->result.variant = OCT_OOBJECTOPTION_OBJECT;
 	CHECK(oct_String_asObjectOwned(ctx, instance, &out_result->result.object));
 
-	printf("Read a String: \"%s\"\n", &instance.ptr->utf8Data.ptr->data[0]);
-
 	goto end;
 error:
 	result = oct_False;

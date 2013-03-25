@@ -7,6 +7,7 @@
 #include "oct_hashtable.h"
 #include "oct_self.h"
 #include "oct_copyable.h"
+#include "oct_printable.h"
 
 typedef struct oct_String {
 	oct_Uword size;
@@ -44,6 +45,7 @@ oct_Bool oct_BString_equals(struct oct_Context* ctx, oct_BString x, oct_BString 
 oct_Bool oct_BStringCString_equals(struct oct_Context* ctx, oct_BString str, const char* cstr, oct_Bool* out_result);
 
 oct_Bool oct_String_hash(struct oct_Context* ctx, oct_BString str, oct_Uword* out_hash);
+oct_Bool oct_String_print(struct oct_Context* ctx, oct_BString str);
 
 // Protocol casts
 oct_Bool oct_String_asObjectOwned(struct oct_Context* ctx, oct_OString str, oct_OObject* out_object);
@@ -52,5 +54,6 @@ oct_Bool oct_String_asObjectOwned(struct oct_Context* ctx, oct_OString str, oct_
 oct_Bool oct_String_asHashtableKeyOwned(struct oct_Context* ctx, oct_OString str, oct_OHashtableKey* out_key);
 oct_Bool oct_String_asHashtableKeyBorrowed(struct oct_Context* ctx, oct_BString str, oct_BHashtableKey* out_key);
 oct_Bool oct_String_asCopyable(struct oct_Context* ctx, oct_BString str, oct_BCopyable* out_key);
+oct_Bool oct_String_asPrintable(struct oct_Context* ctx, oct_BString str, oct_BPrintable* out_prn);
 
 #endif

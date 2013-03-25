@@ -149,6 +149,7 @@ typedef struct oct_BuiltInVTables {
 	oct_BVTable StringAsHashable;
 	oct_BVTable StringAsHashtableKey;
 	oct_BVTable StringAsCopyable;
+	oct_BVTable StringAsPrintable;
 	// Symbol
 	oct_BVTable SymbolAsObject;
 	oct_BVTable SymbolAsEqComparable;

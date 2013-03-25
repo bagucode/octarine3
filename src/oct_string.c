@@ -8,6 +8,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #define CHECK(X) if(!X) return oct_False;
 
@@ -39,6 +40,9 @@ oct_Bool _oct_String_init(struct oct_Context* ctx) {
 
 	// String VTable for Copyable {copyOwned}
 	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Copyable, 1, &ctx->rt->vtables.StringAsCopyable, t, oct_String_copyOwned));
+
+	// String VTable for Printable {print}
+	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Printable, 1, &ctx->rt->vtables.StringAsPrintable, t, oct_String_print));
 
 	// OString
 	t = ctx->rt->builtInTypes.OString;
@@ -221,3 +225,13 @@ oct_Bool oct_String_copyOwned(struct oct_Context* ctx, oct_BSelf orig, oct_OSelf
 	return oct_AU8_copyOwned(ctx, orig, (oct_OSelf*)&cpy->utf8Data);
 }
 
+oct_Bool oct_String_print(struct oct_Context* ctx, oct_BString str) {
+	printf("\"%s\"", str.ptr->utf8Data.ptr->data);
+	return oct_True;
+}
+
+oct_Bool oct_String_asPrintable(struct oct_Context* ctx, oct_BString str, oct_BPrintable* out_prn) {
+	out_prn->self.self = str.ptr;
+	out_prn->vtable = (oct_PrintableVTable*)ctx->rt->vtables.StringAsPrintable.ptr;
+	return oct_True;
+}
