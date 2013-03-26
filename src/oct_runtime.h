@@ -146,6 +146,10 @@ typedef struct oct_BuiltInTypes {
 	oct_BType Vector;
 	oct_BType BVector;
 	oct_BType OVector;
+	// Seq
+	oct_BType Seq;
+	oct_BType OSeq;
+	oct_BType BSeq;
 } oct_BuiltInTypes;
 
 typedef struct oct_BuiltInVTables {
@@ -172,6 +176,7 @@ typedef struct oct_BuiltInVTables {
 	// List
 	oct_BVTable ListAsObject;
 	oct_BVTable ListAsPrintable;
+	oct_BVTable ListAsSeq;
 	// Stringstream
 	oct_BVTable StringstreamAsCharstream;
 	// Type
@@ -205,6 +210,7 @@ typedef struct oct_BuiltInVTables {
 	// Vector
 	oct_BVTable VectorAsObject;
 	oct_BVTable VectorAsPrintable;
+	//oct_BVTable VectorAsSeq;
 } oct_BuiltInVTables;
 
 typedef struct oct_BuiltInProtocols {
@@ -215,6 +221,7 @@ typedef struct oct_BuiltInProtocols {
 	oct_BProtocolBinding Copyable;
 	oct_BProtocolBinding Charstream;
 	oct_BProtocolBinding Printable;
+	oct_BProtocolBinding Seq;
 } oct_BuiltInProtocols;
 
 typedef struct oct_BuiltInFunctions {
@@ -225,6 +232,11 @@ typedef struct oct_BuiltInFunctions {
 	oct_BFunction copyOwned;
 	oct_BFunction dtor;
 	oct_BFunction print;
+	oct_BFunction first;
+	oct_BFunction rest;
+	oct_BFunction prepend;
+	oct_BFunction append;
+	oct_BFunction nth;
 } oct_BuiltInFunctions;
 
 typedef struct oct_BuiltInErrors {

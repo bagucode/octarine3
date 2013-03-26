@@ -56,6 +56,9 @@ oct_Bool _oct_List_init(struct oct_Context* ctx) {
 	// Printable protocol {print}
 	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Printable, 1, &ctx->rt->vtables.ListAsPrintable, t, oct_List_print));
 
+	// Seq protocol {first,rest,prepend,append,nth}
+	CHECK(_oct_Protocol_addBuiltIn(ctx, ctx->rt->builtInProtocols.Seq, 5, &ctx->rt->vtables.ListAsSeq, t, oct_List_first, oct_List_rest, oct_List_prepend, oct_List_append, oct_List_nth));
+
 	// OList
 	t = ctx->rt->builtInTypes.OList;
 	t.ptr->variant = OCT_TYPE_POINTER;

@@ -21,6 +21,7 @@
 #include "oct_printable.h"
 #include "oct_primitives_functions.h"
 #include "oct_vector.h"
+#include "oct_seq.h"
 
 #include <stdlib.h>
 #include <memory.h>
@@ -169,6 +170,7 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	_oct_Charstream_initProtocol(ctx);
 	_oct_Copyable_initProtocol(ctx);
 	_oct_Printable_initProtocol(ctx);
+	_oct_Seq_initProtocol(ctx);
 
 	// *** 1.5.1 Manually fix up the dependencies for oct_Protocol_addImplementation
 	_oct_VTable_init(ctx);
@@ -209,6 +211,7 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	_oct_Copyable_init(ctx);
 	_oct_Printable_init(ctx);
 	_oct_Vector_init(ctx);
+	_oct_Seq_init(ctx);
     _oct_Primitives_initProtocols(ctx);
 
 	// Init built in errors
