@@ -33,4 +33,12 @@ typedef struct oct_OSeq {
 oct_Bool _oct_Seq_initProtocol(struct oct_Context* ctx);
 oct_Bool _oct_Seq_init(struct oct_Context* ctx);
 
+// Helpers
+
+oct_Bool oct_Seq_first(struct oct_Context* ctx, oct_BSeq self, oct_OObjectOption* out_obj);
+oct_Bool oct_Seq_rest(struct oct_Context* ctx, oct_BSeq self, oct_OSelf* out_rest);
+oct_Bool oct_Seq_prepend(struct oct_Context* ctx, oct_BSeq self, oct_OObject obj);
+oct_Bool oct_Seq_append(struct oct_Context* ctx, oct_BSeq self, oct_OObject obj);
+oct_Bool oct_Seq_nth(struct oct_Context* ctx, oct_BSeq self, oct_Uword idx, oct_OObjectOption* out_obj);
+
 #endif

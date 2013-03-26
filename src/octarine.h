@@ -17,5 +17,7 @@
 #include "oct_any.h"
 #include "oct_exchangeheap.h"
 #include "oct_printable.h"
+#include "oct_list.h"
+#include "oct_seq.h"
 
 #endif

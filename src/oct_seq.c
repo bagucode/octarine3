@@ -81,6 +81,24 @@ oct_Bool _oct_Seq_init(struct oct_Context* ctx) {
 	fn.ptr->returnTypes.ptr->data[0] = ctx->rt->builtInTypes.OObjectOption;
 
 	return oct_True;
-
 }
 
+oct_Bool oct_Seq_first(struct oct_Context* ctx, oct_BSeq self, oct_OObjectOption* out_obj) {
+	return self.vtable->functions.first(ctx, self.self, out_obj);
+}
+
+oct_Bool oct_Seq_rest(struct oct_Context* ctx, oct_BSeq self, oct_OSelf* out_rest) {
+	return self.vtable->functions.rest(ctx, self.self, out_rest);
+}
+
+oct_Bool oct_Seq_prepend(struct oct_Context* ctx, oct_BSeq self, oct_OObject obj) {
+	return self.vtable->functions.prepend(ctx, self.self, obj);
+}
+
+oct_Bool oct_Seq_append(struct oct_Context* ctx, oct_BSeq self, oct_OObject obj) {
+	return self.vtable->functions.append(ctx, self.self, obj);
+}
+
+oct_Bool oct_Seq_nth(struct oct_Context* ctx, oct_BSeq self, oct_Uword idx, oct_OObjectOption* out_obj) {
+	return self.vtable->functions.nth(ctx, self.self, idx, out_obj);
+}

@@ -31,7 +31,7 @@ static void StringTests() {
 	bs1.ptr = s1.ptr; // borrow s1
 	bs2.ptr = s2.ptr; // borrow s2
 	TEST(oct_BString_equals(ctx, bs1, bs2, &result));
-	TEST(result);
+	assert(result);
 	TEST(oct_String_destroyOwned(ctx, s1));
 	TEST(oct_String_destroyOwned(ctx, s2));
 	// END Equals
@@ -48,15 +48,15 @@ static void StringTests() {
 	TEST(oct_OStringstream_destroy(ctx, ss));
 	TEST(oct_String_destroyOwned(ctx, s1));
 
-	TEST(readResult.variant == OCT_READRESULT_OK);
-	TEST((readResult.result.object.vtable->type.ptr == ctx->rt->builtInTypes.String.ptr));
+	assert(readResult.variant == OCT_READRESULT_OK);
+	assert(readResult.result.object.vtable->type.ptr == ctx->rt->builtInTypes.String.ptr);
 	bs2.ptr = (oct_String*)readResult.result.object.self.self;
 
 	TEST(oct_String_createOwnedFromCString(ctx, "Hello", &s1));
 	bs1.ptr = s1.ptr; // borrow s1
 
 	TEST(oct_BString_equals(ctx, bs1, bs2, &result));
-	TEST(result);
+	assert(result);
 	TEST(oct_String_destroyOwned(ctx, s1));
 	TEST(oct_Object_destroyOwned(ctx, readResult.result.object));
 	// END Reading
@@ -101,12 +101,12 @@ static void NamespaceTests() {
 
 	// Lookup
 	TEST(oct_Namespace_lookup(ctx, ns, key.borrowed, &lookedUp));
-	TEST(lookedUp.variant == val.variant);
+	assert(lookedUp.variant == val.variant);
 	TEST(oct_String_createOwnedFromCString(ctx, "theValue", &valStr));
 	eq1.ptr = valStr.ptr;
 	eq2.ptr = (oct_String*)lookedUp.oobject.self.self;
 	TEST(oct_BString_equals(ctx, eq1, eq2, &eq));
-	TEST(eq);
+	assert(eq);
 	TEST(oct_String_destroyOwned(ctx, valStr));
 	TEST(oct_Object_destroyOwned(ctx, lookedUp.oobject));
 
@@ -145,18 +145,17 @@ static void defTest() {
 
 	// Eval
 	TEST(oct_String_createOwnedFromCString(ctx, "(def hello \"Hello\")", &str));
-    TEST(str.ptr);
+    assert(str.ptr);
 	bstr.ptr = str.ptr;
 	TEST(oct_OStringstream_create(ctx, bstr, &ss));
-    TEST(ss.ptr);
+    assert(ss.ptr);
 	bss.ptr = ss.ptr;
 	TEST(oct_Stringstream_asCharStream(ctx, bss, &stream));
-    TEST(stream.vtable);
+    assert(stream.vtable);
 	reader.ptr = ctx->reader;
 	TEST(oct_Reader_read(ctx, reader, stream, &readResult));
 	TEST(oct_OStringstream_destroy(ctx, ss));
 	TEST(oct_String_destroyOwned(ctx, str));
-	//TEST(oct_Object_destroyOwned(ctx, readResult.result.object));
 	TEST(oct_Compiler_eval(ctx, readResult.result.object, &evalResult));
 	if(evalResult.variant == OCT_ANY_OOBJECT) {
 		TEST(oct_Object_destroyOwned(ctx, evalResult.oobject));
@@ -173,11 +172,72 @@ static void defTest() {
 	bs1.ptr = str.ptr;
 	bs2.ptr = (oct_String*)lookedUp.oobject.self.self;
 	TEST(oct_BString_equals(ctx, bs1, bs2, &result));
-	TEST(result);
+	assert(result);
 	TEST(oct_String_destroyOwned(ctx, str));
 	TEST(oct_Object_destroyOwned(ctx, lookedUp.oobject));
 
 	TEST(oct_Runtime_destroy(rt, &error));
+}
+
+void testListAsSeq() {
+	const char* error;
+	oct_Runtime* rt;
+	oct_Context* ctx;
+	oct_OList lst;
+	oct_BSeq seq;
+	oct_BSelf self;
+	oct_OList rest;
+	oct_BList blst;
+	oct_OString tmpStr;
+	oct_OObject tmpObj;
+	oct_OObjectOption out;
+	oct_BString cmp1;
+	oct_Bool eq;
+
+	rt = oct_Runtime_create(&error);
+	ctx = oct_Runtime_currentContext(rt);
+
+	TEST(oct_List_createOwned(ctx, &lst));
+	self.self = lst.ptr;
+	TEST(oct_Object_as(ctx, self, rt->builtInTypes.List, rt->builtInProtocols.Seq, (oct_BObject*)&seq));
+	TEST(oct_String_createOwnedFromCString(ctx, "Hello", &tmpStr));
+	TEST(oct_String_asObjectOwned(ctx, tmpStr, &tmpObj));
+	TEST(oct_Seq_append(ctx, seq, tmpObj));
+	TEST(oct_String_createOwnedFromCString(ctx, "Really", &tmpStr));
+	TEST(oct_String_asObjectOwned(ctx, tmpStr, &tmpObj));
+	TEST(oct_Seq_append(ctx, seq, tmpObj));
+	TEST(oct_String_createOwnedFromCString(ctx, "Big", &tmpStr));
+	TEST(oct_String_asObjectOwned(ctx, tmpStr, &tmpObj));
+	TEST(oct_Seq_append(ctx, seq, tmpObj));
+	TEST(oct_String_createOwnedFromCString(ctx, "World!", &tmpStr));
+	TEST(oct_String_asObjectOwned(ctx, tmpStr, &tmpObj));
+	TEST(oct_Seq_append(ctx, seq, tmpObj));
+	TEST(oct_Seq_first(ctx, seq, &out));
+	cmp1.ptr = (oct_String*)out.object.self.self;
+	TEST(oct_BStringCString_equals(ctx, cmp1, "Hello", &eq));
+	assert(eq);
+	TEST(oct_Object_destroyOwned(ctx, out.object));
+	TEST(oct_Seq_nth(ctx, seq, 2, &out));
+	cmp1.ptr = (oct_String*)out.object.self.self;
+	TEST(oct_BStringCString_equals(ctx, cmp1, "World!", &eq));
+	assert(eq);
+	TEST(oct_Object_destroyOwned(ctx, out.object));
+	TEST(oct_Seq_rest(ctx, seq, (oct_OSelf*)&rest));
+	TEST(oct_Seq_first(ctx, seq, &out));
+	cmp1.ptr = (oct_String*)out.object.self.self;
+	TEST(oct_BStringCString_equals(ctx, cmp1, "Really", &eq));
+	assert(eq);
+	TEST(oct_Object_destroyOwned(ctx, out.object));
+	blst.ptr = rest.ptr;
+	TEST(oct_List_first(ctx, blst, &out));
+	cmp1.ptr = (oct_String*)out.object.self.self;
+	TEST(oct_BStringCString_equals(ctx, cmp1, "Big", &eq));
+	assert(eq);
+	TEST(oct_Object_destroyOwned(ctx, out.object));
+	TEST(oct_List_destroyOwned(ctx, rest));
+	TEST(oct_List_destroyOwned(ctx, lst));
+
+	oct_Runtime_destroy(rt, &error);
 }
 
 int main(int argc, char** argv) {
@@ -251,6 +311,7 @@ int main(int argc, char** argv) {
 	StringTests();
 	NamespaceTests();
 	defTest();
+	testListAsSeq();
 
 #ifdef OCT_DEBUG
 	oct_ExchangeHeap_report(NULL);
