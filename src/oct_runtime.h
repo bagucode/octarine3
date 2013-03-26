@@ -91,8 +91,9 @@ typedef struct oct_BuiltInTypes {
 	oct_BType List;
 	oct_BType OList;
 	oct_BType BList;
-	oct_BType OListOption;
-	oct_BType BListOption;
+	oct_BType ListNode;
+	oct_BType OListNode;
+	oct_BType OListNodeOption;
 	// Nothing
 	oct_BType Nothing;
 	oct_BType BNothing;

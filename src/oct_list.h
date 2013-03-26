@@ -5,39 +5,39 @@
 #include "oct_nothing.h"
 #include "oct_printable.h"
 
-struct oct_List;
+struct oct_ListNode;
 
-typedef struct oct_OList {
-	struct oct_List* ptr;
-} oct_OList;
+typedef struct oct_OListNode {
+	struct oct_ListNode* ptr;
+} oct_OListNode;
 
-typedef struct oct_BList {
-	struct oct_List* ptr;
-} oct_BList;
+#define OCT_LISTNODEOPTION_NOTHING 0
+#define OCT_LISTNODEOPTION_NODE 1
 
-#define OCT_LISTOPTION_NOTHING 0
-#define OCT_LISTOPTION_LIST 1
-
-typedef struct oct_OListOption {
+typedef struct oct_OListNodeOption {
 	oct_Uword variant;
 	union {
 		oct_Nothing nothing;
-		oct_OList list;
+		oct_OListNode node;
 	};
-} oct_OListOption;
+} oct_OListNodeOption;
 
-typedef struct oct_BListOption {
-	oct_Uword variant;
-	union {
-		oct_Nothing nothing;
-		oct_BList list;
-	};
-} oct_BListOption;
+typedef struct oct_ListNode {
+	oct_OObject data;
+	oct_OListNodeOption next;
+} oct_ListNode;
 
 typedef struct oct_List {
-	oct_OObjectOption data;
-	oct_OListOption next;
+	oct_OListNodeOption head;
 } oct_List;
+
+typedef struct oct_BList {
+	oct_List* ptr;
+} oct_BList;
+
+typedef struct oct_OList {
+	oct_List* ptr;
+} oct_OList;
 
 // Private
 
@@ -56,11 +56,11 @@ oct_Bool oct_List_createOwned(struct oct_Context* ctx, oct_OList* out_result);
 oct_Bool oct_List_destroyOwned(struct oct_Context* ctx, oct_OList lst);
 
 // Mutating Operations
-oct_Bool oct_List_prepend(struct oct_Context* ctx, oct_OList lst, oct_OObject obj, oct_OList* out_lst);
+oct_Bool oct_List_prepend(struct oct_Context* ctx, oct_BList lst, oct_OObject obj);
 oct_Bool oct_List_append(struct oct_Context* ctx, oct_BList lst, oct_OObject obj);
-oct_Bool oct_List_first(struct oct_Context* ctx, oct_OList lst, oct_OObjectOption* out_value, oct_OList* out_lst);
-oct_Bool oct_List_rest(struct oct_Context* ctx, oct_BList lst, oct_OListOption* out_lst);
-oct_Bool oct_List_nth(struct oct_Context* ctx, oct_OList lst, oct_Uword idx, oct_OObjectOption* out_value, oct_OList* out_lst);
+oct_Bool oct_List_first(struct oct_Context* ctx, oct_BList lst, oct_OObjectOption* out_value);
+oct_Bool oct_List_rest(struct oct_Context* ctx, oct_BList lst, oct_OList* out_lst);
+oct_Bool oct_List_nth(struct oct_Context* ctx, oct_BList lst, oct_Uword idx, oct_OObjectOption* out_value);
 
 // Non-mutating Operations
 oct_Bool oct_List_borrowFirst(struct oct_Context* ctx, oct_BList lst, oct_BObjectOption* out_value);
