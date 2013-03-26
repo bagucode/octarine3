@@ -291,8 +291,6 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	bind_type(ctx, octarine, "List", rt->builtInTypes.List);
 	bind_type(ctx, octarine, "~List", rt->builtInTypes.OList);
 	bind_type(ctx, octarine, "&List", rt->builtInTypes.BList);
-	bind_type(ctx, octarine, "ListOption~", rt->builtInTypes.OListOption);
-	bind_type(ctx, octarine, "ListOption&", rt->builtInTypes.BListOption);
 	// Nothing
 	bind_type(ctx, octarine, "Nothing", rt->builtInTypes.Nothing);
 	bind_type(ctx, octarine, "&Nothing", rt->builtInTypes.BNothing);

@@ -49,8 +49,8 @@ static oct_Bool eval_sym(struct oct_Context* ctx, oct_OObject form, oct_Any* out
 	oct_Bool result = oct_True;
 
 	ns.ptr = ctx->ns;
-	osym.ptr = form.self.self;
-	bsym.ptr = form.self.self;
+	osym.ptr = (oct_Symbol*)form.self.self;
+	bsym.ptr = (oct_Symbol*)form.self.self;
 	CHECK(oct_Symbol_asHashtableKey(ctx, bsym, &key));
 	CHECK(oct_Namespace_lookup(ctx, ns, key, out_result));
 
@@ -67,9 +67,9 @@ static oct_Bool eval_def(struct oct_Context* ctx, oct_OObject form, oct_Any* out
 	oct_BNamespace ns;
 	oct_Uword count;
 	oct_HashtableKeyOption key;
-	oct_OList olist;
+	oct_OList formlist;
     oct_BList blist;
-    oct_OListOption listOpt;
+    oct_OList rest;
     oct_OObjectOption tmp;
 	oct_BSymbol bsym;
 	oct_Any nsVal;
@@ -77,18 +77,19 @@ static oct_Bool eval_def(struct oct_Context* ctx, oct_OObject form, oct_Any* out
 	oct_BSelf bself;
 	oct_Bool result = oct_True;
 
-    olist.ptr = form.self.self;
-	blist.ptr = form.self.self;
+    formlist.ptr = (oct_List*)form.self.self;
+	blist.ptr = (oct_List*)form.self.self;
     CHECK(oct_List_count(ctx, blist, &count));
 	if(count < 2 || count > 3) {
 		oct_Context_setErrorWithCMessage(ctx, "Wrong number of arguments to def");
 		goto error;
 	}
     // Drop "def"
-    CHECK(oct_List_rest(ctx, blist, &listOpt));
-	CHECK(oct_List_destroyOwned(ctx, olist)); // destroy head
-    olist.ptr = listOpt.list.ptr;
-    CHECK(oct_List_first(ctx, olist, &tmp, &olist));
+    CHECK(oct_List_rest(ctx, blist, &rest));
+	CHECK(oct_List_destroyOwned(ctx, formlist)); // destroy head
+    formlist = rest;
+	blist.ptr = formlist.ptr;
+    CHECK(oct_List_first(ctx, blist, &tmp));
 	if(tmp.object.vtable->type.ptr != ctx->rt->builtInTypes.Symbol.ptr) {
     	oct_Context_setErrorWithCMessage(ctx, "First argument to def must be a Symbol");
 		goto error;
@@ -98,7 +99,7 @@ static oct_Bool eval_def(struct oct_Context* ctx, oct_OObject form, oct_Any* out
 	key.variant = OCT_HASHTABLEKEYOPTION_OWNED;
 	// eval second argument if we have one
 	if(count == 3) {
-        CHECK(oct_List_first(ctx, olist, &tmp, &olist));
+        CHECK(oct_List_first(ctx, blist, &tmp));
 		CHECK(oct_Compiler_eval(ctx, tmp.object, out_result));
 	}
 	else {
@@ -111,7 +112,7 @@ error:
 	result = oct_False;
 end:
 	// clean up
-	result = oct_List_destroyOwned(ctx, olist) && result;
+	result = oct_List_destroyOwned(ctx, formlist) && result;
 	if(result) {
 		// bind in current namespace
 		ns.ptr = ctx->ns;
@@ -141,26 +142,27 @@ end:
 static oct_Bool eval_quote(oct_Context* ctx, oct_OObject form, oct_Any* out_result) {
     oct_OList olist;
     oct_BList blist;
-    oct_OListOption olistOpt;
+    oct_OList rest;
 	oct_OObjectOption first;
     oct_Bool result = oct_True;
     out_result->variant = OCT_ANY_NOTHING;
     
+	//oct_Object_destroyOwned(ctx, form);
+
 	// Drop quote symbol
     blist.ptr = (oct_List*)form.self.self;
-    CHECK(oct_List_rest(ctx, blist, &olistOpt)); // detach ...
+    CHECK(oct_List_rest(ctx, blist, &rest)); // detach ...
     olist.ptr = (oct_List*)form.self.self;
     CHECK(oct_List_destroyOwned(ctx, olist)); // ... and drop head
-    if(olistOpt.variant == OCT_LISTOPTION_LIST) {
-		// Return the first item in the list that is left. Anything else will be silently
-		// eaten by the quote form. Throw an error here instead if there is more than one item?
-		CHECK(oct_List_first(ctx, olistOpt.list, &first, &olist));
-		if(first.variant == OCT_OOBJECTOPTION_OBJECT) {
-			out_result->variant = OCT_ANY_OOBJECT;
-			out_result->oobject = first.object;
-		}
-		CHECK(oct_List_destroyOwned(ctx, olist));
-    }
+	// Return the first item in the list that is left. Anything else will be silently
+	// eaten by the quote form. Throw an error here instead if there is more than one item?
+	blist.ptr = rest.ptr;
+	CHECK(oct_List_first(ctx, blist, &first));
+	if(first.variant == OCT_OOBJECTOPTION_OBJECT) {
+		out_result->variant = OCT_ANY_OOBJECT;
+		out_result->oobject = first.object;
+	}
+	CHECK(oct_List_destroyOwned(ctx, rest));
     
     goto end;
 error:
@@ -179,8 +181,8 @@ static oct_Bool eval_list(oct_Context* ctx, oct_OObject form, oct_Any* out_resul
 	oct_BObjectOption val;
 	oct_Bool result = oct_True;
 
-	olist.ptr = form.self.self;
-	blist.ptr = form.self.self;
+	olist.ptr = (oct_List*)form.self.self;
+	blist.ptr = (oct_List*)form.self.self;
 
 	CHECK(oct_List_emptyp(ctx, blist, &eq));
 	if(eq) {

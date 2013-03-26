@@ -121,7 +121,7 @@ oct_Bool oct_List_destroyOwned(struct oct_Context* ctx, oct_OList lst) {
 // Operations
 oct_Bool oct_List_prepend(struct oct_Context* ctx, oct_BList lst, oct_OObject obj) {
 	oct_OListNode newNode;
-	CHECK(OCT_ALLOCOWNED(sizeof(oct_OListNode), (void**)&newNode.ptr, "oct_List_prepend"));
+	CHECK(OCT_ALLOCOWNED(sizeof(oct_ListNode), (void**)&newNode.ptr, "oct_List_prepend"));
 	newNode.ptr->data = obj;
 	newNode.ptr->next.variant = lst.ptr->head.variant;
 	if(lst.ptr->head.variant == OCT_LISTNODEOPTION_NODE) {
@@ -145,7 +145,7 @@ oct_Bool oct_List_append(struct oct_Context* ctx, oct_BList lst, oct_OObject obj
 		while(node->next.variant == OCT_LISTNODEOPTION_NODE) {
 			node = node->next.node.ptr;
 		}
-		CHECK(OCT_ALLOCOWNED(sizeof(oct_OListNode), (void**)&newNode.ptr, "oct_List_append"));
+		CHECK(OCT_ALLOCOWNED(sizeof(oct_ListNode), (void**)&newNode.ptr, "oct_List_append"));
 		newNode.ptr->data = obj;
 		newNode.ptr->next.variant = OCT_LISTNODEOPTION_NOTHING;
 		node->next.variant = OCT_LISTNODEOPTION_NODE;
