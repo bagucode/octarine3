@@ -210,7 +210,7 @@ typedef struct oct_BuiltInVTables {
 	// Vector
 	oct_BVTable VectorAsObject;
 	oct_BVTable VectorAsPrintable;
-	//oct_BVTable VectorAsSeq;
+	oct_BVTable VectorAsSeq;
 } oct_BuiltInVTables;
 
 typedef struct oct_BuiltInProtocols {

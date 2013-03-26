@@ -19,5 +19,6 @@
 #include "oct_printable.h"
 #include "oct_list.h"
 #include "oct_seq.h"
+#include "oct_vector.h"
 
 #endif

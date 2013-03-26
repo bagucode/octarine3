@@ -240,6 +240,67 @@ void testListAsSeq() {
 	oct_Runtime_destroy(rt, &error);
 }
 
+void testVecAsSeq() {
+	const char* error;
+	oct_Runtime* rt;
+	oct_Context* ctx;
+	oct_OVector lst;
+	oct_BSeq seq;
+	oct_BSelf self;
+	oct_OVector rest;
+	oct_BVector blst;
+	oct_OString tmpStr;
+	oct_OObject tmpObj;
+	oct_OObjectOption out;
+	oct_BString cmp1;
+	oct_Bool eq;
+
+	rt = oct_Runtime_create(&error);
+	ctx = oct_Runtime_currentContext(rt);
+
+	TEST(oct_Vector_createOwned(ctx, &lst));
+	self.self = lst.ptr;
+	TEST(oct_Object_as(ctx, self, rt->builtInTypes.Vector, rt->builtInProtocols.Seq, (oct_BObject*)&seq));
+	TEST(oct_String_createOwnedFromCString(ctx, "Hello", &tmpStr));
+	TEST(oct_String_asObjectOwned(ctx, tmpStr, &tmpObj));
+	TEST(oct_Seq_append(ctx, seq, tmpObj));
+	TEST(oct_String_createOwnedFromCString(ctx, "Really", &tmpStr));
+	TEST(oct_String_asObjectOwned(ctx, tmpStr, &tmpObj));
+	TEST(oct_Seq_append(ctx, seq, tmpObj));
+	TEST(oct_String_createOwnedFromCString(ctx, "Big", &tmpStr));
+	TEST(oct_String_asObjectOwned(ctx, tmpStr, &tmpObj));
+	TEST(oct_Seq_append(ctx, seq, tmpObj));
+	TEST(oct_String_createOwnedFromCString(ctx, "World!", &tmpStr));
+	TEST(oct_String_asObjectOwned(ctx, tmpStr, &tmpObj));
+	TEST(oct_Seq_append(ctx, seq, tmpObj));
+
+	TEST(oct_Seq_first(ctx, seq, &out));
+	cmp1.ptr = (oct_String*)out.object.self.self;
+	TEST(oct_BStringCString_equals(ctx, cmp1, "Hello", &eq));
+	assert(eq);
+	TEST(oct_Object_destroyOwned(ctx, out.object));
+	
+	TEST(oct_Seq_nth(ctx, seq, 3, &out));
+	cmp1.ptr = (oct_String*)out.object.self.self;
+	TEST(oct_BStringCString_equals(ctx, cmp1, "World!", &eq));
+	assert(eq);
+	TEST(oct_Object_destroyOwned(ctx, out.object));
+	
+	TEST(oct_Seq_rest(ctx, seq, (oct_OSelf*)&rest));
+	blst.ptr = rest.ptr;
+	
+	TEST(oct_Vector_first(ctx, blst, &out));
+	cmp1.ptr = (oct_String*)out.object.self.self;
+	TEST(oct_BStringCString_equals(ctx, cmp1, "Really", &eq));
+	assert(eq);
+	
+	TEST(oct_Object_destroyOwned(ctx, out.object));
+	TEST(oct_Vector_destroyOwned(ctx, rest));
+	TEST(oct_Vector_destroyOwned(ctx, lst));
+
+	oct_Runtime_destroy(rt, &error);
+}
+
 int main(int argc, char** argv) {
 	const char* error;
 	oct_BCharstream stream;
@@ -312,6 +373,7 @@ int main(int argc, char** argv) {
 	NamespaceTests();
 	defTest();
 	testListAsSeq();
+	testVecAsSeq();
 
 #ifdef OCT_DEBUG
 	oct_ExchangeHeap_report(NULL);

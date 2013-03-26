@@ -105,7 +105,6 @@ oct_Bool oct_AOObjectOption_dtor(struct oct_Context* ctx, oct_BAOObjectOption se
 			result = oct_Object_destroyOwned(ctx, self.ptr->data[i].object) && result;
 		}
 	}
-	result = OCT_FREEOWNED(self.ptr) && result;
 	return result;
 }
 
