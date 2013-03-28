@@ -150,6 +150,10 @@ typedef struct oct_BuiltInTypes {
 	oct_BType Seq;
 	oct_BType OSeq;
 	oct_BType BSeq;
+	// Seqable
+	oct_BType Seqable;
+	oct_BType OSeqable;
+	oct_BType BSeqable;
 } oct_BuiltInTypes;
 
 typedef struct oct_BuiltInVTables {
@@ -222,6 +226,7 @@ typedef struct oct_BuiltInProtocols {
 	oct_BProtocolBinding Charstream;
 	oct_BProtocolBinding Printable;
 	oct_BProtocolBinding Seq;
+	oct_BProtocolBinding Seqable;
 } oct_BuiltInProtocols;
 
 typedef struct oct_BuiltInFunctions {
@@ -237,6 +242,7 @@ typedef struct oct_BuiltInFunctions {
 	oct_BFunction prepend;
 	oct_BFunction append;
 	oct_BFunction nth;
+	oct_BFunction seq;
 } oct_BuiltInFunctions;
 
 typedef struct oct_BuiltInErrors {
