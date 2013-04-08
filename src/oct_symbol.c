@@ -14,7 +14,7 @@
 oct_Bool _oct_Symbol_init(oct_Context* ctx) {
 
 	// Symbol
-	oct_BType t = ctx->rt->builtInTypes.Symbol;
+	oct_CType t = ctx->rt->builtInTypes.Symbol;
 	t.ptr->variant = OCT_TYPE_STRUCT;
 	t.ptr->structType.alignment = 0;
 	t.ptr->structType.size = sizeof(oct_Symbol);
@@ -52,7 +52,7 @@ oct_Bool _oct_Symbol_init(oct_Context* ctx) {
 	t.ptr->variant = OCT_TYPE_VARIADIC;
 	t.ptr->variadicType.alignment = 0;
 	t.ptr->variadicType.size = sizeof(oct_OSymbolOption);
-	CHECK(oct_ABType_createOwned(ctx, 2, &t.ptr->variadicType.types));
+	CHECK(oct_ACType_createOwned(ctx, 2, &t.ptr->variadicType.types));
 	t.ptr->variadicType.types.ptr->data[0] = ctx->rt->builtInTypes.Nothing;
 	t.ptr->variadicType.types.ptr->data[1] = ctx->rt->builtInTypes.OSymbol;
 

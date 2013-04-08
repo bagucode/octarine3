@@ -5,7 +5,7 @@
 
 typedef struct oct_Field {
 	oct_Uword offset;
-	oct_BType type;
+	oct_CType type;
 } oct_Field;
 
 // Array of field
@@ -14,25 +14,9 @@ typedef struct oct_AField {
 	oct_Field data[];
 } oct_AField;
 
-// Owned array of field
-typedef struct oct_OAField {
+// Constant array of field
+typedef struct oct_CAField {
 	oct_AField* ptr;
-} oct_OAField;
-
-// Private
-
-struct oct_Context;
-
-oct_Bool _oct_Field_init(struct oct_Context* ctx);
-
-// Public
-
-//oct_Bool oct_Field_ctor(struct oct_Context* ctx, oct_Field* field);
-
-//oct_Bool oct_Field_dtor(struct oct_Context* ctx, oct_Field* field);
-
-oct_Bool oct_AField_createOwned(struct oct_Context* ctx, oct_Uword size, oct_OAField* out_result);
-
-oct_Bool oct_AField_destroyOwned(struct oct_Context* ctx, oct_OAField oafield);
+} oct_CAField;
 
 #endif

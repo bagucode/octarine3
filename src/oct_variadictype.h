@@ -6,7 +6,7 @@
 typedef struct oct_VariadicType {
 	oct_Uword alignment;
 	oct_Uword size;
-	oct_OABType types;
+	oct_CACType types;
 } oct_VariadicType;
 
 // Private

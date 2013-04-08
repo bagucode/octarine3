@@ -15,12 +15,12 @@ oct_Bool _oct_Seqable_initProtocol(struct oct_Context* ctx) {
 }
 
 oct_Bool _oct_Seqable_init(struct oct_Context* ctx) {
-	oct_BFunction fn;
+	oct_CFunction fn;
 
 	// Seqable protocol
-	oct_BType t = ctx->rt->builtInTypes.Seqable;
+	oct_CType t = ctx->rt->builtInTypes.Seqable;
 	t.ptr->variant = OCT_TYPE_PROTOCOL;
-	CHECK(oct_ABFunction_createOwned(ctx, 1, &t.ptr->protocolType.functions));
+	CHECK(oct_ACFunction_createOwned(ctx, 1, &t.ptr->protocolType.functions));
 	t.ptr->protocolType.functions.ptr->data[0] = ctx->rt->functions.seq;
 
 	// OSeqable
@@ -38,8 +38,8 @@ oct_Bool _oct_Seqable_init(struct oct_Context* ctx) {
 	// seq function signature
 	CHECK(OCT_ALLOCOWNED(sizeof(oct_Function), (void**)&ctx->rt->functions.seq.ptr, "functions.seq"));
 	fn = ctx->rt->functions.seq;
-	CHECK(oct_ABType_createOwned(ctx, 1, &fn.ptr->paramTypes));
-	CHECK(oct_ABType_createOwned(ctx, 1, &fn.ptr->returnTypes));
+	CHECK(oct_ACType_createOwned(ctx, 1, &fn.ptr->paramTypes));
+	CHECK(oct_ACType_createOwned(ctx, 1, &fn.ptr->returnTypes));
 	fn.ptr->paramTypes.ptr->data[0] = ctx->rt->builtInTypes.BSelf;
 	fn.ptr->returnTypes.ptr->data[0] = ctx->rt->builtInTypes.BSeq;
 

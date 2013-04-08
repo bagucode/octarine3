@@ -13,7 +13,7 @@ typedef struct oct_PrintableFunctions {
 } oct_PrintableFunctions;
 
 typedef struct oct_PrintableVTable {
-	oct_BType type;
+	oct_CType type;
 	oct_PrintableFunctions functions;
 } oct_PrintableVTable;
 

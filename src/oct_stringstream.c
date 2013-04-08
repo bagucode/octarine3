@@ -16,7 +16,7 @@
 oct_Bool _oct_Stringstream_init(struct oct_Context* ctx) {
 
 	// Stringstream
-	oct_BType t = ctx->rt->builtInTypes.Stringstream;
+	oct_CType t = ctx->rt->builtInTypes.Stringstream;
 	t.ptr->variant = OCT_TYPE_STRUCT;
 	t.ptr->structType.alignment = 0;
 	t.ptr->structType.size = sizeof(oct_Stringstream);

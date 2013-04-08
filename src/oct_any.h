@@ -19,8 +19,8 @@ typedef struct oct_Any {
 	};
 } oct_Any;
 
-struct oct_Context;
-
-oct_Bool _oct_Any_init(struct oct_Context* ctx);
+//struct oct_Context;
+//
+//oct_Bool _oct_Any_init(struct oct_Context* ctx);
 
 #endif

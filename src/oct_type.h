@@ -30,13 +30,13 @@ typedef struct oct_Type {
 	};
 } oct_Type;
 
-struct oct_Context;
+//struct oct_Context;
 
 // For Type, the vtables need to be added manually because of a circular dependency with protocols
-oct_Bool _oct_Type_VTableInit(struct oct_Context* ctx);
-oct_Bool _oct_Type_init(struct oct_Context* ctx);
+//oct_Bool _oct_Type_VTableInit(struct oct_Context* ctx);
+//oct_Bool _oct_Type_init(struct oct_Context* ctx);
 
-oct_Bool oct_Type_dtor(struct oct_Context* ctx, oct_Type* self);
+//oct_Bool oct_Type_dtor(struct oct_Context* ctx, oct_Type* self);
 
 // Public
 

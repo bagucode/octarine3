@@ -6,7 +6,7 @@
 typedef struct oct_StructType {
 	oct_Uword alignment;
 	oct_Uword size;
-	oct_OAField fields;
+	oct_CAField fields;
 } oct_StructType;
 
 struct oct_Context;

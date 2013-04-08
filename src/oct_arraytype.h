@@ -5,12 +5,12 @@
 #include "oct_type_pointers.h"
 
 typedef struct oct_ArrayType {
-	oct_BType elementType;
+	oct_CType elementType;
 } oct_ArrayType;
 
 typedef struct oct_FixedSizeArrayType {
 	oct_Uword size;
-	oct_BType elementType;
+	oct_CType elementType;
 } oct_FixedSizeArrayType;
 
 // Private

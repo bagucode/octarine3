@@ -75,9 +75,9 @@ typedef oct_U32 oct_Uword;
 
 // Private
 
-struct oct_Context;
+//struct oct_Context;
 
-oct_Bool _oct_Primitives_init(struct oct_Context* ctx);
+//oct_Bool _oct_Primitives_init(struct oct_Context* ctx);
 
 // Public
 

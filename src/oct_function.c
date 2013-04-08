@@ -11,7 +11,7 @@
 oct_Bool _oct_Function_init(struct oct_Context* ctx) {
 
 	// Function
-	oct_BType t = ctx->rt->builtInTypes.Function;
+	oct_CType t = ctx->rt->builtInTypes.Function;
 	t.ptr->variant = OCT_TYPE_STRUCT;
 	t.ptr->structType.size = sizeof(oct_Function);
 	t.ptr->structType.alignment = 0;
@@ -21,35 +21,35 @@ oct_Bool _oct_Function_init(struct oct_Context* ctx) {
 	t.ptr->structType.fields.ptr->data[1].offset = offsetof(oct_Function, returnTypes);
 	t.ptr->structType.fields.ptr->data[1].type = ctx->rt->builtInTypes.OABType;
 
-	// BFunction
-	t = ctx->rt->builtInTypes.BFunction;
+	// CFunction
+	t = ctx->rt->builtInTypes.CFunction;
 	t.ptr->variant = OCT_TYPE_POINTER;
 	t.ptr->pointerType.kind = OCT_POINTER_BORROWED;
 	t.ptr->pointerType.type = ctx->rt->builtInTypes.Function;
 
-	// ABFunction
-	t = ctx->rt->builtInTypes.ABFunction;
+	// ACFunction
+	t = ctx->rt->builtInTypes.ACFunction;
 	t.ptr->variant = OCT_TYPE_ARRAY;
-	t.ptr->arrayType.elementType = ctx->rt->builtInTypes.BFunction;
+	t.ptr->arrayType.elementType = ctx->rt->builtInTypes.CFunction;
 
-	// OABFunction
-	t = ctx->rt->builtInTypes.OABFunction;
+	// OACFunction
+	t = ctx->rt->builtInTypes.OACFunction;
 	t.ptr->variant = OCT_TYPE_POINTER;
 	t.ptr->pointerType.kind = OCT_POINTER_OWNED;
-	t.ptr->pointerType.type = ctx->rt->builtInTypes.ABFunction;
+	t.ptr->pointerType.type = ctx->rt->builtInTypes.ACFunction;
 
 	return oct_True;
 }
 
-oct_Bool oct_ABFunction_createOwned(struct oct_Context* ctx, oct_Uword size, oct_OABFunction* out_result) {
-	oct_Bool result = OCT_ALLOCOWNED(sizeof(oct_BFunction) * size + sizeof(oct_Uword), (void**)&out_result->ptr, "oct_ABFunction_createOwned");
+oct_Bool oct_ACFunction_createOwned(struct oct_Context* ctx, oct_Uword size, oct_CACFunction* out_result) {
+	oct_Bool result = OCT_ALLOCOWNED(sizeof(oct_CFunction) * size + sizeof(oct_Uword), (void**)&out_result->ptr, "oct_ACFunction_createOwned");
 	// TODO: set all the function pointers to point to a built in function so that they have a value. Perhaps the identity function?
 	out_result->ptr->size = size;
 	return result;
 }
 
 oct_Bool oct_Function_dtor(struct oct_Context* ctx, oct_BSelf self) {
-	oct_BFunction fn;
+	oct_CFunction fn;
 	oct_Bool result;
 	fn.ptr = (oct_Function*)self.self;
 	result = OCT_FREEOWNED(fn.ptr->paramTypes.ptr);

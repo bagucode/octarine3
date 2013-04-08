@@ -9,7 +9,7 @@
 #define CHECK(X) if(!X) return oct_False;
 
 oct_Bool _oct_Error_init(struct oct_Context* ctx) {
-	oct_BType t = ctx->rt->builtInTypes.Error;
+	oct_CType t = ctx->rt->builtInTypes.Error;
 
 	// Error
 	t.ptr->variant = OCT_TYPE_STRUCT;
@@ -29,7 +29,7 @@ oct_Bool _oct_Error_init(struct oct_Context* ctx) {
 	t.ptr->variant = OCT_TYPE_VARIADIC;
 	t.ptr->variadicType.alignment = 0;
 	t.ptr->variadicType.size = sizeof(oct_ErrorOption);
-	CHECK(oct_ABType_createOwned(ctx, 2, &t.ptr->variadicType.types));
+	CHECK(oct_ACType_createOwned(ctx, 2, &t.ptr->variadicType.types));
 	t.ptr->variadicType.types.ptr->data[0] = ctx->rt->builtInTypes.Nothing;
 	t.ptr->variadicType.types.ptr->data[1] = ctx->rt->builtInTypes.OError;
 

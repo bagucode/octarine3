@@ -14,22 +14,22 @@
 // that matches the protocol definition.
 
 typedef struct oct_ProtocolType {
-	oct_OABFunction functions;
+	oct_CACFunction functions;
 } oct_ProtocolType;
 
 typedef struct oct_VTable {
-	oct_BType objectType;
+	oct_CType objectType;
 	void* functions[]; /* one or more function pointers */
 } oct_VTable;
 
-typedef struct oct_BVTable {
+typedef struct oct_CVTable {
 	oct_VTable* ptr;
-} oct_BVTable;
+} oct_CVTable;
 
 // This type is what is put in a namespace when creating or linking a new protocol.
 // It contains the protocol definition and a table of implementations for all implementing types.
 typedef struct oct_ProtocolBinding {
-	oct_BType protocolType;
+	oct_CType protocolType;
 	oct_Hashtable implementations;
 } oct_ProtocolBinding;
 
@@ -37,9 +37,9 @@ struct oct_Context;
 
 oct_Bool _oct_VTable_init(struct oct_Context* ctx);
 oct_Bool _oct_Protocol_init(struct oct_Context* ctx);
-oct_Bool _oct_Protocol_addBuiltIn(struct oct_Context* ctx, oct_BProtocolBinding pb, oct_Uword fnCount, oct_BVTable* table, oct_BType type, ...);
+oct_Bool _oct_Protocol_addBuiltIn(struct oct_Context* ctx, oct_BProtocolBinding pb, oct_Uword fnCount, oct_CVTable* table, oct_CType type, ...);
 
-oct_Bool oct_Protocol_addImplementation(struct oct_Context* ctx, oct_BProtocolBinding protocol, oct_BType type, oct_BVTable vtable);
+oct_Bool oct_Protocol_addImplementation(struct oct_Context* ctx, oct_BProtocolBinding protocol, oct_CType type, oct_CVTable vtable);
 
 oct_Bool oct_ProtocolBinding_dtor(struct oct_Context* ctx, oct_BSelf self);
 

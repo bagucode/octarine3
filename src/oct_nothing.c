@@ -40,7 +40,7 @@ oct_Bool _oct_Nothing_VTableInit(struct oct_Context* ctx) {
 oct_Bool _oct_Nothing_init(struct oct_Context* ctx) {
 
 	// Nothing
-	oct_BType t = ctx->rt->builtInTypes.Nothing;
+	oct_CType t = ctx->rt->builtInTypes.Nothing;
 	t.ptr->variant = OCT_TYPE_STRUCT;
 	t.ptr->structType.alignment = 0;
 	t.ptr->structType.size = sizeof(oct_Nothing);

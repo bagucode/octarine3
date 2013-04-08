@@ -10,7 +10,7 @@ typedef struct oct_HashableFunctions {
 } oct_HashableFunctions;
 
 typedef struct oct_HashableVTable {
-	oct_BType type;
+	oct_CType type;
 	oct_HashableFunctions functions;
 } oct_HashableVTable;
 

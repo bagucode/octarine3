@@ -28,29 +28,29 @@
 #include <memory.h>
 
 static void alloc_builtInTypes(oct_Runtime* rt) {
-	oct_Uword iters = sizeof(oct_BuiltInTypes) / sizeof(oct_BType);
+	oct_Uword iters = sizeof(oct_BuiltInTypes) / sizeof(oct_CType);
 	oct_Uword i;
-	oct_BType* place;
+	oct_CType* place;
 	oct_Context* ctx = NULL; // for the alloc macro
 
 	for(i = 0; i < iters; ++i) {
 		char* dummy = (char*)(&rt->builtInTypes);
-		dummy += sizeof(oct_BType) * i;
-		place = (oct_BType*)dummy;
+		dummy += sizeof(oct_CType) * i;
+		place = (oct_CType*)dummy;
 		OCT_ALLOCOWNED(sizeof(oct_Type), (void**)&place->ptr, "alloc_builtInTypes");
 	}
 }
 
 static void dealloc_buintInTypes(oct_Context* ctx) {
-	oct_Uword iters = sizeof(oct_BuiltInTypes) / sizeof(oct_BType);
+	oct_Uword iters = sizeof(oct_BuiltInTypes) / sizeof(oct_CType);
 	oct_Uword i;
-	oct_BType* place;
+	oct_CType* place;
 	oct_Runtime* rt = ctx->rt;
 
 	for(i = 0; i < iters; ++i) {
 		char* dummy = (char*)(&rt->builtInTypes);
-		dummy += sizeof(oct_BType) * i;
-		place = (oct_BType*)dummy;
+		dummy += sizeof(oct_CType) * i;
+		place = (oct_CType*)dummy;
 		oct_Type_dtor(ctx, place->ptr);
 		OCT_FREEOWNED(place->ptr);
 	}
@@ -74,16 +74,16 @@ static void dealloc_builtInProtocols(oct_Context* ctx) {
 }
 
 static void dealloc_builtInFunctions(oct_Context* ctx) {
-	oct_Uword iters = sizeof(oct_BuiltInFunctions) / sizeof(oct_BFunction);
+	oct_Uword iters = sizeof(oct_BuiltInFunctions) / sizeof(oct_CFunction);
 	oct_Uword i;
-	oct_BFunction* place;
+	oct_CFunction* place;
 	oct_Runtime* rt = ctx->rt;
 	oct_BSelf self;
 
 	for(i = 0; i < iters; ++i) {
 		char* dummy = (char*)(&rt->functions);
-		dummy += sizeof(oct_BFunction) * i;
-		place = (oct_BFunction*)dummy;
+		dummy += sizeof(oct_CFunction) * i;
+		place = (oct_CFunction*)dummy;
 		self.self = place->ptr;
 		oct_Function_dtor(ctx, self);
 		OCT_FREEOWNED(place->ptr);
@@ -91,22 +91,22 @@ static void dealloc_builtInFunctions(oct_Context* ctx) {
 }
 
 static void dealloc_builtInVTables(oct_Runtime* rt) {
-	oct_Uword iters = sizeof(oct_BuiltInVTables) / sizeof(oct_BVTable);
+	oct_Uword iters = sizeof(oct_BuiltInVTables) / sizeof(oct_CVTable);
 	oct_Uword i;
-	oct_BVTable* place;
+	oct_CVTable* place;
 	oct_Context* ctx = NULL; // for the free macro
 
 	for(i = 0; i < iters; ++i) {
 		char* dummy = (char*)(&rt->vtables);
-		dummy += sizeof(oct_BVTable) * i;
-		place = (oct_BVTable*)dummy;
+		dummy += sizeof(oct_CVTable) * i;
+		place = (oct_CVTable*)dummy;
 		OCT_FREEOWNED(place->ptr);
 	}
 }
 
 #define CHECK(X) if(!X) return oct_False;
 
-static oct_Bool bind_type(oct_Context* ctx, oct_BNamespace ns, const char* name, oct_BType type) {
+static oct_Bool bind_type(oct_Context* ctx, oct_BNamespace ns, const char* name, oct_CType type) {
 	oct_OString str;
 	oct_OSymbol sym;
 	oct_BSymbol bSym;
@@ -271,9 +271,9 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 	bind_type(ctx, octarine, "&ProtocolBinding", rt->builtInTypes.BProtocolBinding);
 	// Function
 	bind_type(ctx, octarine, "Function", rt->builtInTypes.Function);
-	bind_type(ctx, octarine, "&Function", rt->builtInTypes.BFunction);
-	bind_type(ctx, octarine, "+&Function", rt->builtInTypes.ABFunction);
-	bind_type(ctx, octarine, "~+&Function", rt->builtInTypes.OABFunction);
+	bind_type(ctx, octarine, "&Function", rt->builtInTypes.CFunction);
+	bind_type(ctx, octarine, "+&Function", rt->builtInTypes.ACFunction);
+	bind_type(ctx, octarine, "~+&Function", rt->builtInTypes.OACFunction);
 	// Object
 	bind_type(ctx, octarine, "Object", rt->builtInTypes.Object);
 	bind_type(ctx, octarine, "~Object", rt->builtInTypes.OObject);

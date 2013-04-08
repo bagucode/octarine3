@@ -16,12 +16,12 @@ oct_Bool _oct_Printable_initProtocol(struct oct_Context* ctx) {
 }
 
 oct_Bool _oct_Printable_init(struct oct_Context* ctx) {
-	oct_BFunction fn;
+	oct_CFunction fn;
 
 	// Printable protocol
-	oct_BType t = ctx->rt->builtInTypes.Printable;
+	oct_CType t = ctx->rt->builtInTypes.Printable;
 	t.ptr->variant = OCT_TYPE_PROTOCOL;
-	CHECK(oct_ABFunction_createOwned(ctx, 1, &t.ptr->protocolType.functions));
+	CHECK(oct_ACFunction_createOwned(ctx, 1, &t.ptr->protocolType.functions));
 	t.ptr->protocolType.functions.ptr->data[0] = ctx->rt->functions.print;
 
 	// OPrintable
@@ -39,8 +39,8 @@ oct_Bool _oct_Printable_init(struct oct_Context* ctx) {
 	// print function signature
 	CHECK(OCT_ALLOCOWNED(sizeof(oct_Function), (void**)&ctx->rt->functions.print.ptr, "functions.print"));
 	fn = ctx->rt->functions.print;
-	CHECK(oct_ABType_createOwned(ctx, 1, &fn.ptr->paramTypes));
-	CHECK(oct_ABType_createOwned(ctx, 0, &fn.ptr->returnTypes));
+	CHECK(oct_ACType_createOwned(ctx, 1, &fn.ptr->paramTypes));
+	CHECK(oct_ACType_createOwned(ctx, 0, &fn.ptr->returnTypes));
 	fn.ptr->paramTypes.ptr->data[0] = ctx->rt->builtInTypes.BSelf;
 
 	return oct_True;

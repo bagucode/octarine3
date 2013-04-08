@@ -14,7 +14,7 @@ oct_Bool oct_ExchangeHeap_alloc(struct oct_Context* ctx, oct_Uword size, void** 
 	return oct_True;
 }
 
-//oct_Bool oct_ExchangeHeap_alloc(struct oct_Context* ctx, oct_BType type, void** out_box) {
+//oct_Bool oct_ExchangeHeap_alloc(struct oct_Context* ctx, oct_CType type, void** out_box) {
 //	oct_Uword size;
 //	if(type.ptr->variant == OCT_TYPE_ARRAY) {
 //		oct_Context_setErrorWithCMessage(ctx, "Use allocArray to allocate space for arrays");
@@ -24,7 +24,7 @@ oct_Bool oct_ExchangeHeap_alloc(struct oct_Context* ctx, oct_Uword size, void** 
 //	return OCT_ALLOCOWNED(size, out_box);
 //}
 //
-//oct_Bool oct_ExchangeHeap_allocArray(struct oct_Context* ctx, oct_BType type, oct_Uword size, void** out_box) {
+//oct_Bool oct_ExchangeHeap_allocArray(struct oct_Context* ctx, oct_CType type, oct_Uword size, void** out_box) {
 //	oct_Uword elementSize;
 //	if(type.ptr->variant != OCT_TYPE_ARRAY) {
 //		oct_Context_setErrorWithCMessage(ctx, "Use alloc to allocate space for non-arrays");
@@ -39,7 +39,7 @@ oct_Bool oct_ExchangeHeap_free(struct oct_Context* ctx, void* box) {
 	return oct_True;
 }
 
-//oct_Bool oct_ExchangeHeap_free(struct oct_Context* ctx, void* box, oct_BType type) {
+//oct_Bool oct_ExchangeHeap_free(struct oct_Context* ctx, void* box, oct_CType type) {
 //	// what the heck is the type for here?
 //	return OCT_FREEOWNED(box);
 //}

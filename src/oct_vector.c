@@ -14,7 +14,7 @@
 #define CHECK(X) if(!X) return oct_False;
 
 oct_Bool _oct_Vector_init(struct oct_Context* ctx) {
-	oct_BType t;
+	oct_CType t;
 
 	// Vector
 	t = ctx->rt->builtInTypes.Vector;

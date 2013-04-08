@@ -14,7 +14,7 @@ typedef struct oct_CopyableFunctions {
 } oct_CopyableFunctions;
 
 typedef struct oct_CopyableVTable {
-	oct_BType type;
+	oct_CType type;
 	oct_CopyableFunctions functions;
 } oct_CopyableVTable;
 
@@ -23,14 +23,14 @@ typedef struct oct_OCopyable {
 	oct_CopyableVTable* vtable;
 } oct_OCopyable;
 
-oct_BType _oct_OCopyableType;
+oct_CType _oct_OCopyableType;
 
 typedef struct oct_BCopyable {
 	oct_BSelf self;
 	oct_CopyableVTable* vtable;
 } oct_BCopyable;
 
-oct_BType _oct_BCopyableType;
+oct_CType _oct_BCopyableType;
 
 oct_Bool _oct_Copyable_initProtocol(struct oct_Context* ctx);
 oct_Bool _oct_Copyable_init(struct oct_Context* ctx);

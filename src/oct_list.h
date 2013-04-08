@@ -42,7 +42,7 @@ typedef struct oct_OList {
 // Private
 
 struct oct_Context;
-struct oct_BType;
+struct oct_CType;
 
 oct_Bool _oct_List_init(struct oct_Context* ctx);
 

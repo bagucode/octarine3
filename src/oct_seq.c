@@ -15,12 +15,12 @@ oct_Bool _oct_Seq_initProtocol(struct oct_Context* ctx) {
 }
 
 oct_Bool _oct_Seq_init(struct oct_Context* ctx) {
-	oct_BFunction fn;
+	oct_CFunction fn;
 
 	// Seq protocol
-	oct_BType t = ctx->rt->builtInTypes.Seq;
+	oct_CType t = ctx->rt->builtInTypes.Seq;
 	t.ptr->variant = OCT_TYPE_PROTOCOL;
-	CHECK(oct_ABFunction_createOwned(ctx, 5, &t.ptr->protocolType.functions));
+	CHECK(oct_ACFunction_createOwned(ctx, 5, &t.ptr->protocolType.functions));
 	t.ptr->protocolType.functions.ptr->data[0] = ctx->rt->functions.first;
 	t.ptr->protocolType.functions.ptr->data[1] = ctx->rt->functions.rest;
 	t.ptr->protocolType.functions.ptr->data[2] = ctx->rt->functions.prepend;
@@ -42,40 +42,40 @@ oct_Bool _oct_Seq_init(struct oct_Context* ctx) {
 	// first function signature
 	CHECK(OCT_ALLOCOWNED(sizeof(oct_Function), (void**)&ctx->rt->functions.first.ptr, "functions.first"));
 	fn = ctx->rt->functions.first;
-	CHECK(oct_ABType_createOwned(ctx, 1, &fn.ptr->paramTypes));
-	CHECK(oct_ABType_createOwned(ctx, 1, &fn.ptr->returnTypes));
+	CHECK(oct_ACType_createOwned(ctx, 1, &fn.ptr->paramTypes));
+	CHECK(oct_ACType_createOwned(ctx, 1, &fn.ptr->returnTypes));
 	fn.ptr->paramTypes.ptr->data[0] = ctx->rt->builtInTypes.BSelf;
 	fn.ptr->returnTypes.ptr->data[0] = ctx->rt->builtInTypes.OObjectOption;
 
 	// rest function signature
 	CHECK(OCT_ALLOCOWNED(sizeof(oct_Function), (void**)&ctx->rt->functions.rest.ptr, "functions.rest"));
 	fn = ctx->rt->functions.rest;
-	CHECK(oct_ABType_createOwned(ctx, 1, &fn.ptr->paramTypes));
-	CHECK(oct_ABType_createOwned(ctx, 1, &fn.ptr->returnTypes));
+	CHECK(oct_ACType_createOwned(ctx, 1, &fn.ptr->paramTypes));
+	CHECK(oct_ACType_createOwned(ctx, 1, &fn.ptr->returnTypes));
 	fn.ptr->paramTypes.ptr->data[0] = ctx->rt->builtInTypes.BSelf;
 	fn.ptr->returnTypes.ptr->data[0] = ctx->rt->builtInTypes.OSelf;
 
 	// prepend function signature
 	CHECK(OCT_ALLOCOWNED(sizeof(oct_Function), (void**)&ctx->rt->functions.prepend.ptr, "functions.prepend"));
 	fn = ctx->rt->functions.prepend;
-	CHECK(oct_ABType_createOwned(ctx, 2, &fn.ptr->paramTypes));
-	CHECK(oct_ABType_createOwned(ctx, 0, &fn.ptr->returnTypes));
+	CHECK(oct_ACType_createOwned(ctx, 2, &fn.ptr->paramTypes));
+	CHECK(oct_ACType_createOwned(ctx, 0, &fn.ptr->returnTypes));
 	fn.ptr->paramTypes.ptr->data[0] = ctx->rt->builtInTypes.BSelf;
 	fn.ptr->paramTypes.ptr->data[1] = ctx->rt->builtInTypes.OObject;
 
 	// append function signature
 	CHECK(OCT_ALLOCOWNED(sizeof(oct_Function), (void**)&ctx->rt->functions.append.ptr, "functions.append"));
 	fn = ctx->rt->functions.append;
-	CHECK(oct_ABType_createOwned(ctx, 2, &fn.ptr->paramTypes));
-	CHECK(oct_ABType_createOwned(ctx, 0, &fn.ptr->returnTypes));
+	CHECK(oct_ACType_createOwned(ctx, 2, &fn.ptr->paramTypes));
+	CHECK(oct_ACType_createOwned(ctx, 0, &fn.ptr->returnTypes));
 	fn.ptr->paramTypes.ptr->data[0] = ctx->rt->builtInTypes.BSelf;
 	fn.ptr->paramTypes.ptr->data[1] = ctx->rt->builtInTypes.OObject;
 
 	// nth function signature
 	CHECK(OCT_ALLOCOWNED(sizeof(oct_Function), (void**)&ctx->rt->functions.nth.ptr, "functions.nth"));
 	fn = ctx->rt->functions.nth;
-	CHECK(oct_ABType_createOwned(ctx, 2, &fn.ptr->paramTypes));
-	CHECK(oct_ABType_createOwned(ctx, 1, &fn.ptr->returnTypes));
+	CHECK(oct_ACType_createOwned(ctx, 2, &fn.ptr->paramTypes));
+	CHECK(oct_ACType_createOwned(ctx, 1, &fn.ptr->returnTypes));
 	fn.ptr->paramTypes.ptr->data[0] = ctx->rt->builtInTypes.BSelf;
 	fn.ptr->paramTypes.ptr->data[1] = ctx->rt->builtInTypes.Uword;
 	fn.ptr->returnTypes.ptr->data[0] = ctx->rt->builtInTypes.OObjectOption;

@@ -29,15 +29,15 @@
 
 #define CHECK(X) if(!X) goto error;
 
-static oct_Bool is_symbol(oct_Context* ctx, oct_BType t) {
+static oct_Bool is_symbol(oct_Context* ctx, oct_CType t) {
 	return ctx->rt->builtInTypes.Symbol.ptr == t.ptr;
 }
 
-static oct_Bool is_string(oct_Context* ctx, oct_BType t) {
+static oct_Bool is_string(oct_Context* ctx, oct_CType t) {
 	return ctx->rt->builtInTypes.String.ptr == t.ptr;
 }
 
-static oct_Bool is_list(oct_Context* ctx, oct_BType t) {
+static oct_Bool is_list(oct_Context* ctx, oct_CType t) {
 	return ctx->rt->builtInTypes.List.ptr == t.ptr;
 }
 
@@ -219,7 +219,7 @@ end:
 	return oct_List_destroyOwned(ctx, olist) && result;
 }
 
-static oct_Bool is_atom(oct_Context* ctx, oct_BType t) {
+static oct_Bool is_atom(oct_Context* ctx, oct_CType t) {
 	// TODO: should this return true for any opaque type?
 	oct_Bool result = oct_False;
 	if(t.ptr == ctx->rt->builtInTypes.String.ptr) {
@@ -278,12 +278,12 @@ static oct_Bool eval_atom(oct_Context* ctx, oct_OObject form, oct_Any* out_resul
 }
 
 typedef struct VTable {
-	oct_BType type;
+	oct_CType type;
 	oct_U8 data[];
 } VTable;
 
 oct_Bool oct_Compiler_eval(struct oct_Context* ctx, oct_OObject form, oct_Any* out_result) {
-	oct_BType t;
+	oct_CType t;
 
 	t = ((VTable*)form.vtable)->type;
     if(is_symbol(ctx, t)) {

@@ -22,9 +22,9 @@ oct_Bool _oct_Hashtable_initProtocol(struct oct_Context* ctx) {
 oct_Bool _oct_Hashtable_init(struct oct_Context* ctx) {
 
 	// HashtableKey
-	oct_BType t = ctx->rt->builtInTypes.HashtableKey;
+	oct_CType t = ctx->rt->builtInTypes.HashtableKey;
 	t.ptr->variant = OCT_TYPE_PROTOCOL;
-	CHECK(oct_ABFunction_createOwned(ctx, 2, &t.ptr->protocolType.functions));
+	CHECK(oct_ACFunction_createOwned(ctx, 2, &t.ptr->protocolType.functions));
 	t.ptr->protocolType.functions.ptr->data[0] = ctx->rt->functions.hash;
 	t.ptr->protocolType.functions.ptr->data[1] = ctx->rt->functions.eq;
 
@@ -44,7 +44,7 @@ oct_Bool _oct_Hashtable_init(struct oct_Context* ctx) {
 	t = ctx->rt->builtInTypes.HashtableKeyOption;
 	t.ptr->variant = OCT_TYPE_VARIADIC;
 	t.ptr->variadicType.alignment = 0;
-	CHECK(oct_ABType_createOwned(ctx, 3, &t.ptr->variadicType.types));
+	CHECK(oct_ACType_createOwned(ctx, 3, &t.ptr->variadicType.types));
 	t.ptr->variadicType.types.ptr->data[0] = ctx->rt->builtInTypes.Nothing;
 	t.ptr->variadicType.types.ptr->data[1] = ctx->rt->builtInTypes.OHashtableKey;
 	t.ptr->variadicType.types.ptr->data[2] = ctx->rt->builtInTypes.BHashtableKey;

@@ -14,7 +14,7 @@ typedef struct oct_HashtableKeyFunctions {
 } oct_HashtableKeyFunctions;
 
 typedef struct oct_HashtableKeyVTable {
-	oct_BType type;
+	oct_CType type;
 	oct_HashtableKeyFunctions functions;
 } oct_HashtableKeyVTable;
 

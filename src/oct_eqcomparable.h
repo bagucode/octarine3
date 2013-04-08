@@ -12,7 +12,7 @@ typedef struct oct_EqComparableFunctions {
 } oct_EqComparableFunctions;
 
 typedef struct oct_EqComparableVTable {
-	oct_BType type;
+	oct_CType type;
 	oct_EqComparableFunctions functions;
 } oct_EqComparableVTable;
 

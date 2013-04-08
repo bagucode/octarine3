@@ -6,7 +6,7 @@
 //#include "oct_type_pointers.h"
 //
 //typedef struct oct_ObjectVTable {
-//	oct_BType instanceType;
+//	oct_CType instanceType;
 //	//oct_Bool(*ctor)       (struct oct_Context* ctx, void* object, oct_OList args);
 //	oct_Bool(*dtor)       (struct oct_Context* ctx, void* object);
 //	//oct_Bool(*print)      (struct oct_Context* ctx, void* object, /*Text output stream*/);

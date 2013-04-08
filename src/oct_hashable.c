@@ -18,18 +18,18 @@ oct_Bool _oct_Hashable_initProtocol(struct oct_Context* ctx) {
 }
 
 oct_Bool _oct_Hashable_init(struct oct_Context* ctx) {
-	oct_BFunction fn;
+	oct_CFunction fn;
 
-	oct_BType t = ctx->rt->builtInTypes.Hashable;
+	oct_CType t = ctx->rt->builtInTypes.Hashable;
 	t.ptr->variant = OCT_TYPE_PROTOCOL;
-	CHECK(oct_ABFunction_createOwned(ctx, 1, &t.ptr->protocolType.functions));
+	CHECK(oct_ACFunction_createOwned(ctx, 1, &t.ptr->protocolType.functions));
 	t.ptr->protocolType.functions.ptr->data[0] = ctx->rt->functions.hash;
 
 	// hash function signature
 	CHECK(OCT_ALLOCOWNED(sizeof(oct_Function), (void**)&ctx->rt->functions.hash.ptr, "functions.hash"));
 	fn = ctx->rt->functions.hash;
-	CHECK(oct_ABType_createOwned(ctx, 1, &fn.ptr->paramTypes));
-	CHECK(oct_ABType_createOwned(ctx, 1, &fn.ptr->returnTypes));
+	CHECK(oct_ACType_createOwned(ctx, 1, &fn.ptr->paramTypes));
+	CHECK(oct_ACType_createOwned(ctx, 1, &fn.ptr->returnTypes));
 	fn.ptr->paramTypes.ptr->data[0] = ctx->rt->builtInTypes.BSelf;
 	fn.ptr->returnTypes.ptr->data[0] = ctx->rt->builtInTypes.Uword;
 

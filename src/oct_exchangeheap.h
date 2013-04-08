@@ -22,9 +22,9 @@ oct_Bool oct_ExchangeHeap_report(struct oct_Context* ctx);
 #endif
 
 oct_Bool oct_ExchangeHeap_alloc(struct oct_Context* ctx, oct_Uword size, void** out_box);
-//oct_Bool oct_ExchangeHeap_alloc(struct oct_Context* ctx, oct_BType type, void** out_box);
-//oct_Bool oct_ExchangeHeap_allocArray(struct oct_Context* ctx, oct_BType type, oct_Uword size, void** out_box);
+//oct_Bool oct_ExchangeHeap_alloc(struct oct_Context* ctx, oct_CType type, void** out_box);
+//oct_Bool oct_ExchangeHeap_allocArray(struct oct_Context* ctx, oct_CType type, oct_Uword size, void** out_box);
 oct_Bool oct_ExchangeHeap_free(struct oct_Context* ctx, void* box);
-//oct_Bool oct_ExchangeHeap_free(struct oct_Context* ctx, void* box, oct_BType type);
+//oct_Bool oct_ExchangeHeap_free(struct oct_Context* ctx, void* box, oct_CType type);
 
 #endif

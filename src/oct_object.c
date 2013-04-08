@@ -19,12 +19,12 @@ oct_Bool _oct_Object_initProtocol(struct oct_Context* ctx) {
 }
 
 oct_Bool _oct_Object_init(struct oct_Context* ctx) {
-	oct_BFunction fn;
+	oct_CFunction fn;
 
 	// Object protocol.
-	oct_BType t = ctx->rt->builtInTypes.Object;
+	oct_CType t = ctx->rt->builtInTypes.Object;
 	t.ptr->variant = OCT_TYPE_PROTOCOL;
-	CHECK(oct_ABFunction_createOwned(ctx, 1, &t.ptr->protocolType.functions));
+	CHECK(oct_ACFunction_createOwned(ctx, 1, &t.ptr->protocolType.functions));
 	t.ptr->protocolType.functions.ptr->data[0] = ctx->rt->functions.dtor;
 
 	// OObject
@@ -44,7 +44,7 @@ oct_Bool _oct_Object_init(struct oct_Context* ctx) {
 	t.ptr->variant = OCT_TYPE_VARIADIC;
 	t.ptr->variadicType.alignment = 0;
 	t.ptr->variadicType.size = sizeof(oct_OObjectOption);
-	CHECK(oct_ABType_createOwned(ctx, 2, &t.ptr->variadicType.types));
+	CHECK(oct_ACType_createOwned(ctx, 2, &t.ptr->variadicType.types));
 	t.ptr->variadicType.types.ptr->data[0] = ctx->rt->builtInTypes.Nothing;
 	t.ptr->variadicType.types.ptr->data[1] = ctx->rt->builtInTypes.OObject;
 
@@ -53,15 +53,15 @@ oct_Bool _oct_Object_init(struct oct_Context* ctx) {
 	t.ptr->variant = OCT_TYPE_VARIADIC;
 	t.ptr->variadicType.alignment = 0;
 	t.ptr->variadicType.size = sizeof(oct_BObjectOption);
-	CHECK(oct_ABType_createOwned(ctx, 2, &t.ptr->variadicType.types));
+	CHECK(oct_ACType_createOwned(ctx, 2, &t.ptr->variadicType.types));
 	t.ptr->variadicType.types.ptr->data[0] = ctx->rt->builtInTypes.Nothing;
 	t.ptr->variadicType.types.ptr->data[1] = ctx->rt->builtInTypes.BObject;
 
 	// dtor function signature
 	CHECK(OCT_ALLOCOWNED(sizeof(oct_Function), (void**)&ctx->rt->functions.dtor.ptr, "functions.dtor"));
 	fn = ctx->rt->functions.dtor;
-	CHECK(oct_ABType_createOwned(ctx, 1, &fn.ptr->paramTypes));
-	CHECK(oct_ABType_createOwned(ctx, 0, &fn.ptr->returnTypes));
+	CHECK(oct_ACType_createOwned(ctx, 1, &fn.ptr->paramTypes));
+	CHECK(oct_ACType_createOwned(ctx, 0, &fn.ptr->returnTypes));
 	fn.ptr->paramTypes.ptr->data[0] = ctx->rt->builtInTypes.BSelf;
 
 	// AOObjectOption
@@ -109,13 +109,13 @@ oct_Bool oct_AOObjectOption_dtor(struct oct_Context* ctx, oct_BAOObjectOption se
 }
 
 // The output is BObject because C does not have templates but the output should be safe to manually cast to the given protocol
-oct_Bool oct_Object_as(oct_Context* ctx, oct_BSelf object, oct_BType selfType, oct_BProtocolBinding protocol, oct_BObject* out_casted) {
+oct_Bool oct_Object_as(oct_Context* ctx, oct_BSelf object, oct_CType selfType, oct_BProtocolBinding protocol, oct_BObject* out_casted) {
 	oct_BHashtable table;
 	oct_BHashtableKey key;
 	oct_Any vtable;
 
 	table.ptr = &protocol.ptr->implementations;
-	CHECK(oct_BType_asHashtableKey(ctx, selfType, &key));
+	CHECK(oct_CType_asHashtableKey(ctx, selfType, &key));
 	CHECK(oct_Hashtable_borrow(ctx, table, key, &vtable));
 	if(vtable.variant == OCT_ANY_NOTHING) {
 		CHECK(oct_Context_setErrorWithCMessage(ctx, "No implementation of protocol found"));
@@ -424,7 +424,7 @@ static oct_Bool findEmbeddedPointers(oct_Context* ctx, oct_Type* type, void* obj
 typedef struct FrameStackEntry {
 	oct_OSelf original;
 	oct_OSelf updated;
-	oct_BType type;
+	oct_CType type;
 	FieldPointerArray fieldPointers;
 	oct_Uword fieldIndex;
 } FrameStackEntry;
@@ -489,7 +489,7 @@ static oct_Bool FrameStack_Pop(FrameStack* stack, FrameStackEntry* out) {
 
 //static oct_Bool copyObjectOwned(oct_Context* ctx, oct_Type* type, void* object, void** copy) {
 //	oct_Uword size = 0;
-//	oct_BType bt;
+//	oct_CType bt;
 //
 //	bt.ptr = type;
 //    
@@ -537,7 +537,7 @@ static oct_Bool FrameStack_Pop(FrameStack* stack, FrameStackEntry* out) {
 #undef CHECK
 #define CHECK(X) if(!X) goto error;
 
-oct_Bool oct_Object_preWalk(oct_Context* ctx, oct_OSelf root, oct_BType rootType, oct_PrewalkFn fn) {
+oct_Bool oct_Object_preWalk(oct_Context* ctx, oct_OSelf root, oct_CType rootType, oct_PrewalkFn fn) {
 	PointerTranslationTable ptt;
 	FrameStack stack;
 	FrameStackEntry currentFrame;

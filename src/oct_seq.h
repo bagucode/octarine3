@@ -16,7 +16,7 @@ typedef struct oct_SeqFunctions {
 } oct_SeqFunctions;
 
 typedef struct oct_SeqVTable {
-	oct_BType type;
+	oct_CType type;
 	oct_SeqFunctions functions;
 } oct_SeqVTable;
 

@@ -12,7 +12,7 @@ typedef struct oct_SeqableFunctions {
 } oct_SeqableFunctions;
 
 typedef struct oct_SeqableVTable {
-	oct_BType type;
+	oct_CType type;
 	oct_SeqableFunctions functions;
 } oct_SeqableVTable;
 

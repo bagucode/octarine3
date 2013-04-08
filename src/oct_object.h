@@ -14,7 +14,7 @@ typedef struct oct_ObjectFunctions {
 } oct_ObjectFunctions;
 
 typedef struct oct_ObjectVTable {
-	oct_BType type;
+	oct_CType type;
 	oct_ObjectFunctions functions;
 } oct_ObjectVTable;
 
@@ -70,11 +70,11 @@ oct_Bool oct_AOObjectOption_createOwned(struct oct_Context* ctx, oct_Uword size,
 oct_Bool oct_AOObjectOption_dtor(struct oct_Context* ctx, oct_BAOObjectOption self);
 
 // The output is BObject because C does not have templates but the output should be safe to manually cast to the given protocol
-oct_Bool oct_Object_as(struct oct_Context* ctx, oct_BSelf object, oct_BType selfType, oct_BProtocolBinding protocol, oct_BObject* out_casted);
+oct_Bool oct_Object_as(struct oct_Context* ctx, oct_BSelf object, oct_CType selfType, oct_BProtocolBinding protocol, oct_BObject* out_casted);
 
-typedef oct_Bool(*oct_PrewalkFn)(struct oct_Context* ctx, oct_OSelf obj, oct_BType objType, oct_OSelf* out_result);
+typedef oct_Bool(*oct_PrewalkFn)(struct oct_Context* ctx, oct_OSelf obj, oct_CType objType, oct_OSelf* out_result);
 
-oct_Bool oct_Object_preWalk(struct oct_Context* ctx, oct_OSelf root, oct_BType rootType, oct_PrewalkFn fn);
+oct_Bool oct_Object_preWalk(struct oct_Context* ctx, oct_OSelf root, oct_CType rootType, oct_PrewalkFn fn);
 
 oct_Bool oct_Object_destroyOwned(struct oct_Context* ctx, oct_OObject obj);
 

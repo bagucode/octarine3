@@ -10,7 +10,7 @@ typedef struct oct_ManagedHeap {
 
 struct oct_Context;
 
-oct_Bool oct_ManagedHeap_alloc(struct oct_Context* ctx, oct_BType type, void** out_box);
+oct_Bool oct_ManagedHeap_alloc(struct oct_Context* ctx, oct_CType type, void** out_box);
 oct_Bool oct_ManagedHeap_pushroot(struct oct_Context* ctx, void* box);
 oct_Bool oct_ManagedHeap_poproot(struct oct_Context* ctx);
 oct_Bool oct_ManagedHeap_forceGC(struct oct_Context* ctx);

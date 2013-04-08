@@ -15,7 +15,7 @@ typedef struct oct_CharstreamFunctions {
 } oct_CharstreamFunctions;
 
 typedef struct oct_CharstreamVTable {
-	oct_BType type;
+	oct_CType type;
 	oct_CharstreamFunctions functions;
 } oct_CharstreamVTable;
 

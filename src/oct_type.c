@@ -47,11 +47,11 @@ oct_Bool _oct_Type_VTableInit(struct oct_Context* ctx) {
 oct_Bool _oct_Type_init(oct_Context* ctx) {
 
 	// Type
-	oct_BType t = ctx->rt->builtInTypes.Type;
+	oct_CType t = ctx->rt->builtInTypes.Type;
 	t.ptr->variant = OCT_TYPE_VARIADIC;
 	t.ptr->variadicType.alignment = 0;
 	t.ptr->variadicType.size = sizeof(oct_Type);
-	CHECK(oct_ABType_createOwned(ctx, 7, &t.ptr->variadicType.types));
+	CHECK(oct_ACType_createOwned(ctx, 7, &t.ptr->variadicType.types));
 	t.ptr->variadicType.types.ptr->data[0] = ctx->rt->builtInTypes.Prototype;
 	t.ptr->variadicType.types.ptr->data[1] = ctx->rt->builtInTypes.Variadic;
 	t.ptr->variadicType.types.ptr->data[2] = ctx->rt->builtInTypes.Struct;
@@ -79,9 +79,9 @@ oct_Bool _oct_Type_init(oct_Context* ctx) {
 
 // Public
 
-oct_Bool oct_ABType_createOwned(struct oct_Context* ctx, oct_Uword size, oct_OABType* out_result) {
+oct_Bool oct_ACType_createOwned(struct oct_Context* ctx, oct_Uword size, oct_CACType* out_result) {
 	oct_Uword i;
-    if(!OCT_ALLOCOWNED(sizeof(oct_ABType) + (sizeof(oct_BType) * size), (void**)&out_result->ptr, "oct_ABType_createOwned")) {
+    if(!OCT_ALLOCOWNED(sizeof(oct_ACType) + (sizeof(oct_CType) * size), (void**)&out_result->ptr, "oct_ACType_createOwned")) {
         return oct_False;
     }
 	out_result->ptr->size = size;
@@ -92,7 +92,7 @@ oct_Bool oct_ABType_createOwned(struct oct_Context* ctx, oct_Uword size, oct_OAB
 	return oct_True;
 }
 
-oct_Bool oct_Type_sizeOf(struct oct_Context* ctx, oct_BType type, oct_Uword* out_size) {
+oct_Bool oct_Type_sizeOf(struct oct_Context* ctx, oct_CType type, oct_Uword* out_size) {
 	oct_Uword elementSize;
 	switch(type.ptr->variant) {
 	case OCT_TYPE_PROTOTYPE:
@@ -121,24 +121,24 @@ oct_Bool oct_Type_sizeOf(struct oct_Context* ctx, oct_BType type, oct_Uword* out
 	return oct_True;
 }
 
-oct_Bool oct_Type_asObject(struct oct_Context* ctx, oct_BType self, struct oct_BObject* out_obj) {
+oct_Bool oct_Type_asObject(struct oct_Context* ctx, oct_CType self, struct oct_BObject* out_obj) {
 	out_obj->self.self = self.ptr;
 	out_obj->vtable = (oct_ObjectVTable*)ctx->rt->vtables.TypeAsObject.ptr;
 	return oct_True;
 }
 
-oct_Bool oct_BType_asHashtableKey(struct oct_Context* ctx, oct_BType self, struct oct_BHashtableKey* key) {
+oct_Bool oct_CType_asHashtableKey(struct oct_Context* ctx, oct_CType self, struct oct_BHashtableKey* key) {
 	key->self.self = self.ptr;
 	key->vtable = (oct_HashtableKeyVTable*)ctx->rt->vtables.TypeAsHashtableKey.ptr;
 	return oct_True;
 }
 
-oct_Bool oct_Type_equals(struct oct_Context* ctx, oct_BType t1, oct_BType t2, oct_Bool* out_eq) {
+oct_Bool oct_Type_equals(struct oct_Context* ctx, oct_CType t1, oct_CType t2, oct_Bool* out_eq) {
 	*out_eq = t1.ptr == t2.ptr;
 	return oct_True;
 }
 
-oct_Bool oct_Type_hash(struct oct_Context* ctx, oct_BType self, oct_Uword* out_hash) {
+oct_Bool oct_Type_hash(struct oct_Context* ctx, oct_CType self, oct_Uword* out_hash) {
 	*out_hash = (oct_Uword)self.ptr;
 	return oct_True;
 }
