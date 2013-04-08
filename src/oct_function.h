@@ -22,9 +22,9 @@ typedef struct oct_CACFunction {
 	oct_ACFunction* ptr;
 } oct_CACFunction;
 
-struct oct_Context;
-
-oct_Bool _oct_Function_init(struct oct_Context* ctx);
+//struct oct_Context;
+//
+//oct_Bool _oct_Function_init(struct oct_Context* ctx);
 
 //oct_Bool oct_Function_dtor(struct oct_Context* ctx, oct_BGeneric self);
 //oct_Bool oct_ACFunction_createOwned(struct oct_Context* ctx, oct_Uword size, oct_CACFunction* out_result);

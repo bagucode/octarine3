@@ -1,6 +1,8 @@
 #ifndef oct_generic
 #define oct_generic
 
+#include "oct_primitives.h"
+
 typedef struct oct_Generic {
 	oct_Uword dummy;
 } oct_Generic;
