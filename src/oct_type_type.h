@@ -13,32 +13,39 @@ struct _oct_TypeType_t {
 	oct_VariadicType vt;
 } _oct_TypeType;
 
+#define OCT_DEF_POINTER(NAME, KIND, TARGET_TYPE) \
+struct { \
+	oct_Uword v; \
+	oct_PointerType p; \
+} _oct_ ## NAME ## Type = { \
+	OCT_TYPE_POINTER, \
+	{ KIND , {(oct_Type*)&_oct_ ## TARGET_TYPE ## Type}} \
+};
+
+#define OCT_DEF_C_POINTER(NAME, TARGET_TYPE) OCT_DEF_POINTER(NAME, OCT_POINTER_CONSTANT, TARGET_TYPE)
+#define OCT_DEF_B_POINTER(NAME, TARGET_TYPE) OCT_DEF_POINTER(NAME, OCT_POINTER_BORROWED, TARGET_TYPE)
+#define OCT_DEF_O_POINTER(NAME, TARGET_TYPE) OCT_DEF_POINTER(NAME, OCT_POINTER_OWNED, TARGET_TYPE)
+#define OCT_DEF_M_POINTER(NAME, TARGET_TYPE) OCT_DEF_POINTER(NAME, OCT_POINTER_MANAGED, TARGET_TYPE)
+#define OCT_DEF_CP_POINTER(NAME, TARGET_TYPE) OCT_DEF_POINTER(NAME, OCT_POINTER_CONSTANT_PROTOCOL, TARGET_TYPE)
+#define OCT_DEF_BP_POINTER(NAME, TARGET_TYPE) OCT_DEF_POINTER(NAME, OCT_POINTER_BORROWED_PROTOCOL, TARGET_TYPE)
+#define OCT_DEF_OP_POINTER(NAME, TARGET_TYPE) OCT_DEF_POINTER(NAME, OCT_POINTER_OWNED_PROTOCOL, TARGET_TYPE)
+#define OCT_DEF_MP_POINTER(NAME, TARGET_TYPE) OCT_DEF_POINTER(NAME, OCT_POINTER_MANAGED_PROTOCOL, TARGET_TYPE)
+
+#define OCT_DEF_ARRAY(NAME, TARGET_TYPE) \
+struct { \
+	oct_Uword v; \
+	oct_ArrayType a; \
+} _oct_ ## NAME ## Type = { \
+	OCT_TYPE_ARRAY, \
+	{{(oct_Type*)&_oct_ ## TARGET_TYPE ## Type}} \
+};
+
 // CType
-struct {
-	oct_Uword v;
-	oct_PointerType p;
-} _oct_CTypeType = {
-	OCT_TYPE_POINTER,
-	{OCT_POINTER_CONSTANT, {(oct_Type*)&_oct_TypeType}}
-};
-
+OCT_DEF_C_POINTER(CType, Type);
 // ACType
-struct {
-	oct_Uword v;
-	oct_ArrayType a;
-} _oct_ACTypeType = {
-	OCT_TYPE_ARRAY,
-	{{(oct_Type*)&_oct_CTypeType}}
-};
-
+OCT_DEF_ARRAY(ACType, CType);
 // CACType
-struct {
-	oct_Uword v;
-	oct_PointerType p;
-} _oct_CACTypeType = {
-	OCT_TYPE_POINTER,
-	{OCT_POINTER_CONSTANT, {(oct_Type*)&_oct_ACTypeType}}
-};
+OCT_DEF_C_POINTER(CACType, ACType);
 
 // ProtoType
 oct_AField _oct_ProtoTypeFields = {0};

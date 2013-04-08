@@ -1,6 +1,10 @@
 #ifndef oct_self
 #define oct_self
 
+typedef struct oct_Self {
+	oct_Uword dummy;
+} oct_Self;
+
 typedef struct oct_BSelf {
 	void* self;
 } oct_BSelf;
