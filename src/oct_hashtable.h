@@ -19,12 +19,12 @@ typedef struct oct_HashtableKeyVTable {
 } oct_HashtableKeyVTable;
 
 typedef struct oct_OHashtableKey {
-	oct_OSelf self;
+	oct_OGeneric self;
 	oct_HashtableKeyVTable* vtable;
 } oct_OHashtableKey;
 
 typedef struct oct_BHashtableKey {
-	oct_BSelf self;
+	oct_BGeneric self;
 	oct_HashtableKeyVTable* vtable;
 } oct_BHashtableKey;
 
@@ -78,7 +78,7 @@ oct_Bool oct_AHashtableEntry_createOwned(struct oct_Context* ctx, oct_Uword init
 oct_Bool oct_AHashtableEntry_destroyOwned(struct oct_Context* ctx, oct_OAHashtableEntry self);
 
 oct_Bool oct_Hashtable_ctor(struct oct_Context* ctx, oct_BHashtable self, oct_Uword initialCap);
-oct_Bool oct_Hashtable_dtor(struct oct_Context* ctx, oct_BSelf self);
+oct_Bool oct_Hashtable_dtor(struct oct_Context* ctx, oct_BGeneric self);
 oct_Bool oct_Hashtable_put(struct oct_Context* ctx, oct_BHashtable self, oct_HashtableKeyOption key, oct_Any value);
 // Get a value from the table. If the value is owned, it will be removed from the hash table and returned. If the value
 // is borrowed, a reference to it will be returned and it will remain in the hash table.

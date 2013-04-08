@@ -41,6 +41,6 @@ oct_Bool _oct_Protocol_addBuiltIn(struct oct_Context* ctx, oct_BProtocolBinding 
 
 oct_Bool oct_Protocol_addImplementation(struct oct_Context* ctx, oct_BProtocolBinding protocol, oct_CType type, oct_CVTable vtable);
 
-oct_Bool oct_ProtocolBinding_dtor(struct oct_Context* ctx, oct_BSelf self);
+oct_Bool oct_ProtocolBinding_dtor(struct oct_Context* ctx, oct_BGeneric self);
 
 #endif

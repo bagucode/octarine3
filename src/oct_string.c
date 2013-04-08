@@ -115,7 +115,7 @@ oct_Bool oct_String_createOwnedFromCStringLen(struct oct_Context* ctx, const cha
 }
 
 oct_Bool oct_String_destroyOwned(struct oct_Context* ctx, oct_OString str) {
-	oct_BSelf self;
+	oct_BGeneric self;
 	oct_Bool result;
 	self.self = str.ptr;
 	result = oct_String_dtor(ctx, self);
@@ -139,7 +139,7 @@ oct_Bool oct_String_ctor(struct oct_Context* ctx, oct_String* str, oct_OAU8 utf8
 	return oct_True;
 }
 
-oct_Bool oct_String_dtor(struct oct_Context* ctx, oct_BSelf str) {
+oct_Bool oct_String_dtor(struct oct_Context* ctx, oct_BGeneric str) {
     // TODO: proper free/dtor here
 	OCT_FREEOWNED(((oct_String*)str.self)->utf8Data.ptr);
 	return oct_True;
@@ -212,7 +212,7 @@ oct_Bool oct_String_asCopyable(struct oct_Context* ctx, oct_BString str, oct_BCo
 	return oct_True;
 }
 
-oct_Bool oct_String_copyOwned(struct oct_Context* ctx, oct_BSelf orig, oct_OSelf* out_cpy) {
+oct_Bool oct_String_copyOwned(struct oct_Context* ctx, oct_BGeneric orig, oct_OGeneric* out_cpy) {
 	oct_String* org;
 	oct_String* cpy;
     if(!OCT_ALLOCOWNED(sizeof(oct_String), &out_cpy->self, "oct_String_copyOwned")) {
@@ -222,7 +222,7 @@ oct_Bool oct_String_copyOwned(struct oct_Context* ctx, oct_BSelf orig, oct_OSelf
 	cpy = (oct_String*)out_cpy->self;
 	cpy->size = org->size;
 	orig.self = org->utf8Data.ptr;
-	return oct_AU8_copyOwned(ctx, orig, (oct_OSelf*)&cpy->utf8Data);
+	return oct_AU8_copyOwned(ctx, orig, (oct_OGeneric*)&cpy->utf8Data);
 }
 
 oct_Bool oct_String_print(struct oct_Context* ctx, oct_BString str) {

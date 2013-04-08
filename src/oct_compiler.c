@@ -74,7 +74,7 @@ static oct_Bool eval_def(struct oct_Context* ctx, oct_OObject form, oct_Any* out
 	oct_BSymbol bsym;
 	oct_Any nsVal;
 	oct_BCopyable bcopyable;
-	oct_BSelf bself;
+	oct_BGeneric bself;
 	oct_Bool result = oct_True;
 
     formlist.ptr = (oct_List*)form.self.self;

@@ -167,7 +167,7 @@ oct_Bool oct_Namespace_asObject(struct oct_Context* ctx, oct_BNamespace ns, oct_
 	return oct_True;
 }
 
-oct_Bool oct_Namespace_dtor(struct oct_Context* ctx, oct_BSelf self) {
+oct_Bool oct_Namespace_dtor(struct oct_Context* ctx, oct_BGeneric self) {
 	oct_Namespace* ns = (oct_Namespace*)self.self;
 	oct_Bool result;
 	self.self = &ns->name;

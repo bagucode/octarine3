@@ -10,7 +10,7 @@
 
 #define CHECK(X) if(!X) return oct_False;
 
-static oct_Bool oct_Bool_VTableDtor(struct oct_Context* ctx, oct_BSelf vtable) {
+static oct_Bool oct_Bool_VTableDtor(struct oct_Context* ctx, oct_BGeneric vtable) {
 	oct_VTable* vt = (oct_VTable*)vtable.self;
 	return OCT_FREEOWNED(vt->functions);
 }
@@ -73,7 +73,7 @@ oct_Bool _oct_Protocol_init(struct oct_Context* ctx) {
 	return oct_True;
 }
 
-oct_Bool oct_ProtocolBinding_dtor(struct oct_Context* ctx, oct_BSelf self) {
+oct_Bool oct_ProtocolBinding_dtor(struct oct_Context* ctx, oct_BGeneric self) {
 	oct_ProtocolBinding* pb = (oct_ProtocolBinding*)self.self;
 	self.self = &pb->implementations;
 	return oct_Hashtable_dtor(ctx, self);

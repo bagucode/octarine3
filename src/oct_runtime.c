@@ -61,7 +61,7 @@ static void dealloc_builtInProtocols(oct_Context* ctx) {
 	oct_Uword i;
 	oct_BProtocolBinding* place;
 	oct_Runtime* rt = ctx->rt;
-	oct_BSelf self;
+	oct_BGeneric self;
 
 	for(i = 0; i < iters; ++i) {
 		char* dummy = (char*)(&rt->builtInProtocols);
@@ -78,7 +78,7 @@ static void dealloc_builtInFunctions(oct_Context* ctx) {
 	oct_Uword i;
 	oct_CFunction* place;
 	oct_Runtime* rt = ctx->rt;
-	oct_BSelf self;
+	oct_BGeneric self;
 
 	for(i = 0; i < iters; ++i) {
 		char* dummy = (char*)(&rt->functions);
@@ -335,7 +335,7 @@ struct oct_Runtime* oct_Runtime_create(const char** out_error) {
 
 oct_Bool oct_Runtime_destroy(oct_Runtime* rt, const char** out_error) {
 	oct_Context* ctx = oct_Runtime_currentContext(rt);
-	oct_BSelf self;
+	oct_BGeneric self;
 	_oct_Error_destroyBuiltInErrors(ctx);
 	self.self = &rt->namespaces;
 	oct_Hashtable_dtor(ctx, self);

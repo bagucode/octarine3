@@ -2,13 +2,13 @@
 #define oct_eqcomparable
 
 #include "oct_primitives.h"
-#include "oct_self.h"
+#include "oct_generic.h"
 #include "oct_type_pointers.h"
 
 struct oct_Context;
 
 typedef struct oct_EqComparableFunctions {
-	oct_Bool (*equals) (struct oct_Context* ctx, oct_BSelf self, oct_BSelf other, oct_Bool* out_eq);
+	oct_Bool (*equals) (struct oct_Context* ctx, oct_BGeneric self, oct_BGeneric other, oct_Bool* out_eq);
 } oct_EqComparableFunctions;
 
 typedef struct oct_EqComparableVTable {
@@ -17,17 +17,17 @@ typedef struct oct_EqComparableVTable {
 } oct_EqComparableVTable;
 
 //typedef struct oct_BEqComparable {
-//	oct_BSelf self;
+//	oct_BGeneric self;
 //	oct_EqComparableVTable* vtable;
 //} oct_BEqComparable;
 //
 //typedef struct oct_MEqComparable {
-//	oct_MSelf self;
+//	oct_MGeneric self;
 //	oct_EqComparableVTable* vtable;
 //} oct_MEqComparable;
 //
 //typedef struct oct_OEqComparable {
-//	oct_OSelf self;
+//	oct_OGeneric self;
 //	oct_EqComparableVTable* vtable;
 //} oct_OEqComparable;
 

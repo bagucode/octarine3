@@ -29,8 +29,8 @@ oct_Bool _oct_Copyable_init(struct oct_Context* ctx) {
 	fn = ctx->rt->functions.copyOwned;
 	CHECK(oct_ACType_createOwned(ctx, 1, &fn.ptr->paramTypes));
 	CHECK(oct_ACType_createOwned(ctx, 1, &fn.ptr->returnTypes));
-	fn.ptr->paramTypes.ptr->data[0] = ctx->rt->builtInTypes.BSelf;
-	fn.ptr->returnTypes.ptr->data[0] = ctx->rt->builtInTypes.OSelf;
+	fn.ptr->paramTypes.ptr->data[0] = ctx->rt->builtInTypes.BGeneric;
+	fn.ptr->returnTypes.ptr->data[0] = ctx->rt->builtInTypes.OGeneric;
 
 	return oct_True;
 }

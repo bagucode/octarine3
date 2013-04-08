@@ -70,7 +70,7 @@ oct_Bool oct_Symbol_createOwned(struct oct_Context* ctx, oct_OString name, oct_O
 }
 
 oct_Bool oct_Symbol_destroyOwned(struct oct_Context* ctx, oct_OSymbol sym) {
-	oct_BSelf self;
+	oct_BGeneric self;
 	oct_Bool result;
 	self.self = sym.ptr;
 	result = oct_Symbol_dtor(ctx, self);
@@ -105,7 +105,7 @@ oct_Bool oct_Symbol_hash(struct oct_Context* ctx, oct_BSymbol self, oct_Uword* o
 	return oct_True;
 }
 
-oct_Bool oct_Symbol_dtor(struct oct_Context* ctx, oct_BSelf self) {
+oct_Bool oct_Symbol_dtor(struct oct_Context* ctx, oct_BGeneric self) {
 	oct_Symbol* s = (oct_Symbol*)self.self;
 	oct_Bool result;
 	self.self = s->name.ptr;

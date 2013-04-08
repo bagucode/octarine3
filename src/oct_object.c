@@ -62,7 +62,7 @@ oct_Bool _oct_Object_init(struct oct_Context* ctx) {
 	fn = ctx->rt->functions.dtor;
 	CHECK(oct_ACType_createOwned(ctx, 1, &fn.ptr->paramTypes));
 	CHECK(oct_ACType_createOwned(ctx, 0, &fn.ptr->returnTypes));
-	fn.ptr->paramTypes.ptr->data[0] = ctx->rt->builtInTypes.BSelf;
+	fn.ptr->paramTypes.ptr->data[0] = ctx->rt->builtInTypes.BGeneric;
 
 	// AOObjectOption
 	t = ctx->rt->builtInTypes.AOObjectOption;
@@ -109,7 +109,7 @@ oct_Bool oct_AOObjectOption_dtor(struct oct_Context* ctx, oct_BAOObjectOption se
 }
 
 // The output is BObject because C does not have templates but the output should be safe to manually cast to the given protocol
-oct_Bool oct_Object_as(oct_Context* ctx, oct_BSelf object, oct_CType selfType, oct_BProtocolBinding protocol, oct_BObject* out_casted) {
+oct_Bool oct_Object_as(oct_Context* ctx, oct_BGeneric object, oct_CType selfType, oct_BProtocolBinding protocol, oct_BObject* out_casted) {
 	oct_BHashtable table;
 	oct_BHashtableKey key;
 	oct_Any vtable;
@@ -127,7 +127,7 @@ oct_Bool oct_Object_as(oct_Context* ctx, oct_BSelf object, oct_CType selfType, o
 }
 
 oct_Bool oct_Object_destroyOwned(oct_Context* ctx, oct_OObject obj) {
-	oct_BSelf bself;
+	oct_BGeneric bself;
 	oct_Bool result;
 	bself.self = obj.self.self;
 	result = obj.vtable->functions.dtor(ctx, bself);
@@ -422,8 +422,8 @@ static oct_Bool findEmbeddedPointers(oct_Context* ctx, oct_Type* type, void* obj
 // Stack used to store call frames on the heap to prevent blowing the C stack when traversing large graphs
 
 typedef struct FrameStackEntry {
-	oct_OSelf original;
-	oct_OSelf updated;
+	oct_OGeneric original;
+	oct_OGeneric updated;
 	oct_CType type;
 	FieldPointerArray fieldPointers;
 	oct_Uword fieldIndex;
@@ -537,12 +537,12 @@ static oct_Bool FrameStack_Pop(FrameStack* stack, FrameStackEntry* out) {
 #undef CHECK
 #define CHECK(X) if(!X) goto error;
 
-oct_Bool oct_Object_preWalk(oct_Context* ctx, oct_OSelf root, oct_CType rootType, oct_PrewalkFn fn) {
+oct_Bool oct_Object_preWalk(oct_Context* ctx, oct_OGeneric root, oct_CType rootType, oct_PrewalkFn fn) {
 	PointerTranslationTable ptt;
 	FrameStack stack;
 	FrameStackEntry currentFrame;
 	oct_Bool result;
-    oct_OSelf object;
+    oct_OGeneric object;
     oct_Uword i;
 	oct_Type* type;
     void** embeddedPtr;

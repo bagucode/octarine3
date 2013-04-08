@@ -82,7 +82,7 @@ oct_Bool oct_Vector_dtor(struct oct_Context* ctx, oct_BVector self) {
 
 oct_Bool oct_Vector_print(struct oct_Context* ctx, oct_BVector self) {
 	oct_Uword i;
-	oct_BSelf bself;
+	oct_BGeneric bself;
 	oct_BPrintable prn;
 	putc('[', stdout);
 	for(i = 0; i < self.ptr->size; ++i) {

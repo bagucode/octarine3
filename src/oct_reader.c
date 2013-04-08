@@ -30,7 +30,7 @@ oct_Bool oct_Reader_ctor(struct oct_Context* ctx, oct_Reader* reader) {
 	return oct_True;
 }
 
-oct_Bool oct_Reader_dtor(struct oct_Context* ctx, oct_BSelf self) {
+oct_Bool oct_Reader_dtor(struct oct_Context* ctx, oct_BGeneric self) {
 	oct_Reader* r = (oct_Reader*)self.self;
 	return OCT_FREEOWNED(r->readBuffer.ptr); // TODO: use destructor
 }

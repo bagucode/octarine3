@@ -29,8 +29,8 @@ oct_Bool _oct_EqComparable_init(struct oct_Context* ctx) {
 	fn = ctx->rt->functions.eq;
 	CHECK(oct_ACType_createOwned(ctx, 2, &fn.ptr->paramTypes));
 	CHECK(oct_ACType_createOwned(ctx, 1, &fn.ptr->returnTypes));
-	fn.ptr->paramTypes.ptr->data[0] = ctx->rt->builtInTypes.BSelf;
-	fn.ptr->paramTypes.ptr->data[1] = ctx->rt->builtInTypes.BSelf;
+	fn.ptr->paramTypes.ptr->data[0] = ctx->rt->builtInTypes.BGeneric;
+	fn.ptr->paramTypes.ptr->data[1] = ctx->rt->builtInTypes.BGeneric;
 	fn.ptr->returnTypes.ptr->data[0] = ctx->rt->builtInTypes.Bool;
 
 	return oct_True;

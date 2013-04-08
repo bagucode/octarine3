@@ -1,7 +1,7 @@
 #ifndef oct_function
 #define oct_function
 
-#include "oct_self.h"
+#include "oct_generic.h"
 #include "oct_type_pointers.h"
 
 typedef struct oct_Function {
@@ -26,7 +26,7 @@ struct oct_Context;
 
 oct_Bool _oct_Function_init(struct oct_Context* ctx);
 
-//oct_Bool oct_Function_dtor(struct oct_Context* ctx, oct_BSelf self);
+//oct_Bool oct_Function_dtor(struct oct_Context* ctx, oct_BGeneric self);
 //oct_Bool oct_ACFunction_createOwned(struct oct_Context* ctx, oct_Uword size, oct_CACFunction* out_result);
 
 #endif

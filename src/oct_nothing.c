@@ -77,6 +77,6 @@ oct_Bool oct_Nothing_asHashtableKey(struct oct_Context* ctx, oct_BNothing nothin
 	return oct_True;
 }
 
-oct_Bool oct_Nothing_dtor(struct oct_Context* ctx, oct_BSelf self) {
+oct_Bool oct_Nothing_dtor(struct oct_Context* ctx, oct_BGeneric self) {
 	return oct_True;
 }

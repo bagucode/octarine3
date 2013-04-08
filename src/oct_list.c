@@ -80,7 +80,7 @@ oct_Bool oct_List_ctor(struct oct_Context* ctx, oct_List* self) {
     return oct_True;
 }
 
-oct_Bool oct_List_dtor(struct oct_Context* ctx, oct_BSelf self) {
+oct_Bool oct_List_dtor(struct oct_Context* ctx, oct_BGeneric self) {
     oct_Bool result = oct_True;
 	oct_List* lst = (oct_List*)self.self;
 	oct_ListNode* node;
@@ -114,7 +114,7 @@ oct_Bool oct_List_createOwned(struct oct_Context* ctx, oct_OList* out_result) {
 }
 
 oct_Bool oct_List_destroyOwned(struct oct_Context* ctx, oct_OList lst) {
-	oct_BSelf self;
+	oct_BGeneric self;
 	oct_Bool result;
 	self.self = lst.ptr;
 	result = oct_List_dtor(ctx, self);
@@ -271,7 +271,7 @@ oct_Bool oct_List_asObject(struct oct_Context* ctx, oct_OList lst, oct_OObject* 
 }
 
 oct_Bool oct_List_print(struct oct_Context* ctx, oct_BList lst) {
-	oct_BSelf bself;
+	oct_BGeneric bself;
 	oct_BPrintable prn;
 	oct_ListNode* node;
 

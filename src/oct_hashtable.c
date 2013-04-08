@@ -121,7 +121,7 @@ oct_Bool oct_AHashtableEntry_createOwned(struct oct_Context* ctx, oct_Uword init
 
 static oct_Bool destroyEntry(oct_Context* ctx, oct_HashtableEntry* entry) {
 	oct_OObject obj;
-	oct_BSelf self;
+	oct_BGeneric self;
 	if(entry->key.variant != OCT_HASHTABLEKEYOPTION_NOTHING) {
 		if(entry->key.variant == OCT_HASHTABLEKEYOPTION_OWNED) {
 			self.self = entry->key.borrowed.self.self;
@@ -150,12 +150,12 @@ oct_Bool oct_Hashtable_ctor(struct oct_Context* ctx, oct_BHashtable self, oct_Uw
 	return oct_AHashtableEntry_createOwned(ctx, nextp2(initialCap), &self.ptr->table);
 }
 
-oct_Bool oct_Hashtable_dtor(struct oct_Context* ctx, oct_BSelf self) {
+oct_Bool oct_Hashtable_dtor(struct oct_Context* ctx, oct_BGeneric self) {
 	return oct_AHashtableEntry_destroyOwned(ctx, ((oct_Hashtable*)self.self)->table);
 }
 
 static oct_Bool keyHash(oct_Context* ctx, oct_BHashtableKey key, oct_Uword* result) {
-	oct_BSelf bself;
+	oct_BGeneric bself;
 	bself.self = key.self.self;
 	return key.vtable->functions.hashable.hash(ctx, bself, result);
 }
@@ -300,7 +300,7 @@ static oct_Bool oct_Hashtable_get(struct oct_Context* ctx, oct_BHashtable self, 
 	oct_Bool result = oct_True;
 	oct_HashtableKeyOption tmpKey;
 	oct_BCopyable bcopyable;
-	oct_BSelf bself;
+	oct_BGeneric bself;
 
 	tmpKey.variant = OCT_HASHTABLEKEYOPTION_BORROWED;
 	tmpKey.borrowed.self.self = key.self.self;

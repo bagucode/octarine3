@@ -41,7 +41,7 @@ oct_Bool _oct_Printable_init(struct oct_Context* ctx) {
 	fn = ctx->rt->functions.print;
 	CHECK(oct_ACType_createOwned(ctx, 1, &fn.ptr->paramTypes));
 	CHECK(oct_ACType_createOwned(ctx, 0, &fn.ptr->returnTypes));
-	fn.ptr->paramTypes.ptr->data[0] = ctx->rt->builtInTypes.BSelf;
+	fn.ptr->paramTypes.ptr->data[0] = ctx->rt->builtInTypes.BGeneric;
 
 	return oct_True;
 }

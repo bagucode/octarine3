@@ -66,7 +66,7 @@ oct_Bool oct_AU8_hash(struct oct_Context* ctx, oct_BAU8 self, oct_Uword* out_has
 	return oct_True;
 }
 
-oct_Bool oct_AU8_copyOwned(struct oct_Context* ctx, oct_BSelf orig, oct_OSelf* out_copy) {
+oct_Bool oct_AU8_copyOwned(struct oct_Context* ctx, oct_BGeneric orig, oct_OGeneric* out_copy) {
 	oct_BAU8 bau8;
 	oct_Uword allocSize;
 	bau8.ptr = (oct_AU8*)orig.self;

@@ -48,7 +48,7 @@ oct_Bool oct_ACFunction_createOwned(struct oct_Context* ctx, oct_Uword size, oct
 	return result;
 }
 
-oct_Bool oct_Function_dtor(struct oct_Context* ctx, oct_BSelf self) {
+oct_Bool oct_Function_dtor(struct oct_Context* ctx, oct_BGeneric self) {
 	oct_CFunction fn;
 	oct_Bool result;
 	fn.ptr = (oct_Function*)self.self;

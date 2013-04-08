@@ -5,7 +5,7 @@
 #include "oct_chararray.h"
 #include "oct_object.h"
 #include "oct_hashtable.h"
-#include "oct_self.h"
+#include "oct_generic.h"
 #include "oct_copyable.h"
 #include "oct_printable.h"
 
@@ -33,13 +33,13 @@ oct_Bool oct_String_ctor(struct oct_Context* ctx, oct_String* str, oct_OAU8 utf8
 oct_Bool oct_String_ctorCharArray(struct oct_Context* ctx, oct_String* str, oct_OAChar chars, oct_Uword idx, oct_Uword len);
 oct_Bool oct_String_ctorCString(struct oct_Context* ctx, oct_String* str, const char* cstr);
 oct_Bool oct_String_ctorCStringLen(struct oct_Context* ctx, oct_String* str, const char* cstr, oct_Uword strlen);
-oct_Bool oct_String_dtor(struct oct_Context* ctx, oct_BSelf str);
+oct_Bool oct_String_dtor(struct oct_Context* ctx, oct_BGeneric str);
 
 oct_Bool oct_String_createOwnedFromCString(struct oct_Context* ctx, const char* cstr, oct_OString* out_str);
 oct_Bool oct_String_createOwnedFromCStringLen(struct oct_Context* ctx, const char* cstr, oct_Uword strLen, oct_OString* out_str);
 oct_Bool oct_String_createOwnedFromCharArray(struct oct_Context* ctx, oct_OAChar chars, oct_Uword idx, oct_Uword len, oct_OString* out_str);
 oct_Bool oct_String_destroyOwned(struct oct_Context* ctx, oct_OString str);
-oct_Bool oct_String_copyOwned(struct oct_Context* ctx, oct_BSelf orig, oct_OSelf* out_cpy);
+oct_Bool oct_String_copyOwned(struct oct_Context* ctx, oct_BGeneric orig, oct_OGeneric* out_cpy);
 
 oct_Bool oct_BString_equals(struct oct_Context* ctx, oct_BString x, oct_BString y, oct_Bool* out_result);
 oct_Bool oct_BStringCString_equals(struct oct_Context* ctx, oct_BString str, const char* cstr, oct_Bool* out_result);

@@ -2,14 +2,14 @@
 #define oct_printable
 
 #include "oct_primitives.h"
-#include "oct_self.h"
+#include "oct_generic.h"
 #include "oct_type.h"
 
 struct oct_Context;
 
 typedef struct oct_PrintableFunctions {
-    oct_Bool (*print)(struct oct_Context* ctx, oct_BSelf self);
-    //oct_Bool (*printToStream)(struct oct_Context* ctx, oct_BSelf self, oct_BCharOutputStream cos);
+    oct_Bool (*print)(struct oct_Context* ctx, oct_BGeneric self);
+    //oct_Bool (*printToStream)(struct oct_Context* ctx, oct_BGeneric self, oct_BCharOutputStream cos);
 } oct_PrintableFunctions;
 
 typedef struct oct_PrintableVTable {
@@ -18,12 +18,12 @@ typedef struct oct_PrintableVTable {
 } oct_PrintableVTable;
 
 typedef struct oct_BPrintable {
-	oct_BSelf self;
+	oct_BGeneric self;
 	oct_PrintableVTable* vtable;
 } oct_BPrintable;
 
 typedef struct oct_OPrintable {
-	oct_OSelf self;
+	oct_OGeneric self;
 	oct_PrintableVTable* vtable;
 } oct_OPrintable;
 

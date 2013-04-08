@@ -185,7 +185,7 @@ void testListAsSeq() {
 	oct_Context* ctx;
 	oct_OList lst;
 	oct_BSeq seq;
-	oct_BSelf self;
+	oct_BGeneric self;
 	oct_OList rest;
 	oct_BList blst;
 	oct_OString tmpStr;
@@ -222,7 +222,7 @@ void testListAsSeq() {
 	TEST(oct_BStringCString_equals(ctx, cmp1, "World!", &eq));
 	assert(eq);
 	TEST(oct_Object_destroyOwned(ctx, out.object));
-	TEST(oct_Seq_rest(ctx, seq, (oct_OSelf*)&rest));
+	TEST(oct_Seq_rest(ctx, seq, (oct_OGeneric*)&rest));
 	TEST(oct_Seq_first(ctx, seq, &out));
 	cmp1.ptr = (oct_String*)out.object.self.self;
 	TEST(oct_BStringCString_equals(ctx, cmp1, "Really", &eq));
@@ -246,7 +246,7 @@ void testVecAsSeq() {
 	oct_Context* ctx;
 	oct_OVector lst;
 	oct_BSeq seq;
-	oct_BSelf self;
+	oct_BGeneric self;
 	oct_OVector rest;
 	oct_BVector blst;
 	oct_OString tmpStr;
@@ -286,7 +286,7 @@ void testVecAsSeq() {
 	assert(eq);
 	TEST(oct_Object_destroyOwned(ctx, out.object));
 	
-	TEST(oct_Seq_rest(ctx, seq, (oct_OSelf*)&rest));
+	TEST(oct_Seq_rest(ctx, seq, (oct_OGeneric*)&rest));
 	blst.ptr = rest.ptr;
 	
 	TEST(oct_Vector_first(ctx, blst, &out));
@@ -314,7 +314,7 @@ int main(int argc, char** argv) {
 	oct_BStringstream bss;
 	oct_Any evalResult;
     oct_BPrintable prn;
-	oct_BSelf bself;
+	oct_BGeneric bself;
 	reader.ptr = ctx->reader;
 
 	oct_String_createOwnedFromCString(ctx, "- . ! ? 1 2 3 -37 1.5 0.34 .34 1e16 -0.8 -.8 -.main .main -main \"hej\" \"hell o workdl\" (quote (this is a (nested) \"list\" of 8 readables )) () (quote a) hello (def hello \"Hello!\") hello hello", &str);

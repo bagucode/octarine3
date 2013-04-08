@@ -7,7 +7,7 @@
 
 #define CHECK(X) if(!X) return oct_False;
 
-static oct_Bool noopDtor(struct oct_Context* ctx, oct_BSelf self) {
+static oct_Bool noopDtor(struct oct_Context* ctx, oct_BGeneric self) {
 	return oct_True;
 }
 

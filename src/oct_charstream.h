@@ -5,13 +5,13 @@
 #include "oct_object.h"
 #include "oct_primitive_pointers.h"
 #include "oct_type_pointers.h"
-#include "oct_self.h"
+#include "oct_generic.h"
 
 // Charstream protocol. Used by the reader
 
 typedef struct oct_CharstreamFunctions {
-	oct_Bool (*readChar)(struct oct_Context* ctx, oct_BSelf self, oct_Char* out_read);
-	oct_Bool (*peekChar)(struct oct_Context* ctx, oct_BSelf self, oct_Char* out_peeked);
+	oct_Bool (*readChar)(struct oct_Context* ctx, oct_BGeneric self, oct_Char* out_read);
+	oct_Bool (*peekChar)(struct oct_Context* ctx, oct_BGeneric self, oct_Char* out_peeked);
 } oct_CharstreamFunctions;
 
 typedef struct oct_CharstreamVTable {
@@ -20,12 +20,12 @@ typedef struct oct_CharstreamVTable {
 } oct_CharstreamVTable;
 
 typedef struct oct_BCharstream {
-	oct_BSelf self;
+	oct_BGeneric self;
 	oct_CharstreamVTable* vtable;
 } oct_BCharstream;
 
 typedef struct oct_OCharstream {
-	oct_OSelf self;
+	oct_OGeneric self;
 	oct_CharstreamVTable* vtable;
 } oct_OCharstream;
 

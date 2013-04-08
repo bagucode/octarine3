@@ -32,10 +32,10 @@ typedef struct oct_ContextList {
 //	oct_CType Word;
 //	oct_CType Char;
 //	oct_CType Bool;
-//	// Self, This is a special type, it is just a marker
-//	oct_CType BSelf;
-//	oct_CType OSelf;
-//	oct_CType MSelf;
+//	// Generic, This is a special type, it is just a marker
+//	oct_CType BGeneric;
+//	oct_CType OGeneric;
+//	oct_CType MGeneric;
 //	// Hashtable
 //	oct_CType HashtableKey;
 //	oct_CType OHashtableKey;

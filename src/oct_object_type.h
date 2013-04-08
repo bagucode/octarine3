@@ -3,7 +3,7 @@
 
 #include "oct_object.h"
 #include "oct_nothing_type.h"
-#include "oct_self_type.h"
+#include "oct_generic_type.h"
 
 
 
