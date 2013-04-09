@@ -9,8 +9,10 @@
 
 struct oct_Context;
 
+typedef oct_Bool(*oct_Object_dtor)(struct oct_Context* ctx, oct_BGeneric self);
+
 typedef struct oct_ObjectFunctions {
-	oct_Bool(*dtor)(struct oct_Context* ctx, oct_BGeneric self);
+	oct_Object_dtor dtor;
 } oct_ObjectFunctions;
 
 typedef struct oct_ObjectVTable {

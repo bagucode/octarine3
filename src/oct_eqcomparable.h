@@ -7,8 +7,10 @@
 
 struct oct_Context;
 
+typedef oct_Bool(*oct_equals)(struct oct_Context* ctx, oct_BGeneric self, oct_BGeneric other, oct_Bool* out_eq);
+
 typedef struct oct_EqComparableFunctions {
-	oct_Bool (*equals) (struct oct_Context* ctx, oct_BGeneric self, oct_BGeneric other, oct_Bool* out_eq);
+	oct_equals equals;
 } oct_EqComparableFunctions;
 
 typedef struct oct_EqComparableVTable {

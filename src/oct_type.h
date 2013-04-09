@@ -2,12 +2,14 @@
 #define oct_type
 
 #include "oct_primitives.h"
+
 #include "oct_prototype.h"
 #include "oct_variadictype.h"
 #include "oct_structtype.h"
 #include "oct_arraytype.h"
 #include "oct_pointertype.h"
 #include "oct_protocoltype.h"
+//#include "oct_templatetype.h"
 
 #define OCT_TYPE_PROTOTYPE 0
 #define OCT_TYPE_VARIADIC 1
@@ -16,6 +18,7 @@
 #define OCT_TYPE_FIXED_SIZE_ARRAY 4
 #define OCT_TYPE_POINTER 5
 #define OCT_TYPE_PROTOCOL 6
+//#define OCT_TYPE_TEMPLATE 7
 
 typedef struct oct_Type {
 	oct_Uword variant; // OCT_TYPE_*
@@ -27,14 +30,15 @@ typedef struct oct_Type {
 		oct_FixedSizeArrayType fixedSizeArray;
 		oct_PointerType pointerType;
 		oct_ProtocolType protocolType;
+		//oct_TemplateType templateType;
 	};
 } oct_Type;
 
-//struct oct_Context;
+struct oct_Context;
 
 // For Type, the vtables need to be added manually because of a circular dependency with protocols
 //oct_Bool _oct_Type_VTableInit(struct oct_Context* ctx);
-//oct_Bool _oct_Type_init(struct oct_Context* ctx);
+oct_Bool _oct_Type_init(struct oct_Context* ctx);
 
 //oct_Bool oct_Type_dtor(struct oct_Context* ctx, oct_Type* self);
 

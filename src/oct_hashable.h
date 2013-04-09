@@ -5,8 +5,10 @@
 #include "oct_primitives.h"
 #include "oct_type_pointers.h"
 
+typedef oct_Bool(*oct_hash)(struct oct_Context* ctx, oct_BGeneric self, oct_Uword* out_hash);
+
 typedef struct oct_HashableFunctions {
-	oct_Bool (*hash) (struct oct_Context* ctx, oct_BGeneric self, oct_Uword* out_hash);
+	oct_hash hash;
 } oct_HashableFunctions;
 
 typedef struct oct_HashableVTable {

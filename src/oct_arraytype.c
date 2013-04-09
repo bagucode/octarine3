@@ -3,6 +3,7 @@
 #include "oct_field.h"
 #include "oct_type.h"
 #include "oct_context.h"
+#include "oct_type_type.h"
 
 #include <stddef.h>
 

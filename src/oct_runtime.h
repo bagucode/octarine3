@@ -267,7 +267,7 @@ oct_Runtime* oct_Runtime_create(const char** out_error);
 struct oct_Context* oct_Runtime_currentContext(oct_Runtime* rt);
 oct_Bool oct_Runtime_destroy(oct_Runtime* rt, const char** out_error);
 
-oct_Bool _oct_Runtime_bindBuiltInType(struct oct_Context* ctx, const char* binding_name, void* typePtr);
+oct_Bool _oct_Runtime_bindBuiltInType(struct oct_Context* ctx, const char* binding_name, oct_ObjectVTable* ovt);
 oct_Bool oct_Runtime_CbindType(struct oct_Context* ctx, const char* ns, const char* binding_name, oct_CType type);
 oct_Bool oct_Runtime_bindType(struct oct_Context* ctx, oct_BNamespace ns, oct_OSymbol binding_name, oct_CType type);
 
