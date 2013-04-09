@@ -17,14 +17,14 @@ oct_Function _oct_ObjectType_dtorFunction = {
 };
 oct_ACFunction _oct_ObjectTypeFunctions = {
 	1,
-	{&_oct_ObjectType_dtorFunction}
+	{{&_oct_ObjectType_dtorFunction}}
 };
 struct {
 	oct_Uword v;
 	oct_ProtocolType p;
 } _oct_ObjectType = {
 	OCT_TYPE_PROTOCOL,
-	{&_oct_ObjectTypeFunctions}
+	{{&_oct_ObjectTypeFunctions}}
 };
 
 OCT_DEF_O_POINTER(OObject, Object);

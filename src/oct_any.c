@@ -12,7 +12,7 @@ oct_Bool oct_Any_dtor(struct oct_Context* ctx, oct_BAny self) {
 
 oct_ObjectVTable _Object_vtable = {
 	{(oct_Type*)&_oct_AnyType},
-	(oct_Object_dtor)oct_Any_dtor
+	{(oct_Object_dtor)oct_Any_dtor}
 };
 
 oct_Bool _oct_Any_init(struct oct_Context* ctx) {
