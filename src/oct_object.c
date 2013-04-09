@@ -1,14 +1,25 @@
 #include "oct_object.h"
 #include "oct_context.h"
 #include "oct_runtime.h"
-#include "oct_object_vtable.h"
 #include "oct_exchangeheap.h"
 #include "oct_type.h"
 #include "oct_function.h"
+#include "oct_hashtable.h"
+#include "oct_protocoltype.h"
+#include "oct_object_type.h"
 
 #include <memory.h>
 
 #define CHECK(X) if(!X) return oct_False;
+
+// oct_ProtocolBinding _oct_ObjectProtocol;
+
+oct_Bool _oct_Object_initializeProtocol(oct_Context* ctx) {
+	oct_BHashtable hashSelf;
+	_oct_ObjectProtocol.protocolType.ptr = (oct_Type*)&_oct_ObjectType;
+	hashSelf.ptr = &_oct_ObjectProtocol.implementations;
+	return oct_Hashtable_ctor(ctx, hashSelf, 100);
+}
 
 oct_Bool _oct_Object_initProtocol(struct oct_Context* ctx) {
 	oct_BHashtable table;

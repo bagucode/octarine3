@@ -25,7 +25,10 @@ OCT_DEF_C_POINTER(CFunction, Function);
 // ACFunction
 OCT_DEF_ARRAY(ACFunction, CFunction);
 
-// CACFunction
-OCT_DEF_C_POINTER(CACFunction, ACFunction);
+// CACFunction (declared in type_type)
+struct _oct_CACFunctionType_t _oct_CACFunctionType = {
+	OCT_TYPE_POINTER,
+	{OCT_POINTER_CONSTANT, {(oct_Type*)&_oct_ACFunctionType}}
+};
 
 #endif

@@ -19,8 +19,13 @@ typedef struct oct_Any {
 	};
 } oct_Any;
 
-//struct oct_Context;
-//
-//oct_Bool _oct_Any_init(struct oct_Context* ctx);
+typedef struct oct_BAny {
+	oct_Any* ptr;
+} oct_BAny;
+
+struct oct_Context;
+oct_Bool _oct_Any_init(struct oct_Context* ctx);
+
+oct_Bool oct_Any_dtor(struct oct_Context* ctx, oct_BAny self);
 
 #endif

@@ -37,7 +37,7 @@ struct oct_Context;
 
 oct_Bool _oct_VTable_init(struct oct_Context* ctx);
 oct_Bool _oct_Protocol_init(struct oct_Context* ctx);
-oct_Bool _oct_Protocol_addBuiltIn(struct oct_Context* ctx, oct_BProtocolBinding pb, oct_Uword fnCount, oct_CVTable* table, oct_CType type, ...);
+//oct_Bool _oct_Protocol_addBuiltIn(struct oct_Context* ctx, oct_BProtocolBinding pb, oct_Uword fnCount, oct_CVTable* table, oct_CType type, ...);
 
 oct_Bool oct_Protocol_addImplementation(struct oct_Context* ctx, oct_BProtocolBinding protocol, oct_CType type, oct_CVTable vtable);
 

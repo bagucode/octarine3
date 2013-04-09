@@ -42,6 +42,7 @@ oct_Bool _oct_Symbol_init(struct oct_Context* ctx);
 oct_Bool oct_Symbol_dtor(struct oct_Context* ctx, oct_BGeneric self);
 
 oct_Bool oct_Symbol_createOwned(struct oct_Context* ctx, oct_OString name, oct_OSymbol* out_result);
+oct_Bool oct_Symbol_createOwnedFromCString(struct oct_Context* ctx, const char* name, oct_OSymbol* out_sym);
 oct_Bool oct_Symbol_destroyOwned(struct oct_Context* ctx, oct_OSymbol sym);
 
 oct_Bool oct_Symbol_equals(struct oct_Context* ctx, oct_BSymbol self, oct_BSymbol other, oct_Bool* out_eq);

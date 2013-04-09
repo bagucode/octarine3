@@ -27,4 +27,12 @@ struct {
 	{&_oct_ObjectTypeFunctions}
 };
 
+OCT_DEF_O_POINTER(OObject, Object);
+OCT_DEF_B_POINTER(BObject, Object);
+
+oct_ProtocolBinding _oct_ObjectProtocol;
+
+struct oct_Context;
+oct_Bool _oct_Object_initializeProtocol(struct oct_Context* ctx);
+
 #endif
