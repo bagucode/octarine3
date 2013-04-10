@@ -5,6 +5,7 @@
 #include "oct_context.h"
 #include "oct_exchangeheap.h"
 #include "oct_type_type.h"
+#include "oct_hashtablekey_type.h"
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -179,8 +180,8 @@ oct_Bool oct_Type_asObject(struct oct_Context* ctx, oct_CType self, struct oct_B
 }
 
 oct_Bool oct_CType_asHashtableKey(struct oct_Context* ctx, oct_CType self, struct oct_BHashtableKey* key) {
-	key->self.self = self.ptr;
-	key->vtable = (oct_HashtableKeyVTable*)ctx->rt->vtables.TypeAsHashtableKey.ptr;
+	key->self.ptr = (void*)self.ptr;
+	key->vtable = &_HashtableKey_Type_vtable;
 	return oct_True;
 }
 
